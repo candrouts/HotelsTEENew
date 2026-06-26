@@ -1,0 +1,80 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_AnonymousLayout.cshtml";
+}
+
+
+<div class="login-bg account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 position-relative">
+    <div class="container" id="container">
+        <div class="row justify-content-center">
+            <div class="col-xxl-4 col-lg-5">
+                <div class="card">
+                    <!-- Logo -->
+                    <div class=" py-4 text-center login-info-panel">
+                        <div>
+                            @*<img src="~/Content/xee_logo_smaller.png" alt="logo">*@
+                            <h3>
+                                Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων
+                            </h3>                           
+                            <small>
+                                Με τη συνεργασία ΞΕΕ – ΤΕΕ<br>
+                                και την εποπτεία του Υπουργείου Τουρισμού
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+
+                        <div class="text-center w-75 m-auto">
+                            <h4 class="text-dark-50 text-center pb-4 fw-bold">Είσοδος στο σύστημα</h4>
+                            @*<p class="text-muted mb-4">Παρακαλούμε εισάγετε τα στοχιεία σύνδεσής σας.</p>*@
+                        </div>
+
+
+
+                        <div class="mb-3">
+                            <label for="emailaddress" class="form-label">Όνομα Χρήστη</label>
+                            <input class="form-control" type="text" id="userName" required="" placeholder="Εισάγετε το όνομα χρήστη σας" data-bind="value:UserName,hasfocus: true, event: { 'keypress': onEnter }">
+                        </div>
+
+                        <div class="mb-3">
+                            <a href=@Url.Action("RecoverPassword", "Auth") class="text-muted float-end"><small>Ξεχάσατε τον κωδικό σας;</small></a>
+                            <label for="password" class="form-label">Κωδικός</label>
+                            <div class="input-group input-group-merge">
+                                <input type="password" id="password" class="form-control" placeholder="Εισάγετε τον κωδικό σας" data-bind="value: Password, event: { 'keypress': onEnter }">
+                                <div class="input-group-text" data-password="false">
+                                    <span class="password-eye"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="checkbox-signin" data-bind="checked : rememberme">
+                                <label class="form-check-label" for="checkbox-signin">Να με θυμάσαι</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 mb-0 text-center">
+                            <button class="btn login-info-panel" data-bind="click: submitLogin"> Είσοδος </button>
+                        </div>
+
+                        <div class="row mt-3">
+                            <div class="col-12 text-center">
+                                <p class="text-muted">Δεν έχετε λογαριασμό; Πατήστε εδώ για <a href=@Url.Action("Register", "Auth") class="text-muted ms-1"><b>Εγγραφή</b></a></p>
+                            </div>
+                            <!-- end col -->
+                        </div><!-- end row -->
+
+                    </div> <!-- end card-body -->
+                </div> <!-- end card -->
+
+            </div> <!-- end col -->
+        </div><!-- end row -->
+    </div><!-- end container -->
+</div><!-- end page -->
+
+<footer class="footer footer-alt" style="color:white">
+    <script>document.write(new Date().getFullYear())</script> © ΞΕΝΟΔΟΧΕΙΑΚΟ ΕΠΙΜΕΛΗΤΗΡΙΟ ΕΛΛΑΔΟΣ
+</footer>

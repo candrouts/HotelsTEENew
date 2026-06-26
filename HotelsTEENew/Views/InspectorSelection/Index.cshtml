@@ -1,0 +1,493 @@
+@{
+    ViewBag.Title = "Επιλογή Επιθεωρητή";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Αρχική</a></li>
+                    <li class="breadcrumb-item active">Αίτηση Αξιολόγησης</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Αίτηση Αξιολόγησης</h4>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     Μόνο όταν η αυτοαξιολόγηση ΔΕΝ έχει υποβληθεί
+     ════════════════════════════════════════════════════ -->
+<!-- ko if: hotelCriteriaStatus() != 2 -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-body text-center py-5">
+                <i class="uil uil-clipboard-notes text-info" style="font-size:48px;"></i>
+
+                <!-- ko if: hotelCriteriaStatus() == 1 -->
+                <h4 class="mt-2">Ολοκληρώστε την αυτοαξιολόγησή σας</h4>
+                <p class="text-muted">
+                    Έχετε ξεκινήσει την αυτοαξιολόγηση αλλά δεν την έχετε υποβάλει οριστικά.
+                    Η υποβολή αίτησης και η επιλογή επιθεωρητή θα ενεργοποιηθούν μόλις την υποβάλετε.
+                </p>
+                <a href="@Url.Action("Index","Criteria")" class="btn btn-success mt-1">
+                    <i class="uil uil-edit me-1"></i> Συνέχεια Αυτοαξιολόγησης
+                </a>
+                <!-- /ko -->
+
+                <!-- ko ifnot: hotelCriteriaStatus() == 1 -->
+                <h4 class="mt-2">Ξεκινήστε με την αυτοαξιολόγηση</h4>
+                <p class="text-muted">
+                    Για να υποβάλετε αίτηση και να επιλέξετε επιθεωρητή, πρέπει πρώτα να
+                    ολοκληρώσετε και να υποβάλετε οριστικά την αυτοαξιολόγηση του καταλύματός σας.
+                </p>
+                <a href="@Url.Action("Index","Criteria")" class="btn btn-success mt-1">
+                    <i class="uil uil-play me-1"></i> Μετάβαση στην Αυτοαξιολόγηση
+                </a>
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+<!-- ════════════════════════════════════════════════════
+     Μόνο όταν η αυτοαξιολόγηση ΕΧΕΙ υποβληθεί (status=2)
+     ════════════════════════════════════════════════════ -->
+<!-- ko if: hotelCriteriaStatus() == 2 -->
+<!-- ════ Τρέχουσα Αίτηση ════ -->
+<!-- ko if: submitSuccess() && existingCertificate() -->
+<div class="row mb-2">
+    <div class="col-12">
+        <div class="border card border-success">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="mdi mdi-file-document-outline me-1"></i>
+                    Τρέχουσα Αίτηση #<span data-bind="text: existingCertificate().certificateID"></span>
+                </h5>
+                <span class="badge bg-white text-success" data-bind="text: currentStageLabel"></span>
+            </div>
+            <div class="card-body py-2">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <small class="text-muted d-block">Επιθεωρητής</small>
+                        <strong data-bind="text: existingCertificate().inspectorName"></strong><br />
+                        <small data-bind="text: existingCertificate().inspectorEmail"></small>
+                        <!-- ko if: existingCertificate().inspectorPhone -->
+                        <small> &middot; <span data-bind="text: existingCertificate().inspectorPhone"></span></small>
+                        <!-- /ko -->
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Ημ/νία υποβολής αίτησης</small>
+                        <strong data-bind="text: existingCertificate().submissionDate"></strong>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Ημ/νία επιθεώρησης</small>
+                        <strong data-bind="text: existingCertificate().proposedDate"></strong>
+                        <!-- ko if: existingCertificate().autopsyDateStatus === 1 -->
+                        <span class="badge badge-warning-lighten ms-1">Αναμένει επιβεβαίωση</span>
+                        <!-- /ko -->
+                        <!-- ko if: existingCertificate().autopsyDateStatus === 2 || existingCertificate().autopsyDateStatus === 3 -->
+                        <span class="badge badge-success-lighten ms-1">Οριστική</span>
+                        <!-- /ko -->
+                    </div>
+                </div>
+
+                <!-- Ενέργειες: προβολή εκδόσεων (read-only) -->
+                <hr class="my-2" />
+                <div class="d-flex gap-1 flex-wrap">
+                    <!-- ko if: existingCertificate().v1Status -->
+                    <a class="btn btn-sm btn-outline-secondary"
+                       data-bind="attr: { href: '/Certificate/ViewCertificate/' + existingCertificate().certificateID + '?mode=1' }">
+                        <i class="uil uil-eye me-1"></i>Αυτοαξιολόγηση
+                    </a>
+                    <!-- /ko -->
+                    <!-- ko if: existingCertificate().v2Status -->
+                    <a class="btn btn-sm btn-outline-warning"
+                       data-bind="attr: { href: '/Certificate/ViewCertificate/' + existingCertificate().certificateID + '?mode=2' }">
+                        <i class="uil uil-clipboard-notes me-1"></i>Αυτοψία
+                        <!-- ko if: existingCertificate().v2Status === 2 --><i class="uil uil-check"></i><!-- /ko -->
+                    </a>
+                    <!-- /ko -->
+                    <!-- ko if: existingCertificate().v3Status -->
+                    <a class="btn btn-sm btn-outline-success"
+                       data-bind="attr: { href: '/Certificate/ViewCertificate/' + existingCertificate().certificateID + '?mode=3' }">
+                        <i class="uil uil-award me-1"></i>Τελική Κατάταξη
+                        <!-- ko if: existingCertificate().v3Status === 2 --><i class="uil uil-check"></i><!-- /ko -->
+                    </a>
+                    <!-- /ko -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ Αποδοχή Τελικής Κατάταξης ════ -->
+<!-- ko if: existingCertificate().awaitingAcceptance -->
+<div class="row mb-2">
+    <div class="col-12">
+        <div class="border card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="mdi mdi-seal me-1"></i> Αποδοχή Τελικής Κατάταξης</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    Ο επιθεωρητής ολοκλήρωσε την τελική κατάταξη του καταλύματός σας:
+                    <strong>Βαθμολογία <span data-bind="text: existingCertificate().finalTotalPoints"></span></strong>
+                    <!-- ko if: existingCertificate().finalMedalTitle -->
+                    &nbsp;&middot;&nbsp; Μετάλλιο: <strong data-bind="text: existingCertificate().finalMedalTitle"></strong>
+                    <!-- /ko -->
+                </p>
+                <p class="text-muted mb-2">
+                    <small>Με την αποδοχή εκδίδεται η βεβαίωση με ισχύ 3 ετών και ολοκληρώνεται η διαδικασία.
+                    Σε περίπτωση διαφωνίας, η τελική κατάταξη επιστρέφει στον επιθεωρητή με το σχόλιό σας.</small>
+                </p>
+                <button class="btn btn-success me-1" data-bs-toggle="modal" data-bs-target="#accept-final-modal">
+                    <i class="uil uil-check-circle me-1"></i>Αποδοχή &amp; Έκδοση Βεβαίωσης
+                </button>
+                <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reject-final-modal">
+                    <i class="uil uil-times-circle me-1"></i>Απόρριψη με σχόλιο
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+<!-- /ko -->
+<!-- Φίλτρα αναζήτησης + αποτελέσματα: μόνο αν δεν έχει υποβληθεί ήδη αίτηση -->
+<!-- ko ifnot: submitSuccess() -->
+
+<!-- Ειδοποίηση απόρριψης ανάθεσης από επιθεωρητή -->
+<!-- ko if: assignmentRejected() -->
+<div class="row mb-2">
+    <div class="col-12">
+        <div class="alert alert-danger mb-0">
+            <h5 class="alert-heading"><i class="uil uil-ban me-1"></i> Η ανάθεση απορρίφθηκε</h5>
+            Ο επιθεωρητής <strong data-bind="text: rejectedInspectorName"></strong> απέρριψε την ανάθεση.
+            Παρακαλώ επιλέξτε άλλον επιθεωρητή παρακάτω.
+            <!-- ko if: assignmentRejectionNote() -->
+            <hr class="my-2" />
+            <strong>Παρατηρήσεις:</strong>
+            <div style="white-space: pre-wrap; word-break: break-word;" data-bind="text: assignmentRejectionNote"></div>
+            <!-- /ko -->
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+
+<div class="row">
+    <div class="col-12">
+        <div class="border card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="uil-search me-1"></i> Αναζήτηση Επιθεωρητή</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Περιφέρεια</label>
+                        <select class="form-select" data-bind="value: selectedPerifereia, options: perifereies, optionsText: 'title', optionsValue: 'kalID', optionsCaption: '-- Όλες οι Περιφέρειες --'"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Περιφερειακή Ενότητα</label>
+                        <select class="form-select" data-bind="value: selectedPE, options: periferiakesEnotites, optionsText: 'title', optionsValue: 'kalID', optionsCaption: '-- Όλες --', enable: periferiakesEnotites().length > 0"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Όνομα Επιθεωρητή</label>
+                        <input type="text" class="form-control" placeholder="Αναζήτηση ονόματος..." data-bind="value: searchName, valueUpdate: 'input'" />
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" data-bind="click: searchInspectors">
+                            <i class="uil-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Αποτελέσματα αναζήτησης -->
+<!-- ko if: inspectors().length > 0 -->
+<div class="row">
+    <div class="col-12">
+        <div class="border card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    Αποτελέσματα
+                    <span class="badge bg-secondary ms-1" data-bind="text: inspectors().length"></span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-centered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Επιλογή</th>
+                                <th>Επιθεωρητής</th>
+                                <th>Επικοινωνία</th>
+                                <th>Περιοχές δραστηριότητας</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: inspectors">
+                            <tr data-bind="css: { 'table-primary': $root.selectedInspector() && $root.selectedInspector().id === id }, click: $root.selectInspector" style="cursor:pointer;">
+                                <td>
+                                    <!-- ko if: $root.selectedInspector() && $root.selectedInspector().id === id -->
+                                    <i class="mdi mdi-check-circle text-primary font-18"></i>
+                                    <!-- /ko -->
+                                    <!-- ko ifnot: $root.selectedInspector() && $root.selectedInspector().id === id -->
+                                    <i class="mdi mdi-circle-outline text-muted font-18"></i>
+                                    <!-- /ko -->
+                                </td>
+                                <td>
+                                    <strong data-bind="text: lastName + ' ' + firstName"></strong>
+                                </td>
+                                <td>
+                                    <span data-bind="text: email"></span><br />
+                                    <span class="text-muted" data-bind="text: phone"></span>
+                                </td>
+                                <td>
+                                    <small class="text-muted" data-bind="text: areas || '—'"></small>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+<!-- ko if: inspectors().length === 0 -->
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            Χρησιμοποιήστε τα φίλτρα παραπάνω για να αναζητήσετε επιθεωρητές.
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+<!-- Επιλεγμένος Επιθεωρητής + Ημερομηνία + Υποβολή -->
+<!-- ko if: selectedInspector() && !submitSuccess() -->
+<div class="row mt-2">
+    <div class="col-12">
+        <div class="border card border-primary">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0"><i class="mdi mdi-account-check me-1"></i> Επιλεγμένος Επιθεωρητής</h5>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-end g-3">
+                    <div class="col-md-4">
+                        <strong data-bind="text: selectedInspector().lastName + ' ' + selectedInspector().firstName"></strong><br />
+                        <small class="text-muted" data-bind="text: selectedInspector().email"></small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Προτεινόμενη ημερομηνία επιθεώρησης</label>
+                        <input type="date" class="form-control" data-bind="value: proposedDate" min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100" data-bind="click: submitRequest, enable: !submitSuccess()">
+                            <i class="mdi mdi-send me-1"></i> Υποβολή Αίτησης
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+<!-- /ko --> <!-- /ifnot: submitSuccess -->
+<!-- /ko --> <!-- /if: hotelCriteriaStatus == 2 -->
+<!-- ════════════════════════════════════════════════════
+     TIMELINE — μόνο αφού υποβληθεί η αυτοαξιολόγηση (status=2)·
+     πριν από αυτό δεν υπάρχει πραγματικό περιεχόμενο διαδικασίας
+     ════════════════════════════════════════════════════ -->
+<!-- ko if: hotelCriteriaStatus() == 2 && timeline().length > 0 -->
+<div class="row">
+    <div class="col-12">
+        <div class="border card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i class="mdi mdi-timeline-outline me-1"></i> Εξέλιξη Διαδικασίας Πιστοποίησης</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline" dir="ltr">
+                    <!-- ko foreach: timeline -->
+                    <!-- ko if: $index() % 2 === 0 -->
+                    <div class="timeline-lg-item timeline-item-left">
+                        <div class="timeline-desk">
+                            <div class="timeline-box">
+                                <span class="arrow-alt"></span>
+                                <span data-bind="attr: { class: 'timeline-icon bg-' + colorClass }">
+                                    <i data-bind="attr: { class: icon + ' text-white' }"></i>
+                                </span>
+                                <h4 class="mt-0 mb-1 font-16" data-bind="text: title"></h4>
+                                <!-- ko if: date -->
+                                <p class="text-muted mb-1">
+                                    <small><i class="mdi mdi-calendar me-1"></i><span data-bind="text: date"></span></small>
+                                </p>
+                                <!-- /ko -->
+                                <p class="mb-1 text-muted" data-bind="text: subtitle"></p>
+                                <!-- ko if: isCompleted -->
+                                <span class="badge bg-success"><i class="mdi mdi-check me-1"></i>Ολοκληρώθηκε</span>
+                                <!-- /ko -->
+                                <!-- ko if: !isCompleted && isPending -->
+                                <span class="badge bg-primary"><i class="mdi mdi-clock-outline me-1"></i><span data-bind="text: pendingLabel || 'Σε εξέλιξη'"></span></span>
+                                <!-- /ko -->
+                                <!-- ko if: !isCompleted && !isPending -->
+                                <span class="badge bg-secondary"><i class="mdi mdi-dots-horizontal me-1"></i>Αναμένεται</span>
+                                <!-- /ko -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                    <!-- ko if: $index() % 2 !== 0 -->
+                    <div class="timeline-lg-item timeline-item-right">
+                        <div class="timeline-desk">
+                            <div class="timeline-box">
+                                <span class="arrow"></span>
+                                <span data-bind="attr: { class: 'timeline-icon bg-' + colorClass }">
+                                    <i data-bind="attr: { class: icon + ' text-white' }"></i>
+                                </span>
+                                <h4 class="mt-0 mb-1 font-16" data-bind="text: title"></h4>
+                                <!-- ko if: date -->
+                                <p class="text-muted mb-1">
+                                    <small><i class="mdi mdi-calendar me-1"></i><span data-bind="text: date"></span></small>
+                                </p>
+                                <!-- /ko -->
+                                <p class="mb-1 text-muted" data-bind="text: subtitle"></p>
+                                <!-- ko if: isCompleted -->
+                                <span class="badge bg-success"><i class="mdi mdi-check me-1"></i>Ολοκληρώθηκε</span>
+                                <!-- /ko -->
+                                <!-- ko if: !isCompleted && isPending -->
+                                <span class="badge bg-primary"><i class="mdi mdi-clock-outline me-1"></i><span data-bind="text: pendingLabel || 'Σε εξέλιξη'"></span></span>
+                                <!-- /ko -->
+                                <!-- ko if: !isCompleted && !isPending -->
+                                <span class="badge bg-secondary"><i class="mdi mdi-dots-horizontal me-1"></i>Αναμένεται</span>
+                                <!-- /ko -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+<!-- Modals -->
+<div id="inspector-required-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Προσοχή</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">Παρακαλώ επιλέξτε επιθεωρητή από τη λίστα.</div>
+            <div class="modal-footer"><button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">ΟΚ</button></div>
+        </div>
+    </div>
+</div>
+
+<div id="date-required-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header text-bg-info border-0">
+                <h5 class="modal-title">Προσοχή</h5>
+            </div>
+            <div class="modal-body"><p>Παρακαλώ ορίστε προτεινόμενη ημερομηνία επιθεώρησης.</p></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">ΟΚ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="submit-success-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="mdi mdi-check-circle me-1"></i> Επιτυχής Υποβολή</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">Η αίτησή σας υποβλήθηκε επιτυχώς. Ο επιθεωρητής θα ενημερωθεί για την ανάθεση.</div>
+            <div class="modal-footer"><button class="btn btn-success btn-sm" data-bs-dismiss="modal">ΟΚ</button></div>
+        </div>
+    </div>
+</div>
+
+<!-- Επιβεβαίωση αποδοχής τελικής κατάταξης -->
+<div id="accept-final-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="mdi mdi-seal me-1"></i> Επιβεβαίωση Αποδοχής</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Με την αποδοχή της τελικής κατάταξης θα εκδοθεί η βεβαίωση με <strong>ισχύ 3 ετών</strong>
+                και η διαδικασία αξιολόγησης θα ολοκληρωθεί οριστικά. Θέλετε να συνεχίσετε;
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Ακύρωση</button>
+                <button class="btn btn-success" data-bind="click: acceptFinal">Αποδοχή &amp; Έκδοση</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Επιτυχής έκδοση βεβαίωσης -->
+<div id="accept-success-modal" class="modal fade" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="mdi mdi-check-decagram me-1"></i> Η Βεβαίωση Εκδόθηκε!</h5>
+            </div>
+            <div class="modal-body">
+                Συγχαρητήρια! Η βεβαίωση βιωσιμότητας εκδόθηκε με ισχύ 3 ετών.
+                Μπορείτε να τη δείτε στην αρχική σελίδα, στο ιστορικό των βεβαιώσεών σας.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" data-bind="click: reloadPage">ΟΚ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Απόρριψη τελικής κατάταξης με σχόλιο -->
+<div id="reject-final-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="uil uil-times-circle me-1"></i> Απόρριψη Τελικής Κατάταξης</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Η τελική κατάταξη θα επιστρέψει στον επιθεωρητή για διόρθωση, μαζί με το σχόλιό σας:</p>
+                <textarea class="form-control" rows="4"
+                          placeholder="Περιγράψτε τον λόγο της διαφωνίας σας..."
+                          data-bind="value: rejectComment, valueUpdate: 'input'"></textarea>
+                <small class="text-muted">Το σχόλιο είναι υποχρεωτικό.</small>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Ακύρωση</button>
+                <button class="btn btn-danger" data-bind="click: rejectFinal, enable: rejectComment().trim().length > 0">Απόρριψη</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="submit-error-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Σφάλμα</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">Παρουσιάστηκε σφάλμα κατά την υποβολή. Παρακαλώ δοκιμάστε ξανά.</div>
+            <div class="modal-footer"><button class="btn btn-danger btn-sm" data-bs-dismiss="modal">ΟΚ</button></div>
+        </div>
+    </div>
+</div>

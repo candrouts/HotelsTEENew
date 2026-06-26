@@ -1,0 +1,128 @@
+@{
+    ViewBag.Title = "Προφίλ Επιθεωρητή";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript:void(0);">Αρχική</a></li>
+                    <li class="breadcrumb-item active">Προφίλ Επιθεωρητή</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Περιοχές Δραστηριότητας</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Μηνύματα αποτελέσματος -->
+<!-- ko if: saveSuccess() -->
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="mdi mdi-check-circle me-1"></i>
+    <strong>Αποθηκεύτηκε!</strong> Οι περιοχές δραστηριότητάς σας ενημερώθηκαν επιτυχώς.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<!-- /ko -->
+<!-- ko if: saveError() -->
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="mdi mdi-alert me-1"></i>
+    Παρουσιάστηκε σφάλμα κατά την αποθήκευση. Παρακαλώ δοκιμάστε ξανά.
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+<!-- /ko -->
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="uil-map-marker me-1"></i>
+                    Επιλογή Περιφερειών &amp; Περιφερειακών Ενοτήτων
+                </h5>
+                <button class="btn btn-success btn-sm" data-bind="click: saveAreas">
+                    <i class="mdi mdi-content-save me-1"></i> Αποθήκευση
+                </button>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Επιλέξτε τις περιοχές στις οποίες δραστηριοποιείστε. Μπορείτε να επιλέξετε
+                    ολόκληρη Περιφέρεια ή συγκεκριμένες Περιφερειακές Ενότητες.
+                </p>
+
+                <!-- Accordion Περιφερειών -->
+                <div class="accordion" id="perifereiesAccordion" data-bind="foreach: perifereies">
+
+                    <div class="accordion-item border mb-2">
+                        <!-- Header Περιφέρειας -->
+                        <div class="accordion-header">
+                            <div class="d-flex align-items-center px-3 py-2"
+                                 style="background: #f8f9fa; border-radius: 4px;">
+
+                                <!-- Expand/collapse -->
+                                <button class="btn btn-link btn-sm p-0 me-2 text-dark"
+                                        data-bind="click: $root.toggleExpand">
+                                    <!-- ko if: isExpanded() -->
+                                    <i class="mdi mdi-chevron-down font-18"></i>
+                                    <!-- /ko -->
+                                    <!-- ko ifnot: isExpanded() -->
+                                    <i class="mdi mdi-chevron-right font-18"></i>
+                                    <!-- /ko -->
+                                </button>
+
+                                <!-- Checkbox "Ολόκληρη Περιφέρεια" -->
+                                <div class="form-check form-switch me-3">
+                                    <input class="form-check-input" type="checkbox"
+                                           data-bind="checked: coversAll" />
+                                </div>
+
+                                <!-- Τίτλος -->
+                                <span class="fw-semibold" data-bind="text: title"
+                                      style="cursor:pointer;"
+                                      data-bind-click="$root.toggleExpand($data)"></span>
+
+                                <!-- Badge: ολόκληρη ή αριθμός ΠΕ -->
+                                <!-- ko if: coversAll() -->
+                                <span class="badge bg-success ms-2">Ολόκληρη η Περιφέρεια</span>
+                                <!-- /ko -->
+                                <!-- ko ifnot: coversAll() -->
+                                <!-- ko if: pes().filter(function(p){ return p.isChecked(); }).length > 0 -->
+                                <span class="badge bg-primary ms-2"
+                                      data-bind="text: pes().filter(function(p){ return p.isChecked(); }).length + ' ΠΕ'"></span>
+                                <!-- /ko -->
+                                <!-- /ko -->
+                            </div>
+                        </div>
+
+                        <!-- Body: λίστα ΠΕ -->
+                        <!-- ko if: isExpanded() -->
+                        <div class="accordion-body pt-2 pb-3">
+                            <!-- ko if: pes().length === 0 -->
+                            <small class="text-muted">Δεν υπάρχουν Περιφερειακές Ενότητες.</small>
+                            <!-- /ko -->
+                            <div class="row g-2" data-bind="foreach: pes">
+                                <div class="col-md-4 col-lg-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               data-bind="checked: isChecked, disable: $parent.coversAll()" />
+                                        <label class="form-check-label" data-bind="text: title"></label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /ko -->
+                    </div>
+
+                </div>
+                <!-- /foreach perifereies -->
+
+            </div>
+            <div class="card-footer text-end">
+                <button class="btn btn-success" data-bind="click: saveAreas">
+                    <i class="mdi mdi-content-save me-1"></i> Αποθήκευση Αλλαγών
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

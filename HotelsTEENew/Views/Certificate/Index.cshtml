@@ -1,0 +1,413 @@
+
+@{
+    ViewBag.Title = "Αιτήσεις";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Αρχική</a></li>
+                    <li class="breadcrumb-item active">Αιτήσεις</li>
+                </ol>
+            </div>
+            <h4 class="page-title">
+                Αναθέσεις Αξιολόγησης
+                <!-- ko if: countNew() > 0 -->
+                <span class="badge badge-primary-lighten ms-1" data-bind="text: countNew() + ' νέες'"></span>
+                <!-- /ko -->
+                <!-- ko if: countAutopsyDue() > 0 -->
+                <span class="badge badge-danger-lighten ms-1" data-bind="text: countAutopsyDue() + ' προς αυτοψία'"></span>
+                <!-- /ko -->
+            </h4>
+        </div>
+    </div>
+</div>
+
+<!-- ════ Φίλτρα ════ -->
+<div class="row" data-bind="visible: focusActive">
+    <div class="col-12">
+        <div class="alert alert-info d-flex align-items-center justify-content-between py-2">
+            <span>
+                <i class="uil uil-filter me-1"></i>
+                Εμφανίζεται μόνο η αίτηση: <strong data-bind="text: focusHotel"></strong>
+            </span>
+            <button class="btn btn-sm btn-outline-info" data-bind="click: clearFocus">
+                <i class="uil uil-list-ul me-1"></i>Εμφάνιση όλων των αιτήσεων
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="border card">
+            <div class="card-body py-2">
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Αναζήτηση</label>
+                        <input type="text" class="form-control form-control-sm"
+                               placeholder="Ξενοδοχείο, επιχείρηση, ΑΦΜ, περιοχή..."
+                               data-bind="value: filterText, valueUpdate: 'input'" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Στάδιο</label>
+                        <select class="form-select form-select-sm" data-bind="value: filterStage">
+                            <option value="">-- Όλα τα στάδια --</option>
+                            <option value="new">Νέες Αναθέσεις</option>
+                            <option value="scheduled">Προγραμματισμένες Αυτοψίες</option>
+                            <option value="autopsy-due">Προς Αυτοψία</option>
+                            <option value="autopsy">Αυτοψία σε εξέλιξη</option>
+                            <option value="final">Προς Τελική Κατάταξη</option>
+                            <option value="awaiting-acceptance">Αναμονή Αποδοχής Ξενοδόχου</option>
+                            <option value="completed">Ολοκληρωμένες</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Μετάλλιο</label>
+                        <select class="form-select form-select-sm"
+                                data-bind="options: medals, optionsText: 'title', optionsValue: 'id', value: filterMedal, optionsCaption: '-- Όλα τα μετάλλια --'"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-sm btn-light" data-bind="click: clearFilters">
+                            <i class="uil uil-times me-1"></i>Καθαρισμός
+                        </button>
+                        <span class="text-muted ms-2">
+                            <span data-bind="text: filteredCertificates().length"></span> / <span data-bind="text: certificates().length"></span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Γεωγραφικά φίλτρα & κατηγορία (admin) -->
+                <div class="row g-2 align-items-end mt-1" data-bind="visible: isAdmin">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Κατηγορία (αστέρια)</label>
+                        <select class="form-select form-select-sm"
+                                data-bind="options: categoryOptions, value: filterCategory, optionsCaption: '-- Όλες οι κατηγορίες --'"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Περιφέρεια</label>
+                        <select class="form-select form-select-sm"
+                                data-bind="options: regionOptions, value: filterRegion, optionsCaption: '-- Όλες οι Περιφέρειες --'"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Περιφερειακή Ενότητα</label>
+                        <select class="form-select form-select-sm"
+                                data-bind="options: peOptions, value: filterPE, optionsCaption: '-- Όλες οι Π.Ε. --', enable: peOptions().length > 0"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ Λίστα αναθέσεων ════ -->
+<div class="row">
+    <div class="col-xl-12">
+        <div class="border card">
+            <div class="card-body">
+
+                <div class="table-responsive-sm">
+                    <table id="certificates" class="table table-striped table-centered mb-0">
+                        <thead>
+                            <tr>
+                                <th>Αίτηση</th>
+                                <th>Ξενοδοχείο</th>
+                                <th>Επιχείρηση</th>
+                                <th>Περιοχή / Επικοινωνία</th>
+                                <th>Ημ/νία Αυτοψίας</th>
+                                <th>Στάδιο</th>
+                                <th style="min-width:160px;">Ενέργειες</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: pagedCertificates">
+
+                            <tr data-bind="css: { 'table-warning': isAutopsyDue }">
+                                <td>
+                                    <strong data-bind="text: '#' + certificateID"></strong>
+                                    <!-- ko if: isNew -->
+                                    <br /><span class="badge bg-primary mt-1">ΝΕΑ</span>
+                                    <!-- /ko -->
+                                </td>
+                                <td data-bind="html: hotelTitle + '<br><small class=text-muted>' + category + ' &middot; ' + totalRooms + ' δωμ. / ' + totalBeds + ' κλίνες</small>'"></td>
+                                <td data-bind="html: exploitingCompanyName + '<br><small class=text-muted>ΑΦΜ: ' + taxNumber + '</small>'"></td>
+                                <td data-bind="html: '<small>' + address + ', ' + municipalityTitle + ' ' + zipCode + '<br>' + email + ' &middot; ' + phoneNumber1 + '</small>'"></td>
+
+                                <!-- ── Ημ/νία Αυτοψίας: inline edit ── -->
+                                <td>
+                                    <!-- Read mode -->
+                                    <!-- ko ifnot: isEditingDate() -->
+                                    <div>
+                                        <div class="d-flex align-items-center">
+                                            <!-- ko if: autopsyDateTime() -->
+                                            <span data-bind="text: autopsyDateTime()" class="font-weight-medium"></span>
+                                            <!-- /ko -->
+                                            <!-- ko ifnot: autopsyDateTime() -->
+                                            <span class="text-muted">Δεν έχει οριστεί</span>
+                                            <!-- /ko -->
+
+                                            <!-- Αλλαγή: μόνο όσο δεν έχει οριστικοποιηθεί -->
+                                            <!-- ko ifnot: isDateFinal() -->
+                                            <a href="#"
+                                               class="ms-2 text-muted"
+                                               title="Αλλαγή ημερομηνίας"
+                                               data-bind="click: startEditDate">
+                                                <i class="uil uil-edit-alt"></i>
+                                            </a>
+                                            <!-- /ko -->
+                                        </div>
+
+                                        <!-- Κατάσταση + Αποδοχή -->
+                                        <!-- ko if: isDatePending() -->
+                                        <div class="mt-1">
+                                            <span class="badge badge-warning-lighten">Πρόταση ξενοδόχου</span>
+                                            <a href="#"
+                                               class="btn btn-sm btn-success py-0 px-1 ms-1"
+                                               title="Αποδοχή ημερομηνίας"
+                                               data-bind="click: acceptDate">
+                                                <i class="uil uil-check"></i> Αποδοχή
+                                            </a>
+                                        </div>
+                                        <!-- /ko -->
+                                        <!-- ko if: autopsyDateStatus() === 2 -->
+                                        <div class="mt-1"><span class="badge badge-success-lighten"><i class="uil uil-check"></i> Αποδεκτή</span></div>
+                                        <!-- /ko -->
+                                        <!-- ko if: autopsyDateStatus() === 3 -->
+                                        <div class="mt-1"><span class="badge badge-success-lighten"><i class="uil uil-check"></i> Οριστική (αλλαγή)</span></div>
+                                        <!-- /ko -->
+                                    </div>
+                                    <!-- /ko -->
+                                    <!-- Edit mode -->
+                                    <div data-bind="visible: isEditingDate()" style="min-width:180px;">
+                                        <div class="input-group input-group-sm">
+                                            <input type="text"
+                                                   class="form-control"
+                                                   placeholder="ηη/ΜΜ/εεεε"
+                                                   maxlength="10"
+                                                   data-bind="attr: { id:  certificateID },value: editDateValue,event: { keyup: function(d, e){ if(e.keyCode===13) d.saveDate(); if(e.keyCode===27) d.cancelEditDate(); } }" />
+                                            <div class="input-group-append">
+                                                <a class="uil uil-check text-success"
+                                                   title="Αποθήκευση"
+                                                   data-bind="click: saveDate">
+                                                </a>
+                                                <a class="uil uil-times text-danger"
+                                                   title="Ακύρωση"
+                                                   data-bind="click: cancelEditDate">
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <!-- Validation error -->
+                                        <small class="text-danger" data-bind="text: dateSaveError, visible: dateSaveError().length > 0"></small>
+                                    </div>
+                                </td>
+                                <!-- ── /Ημ/νία Αυτοψίας ── -->
+
+                                <!-- Στάδιο -->
+                                <td>
+                                    <span data-bind="text: stageLabel(), attr: { class: stageBadgeClass() }"></span>
+                                    <!-- ko if: medalTitle -->
+                                    <div class="mt-1"><span class="badge bg-light text-dark border"><i class="uil uil-award me-1"></i><span data-bind="text: medalTitle"></span></span></div>
+                                    <!-- /ko -->
+                                    <!-- ko if: hasRejection() -->
+                                    <div class="mt-1">
+                                        <a href="javascript:void(0);" class="badge bg-danger"
+                                           title="Κλικ για προβολή των παρατηρήσεων"
+                                           data-bind="click: $root.showRejection">
+                                            <i class="uil uil-comment-exclamation me-1"></i>Απόρριψη Ξενοδόχου <i class="uil uil-search-plus"></i>
+                                        </a>
+                                    </div>
+                                    <!-- /ko -->
+                                </td>
+
+                                <!-- Ενέργειες -->
+                                <td>
+                                    <div class="btn-group-vertical btn-group-sm w-100" role="group">
+
+                                        <!-- 1. Αυτοαξιολόγηση (πάντα διαθέσιμη, read-only) -->
+                                        <a class="btn btn-outline-secondary btn-sm text-start"
+                                           title="Προβολή της αυτοαξιολόγησης του ξενοδόχου"
+                                           data-bind="attr: { href: '/Certificate/ViewCertificate/' + certificateID + '?mode=1' }">
+                                            <i class="uil uil-eye me-1"></i>Αυτοαξιολόγηση
+                                        </a>
+
+                                        <!-- 2. Αυτοψία -->
+                                        <!-- ko if: canDoAutopsy -->
+                                        <a class="btn btn-outline-warning btn-sm text-start"
+                                           title="Διενέργεια / συνέχιση αυτοψίας"
+                                           data-bind="attr: { href: '/Certificate/ViewCertificate/' + certificateID + '?mode=2' }">
+                                            <i class="uil uil-clipboard-notes me-1"></i>Αυτοψία
+                                            <!-- ko if: v2Status === 2 --><i class="uil uil-check float-end"></i><!-- /ko -->
+                                        </a>
+                                        <!-- /ko -->
+                                        <!-- ko ifnot: canDoAutopsy -->
+                                        <a class="btn btn-outline-warning btn-sm text-start disabled"
+                                           title="Ενεργοποιείται όταν έρθει η ημερομηνία αυτοψίας">
+                                            <i class="uil uil-clipboard-notes me-1"></i>Αυτοψία <i class="uil uil-lock float-end"></i>
+                                        </a>
+                                        <!-- /ko -->
+
+                                        <!-- 3. Τελική Κατάταξη -->
+                                        <!-- ko if: canDoFinal -->
+                                        <a class="btn btn-outline-success btn-sm text-start"
+                                           title="Τελική κατάταξη καταλύματος"
+                                           data-bind="attr: { href: '/Certificate/ViewCertificate/' + certificateID + '?mode=3' }">
+                                            <i class="uil uil-award me-1"></i>Τελική Κατάταξη
+                                            <!-- ko if: v3Status === 2 --><i class="uil uil-check float-end"></i><!-- /ko -->
+                                        </a>
+                                        <!-- /ko -->
+                                        <!-- ko ifnot: canDoFinal -->
+                                        <a class="btn btn-outline-success btn-sm text-start disabled"
+                                           title="Ενεργοποιείται μετά την οριστική υποβολή της αυτοψίας">
+                                            <i class="uil uil-award me-1"></i>Τελική Κατάταξη <i class="uil uil-lock float-end"></i>
+                                        </a>
+                                        <!-- /ko -->
+
+                                        <!-- Απόρριψη Ανάθεσης (επιθεωρητής, πριν την αυτοψία) -->
+                                        <!-- ko if: !$root.isAdmin() && canRejectAssignment() -->
+                                        <a class="btn btn-outline-danger btn-sm text-start"
+                                           href="javascript:void(0);"
+                                           title="Απόρριψη ανάθεσης — ο ξενοδόχος θα επιλέξει άλλον επιθεωρητή"
+                                           data-bind="click: openRejectAssignment">
+                                            <i class="uil uil-ban me-1"></i>Απόρριψη Ανάθεσης
+                                        </a>
+                                        <!-- /ko -->
+
+                                        <!-- 4. Στατιστικά (μόνο admin): charts "ως ξενοδόχος" -->
+                                        <!-- ko if: $root.isAdmin() -->
+                                        <a class="btn btn-outline-info btn-sm text-start"
+                                           title="Προβολή στατιστικών βαθμολογίας του ξενοδοχείου"
+                                           data-bind="attr: { href: '/Home/Index?hotelID=' + encodeURIComponent(hotelID) + '&exploitingCompanyID=' + encodeURIComponent(exploitingCompanyID) }">
+                                            <i class="uil-chart-bar me-1"></i>Στατιστικά
+                                        </a>
+
+                                        <!-- Έκδοση/Προβολή Βεβαίωσης (μόνο για εκδομένες) -->
+                                        <!-- ko if: isIssued -->
+                                        <a class="btn btn-outline-dark btn-sm text-start" target="_blank"
+                                           title="Έκδοση / προβολή του εγγράφου βεβαίωσης"
+                                           data-bind="attr: { href: '/CertificateDoc/Generate/' + certificateID }">
+                                            <i class="uil-file-check-alt me-1"></i>Βεβαίωση
+                                        </a>
+                                        <!-- /ko -->
+                                        <!-- /ko -->
+
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+
+                    <!-- Καμία εγγραφή -->
+                    <!-- ko if: filteredCertificates().length === 0 -->
+                    <div class="text-center text-muted py-4">
+                        <i class="uil uil-folder-open font-24 d-block mb-1"></i>
+                        Δεν βρέθηκαν αναθέσεις με τα επιλεγμένα κριτήρια.
+                    </div>
+                    <!-- /ko -->
+                </div> <!-- end table-responsive-->
+
+                <!-- ════ Paging ════ -->
+                <!-- ko if: filteredCertificates().length > 0 -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap mt-2 pt-2 border-top">
+
+                    <div class="d-flex align-items-center">
+                        <span class="text-muted me-2" data-bind="text: pagingInfo"></span>
+                        <select class="form-select form-select-sm w-auto"
+                                data-bind="value: pageSize"
+                                title="Εγγραφές ανά σελίδα">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span class="text-muted ms-1">/ σελίδα</span>
+                    </div>
+
+                    <!-- ko if: totalPages() > 1 -->
+                    <nav>
+                        <ul class="pagination pagination-rounded mb-0">
+                            <li class="page-item" data-bind="css: { disabled: currentPage() === 1 }">
+                                <a class="page-link" href="javascript:void(0);" data-bind="click: prevPage">
+                                    <i class="uil uil-angle-left"></i>
+                                </a>
+                            </li>
+                            <!-- ko foreach: pageNumbers -->
+                            <li class="page-item" data-bind="css: { active: $data === $root.currentPage() }">
+                                <a class="page-link" href="javascript:void(0);"
+                                   data-bind="text: $data, click: function () { $root.goToPage($data); }"></a>
+                            </li>
+                            <!-- /ko -->
+                            <li class="page-item" data-bind="css: { disabled: currentPage() === totalPages() }">
+                                <a class="page-link" href="javascript:void(0);" data-bind="click: nextPage">
+                                    <i class="uil uil-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    <!-- /ko -->
+
+                </div>
+                <!-- /ko -->
+                <!-- ════ /Paging ════ -->
+
+            </div> <!-- end card body-->
+        </div> <!-- end card -->
+    </div><!-- end col-->
+</div>
+
+<!-- ════ Modal: Απόρριψη Ανάθεσης από επιθεωρητή ════ -->
+<div id="reject-assignment-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="uil uil-ban me-1"></i>
+                    Απόρριψη Ανάθεσης — <span data-bind="text: rejectAssignHotel"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Η ανάθεση θα απορριφθεί και ο ξενοδόχος θα ειδοποιηθεί να επιλέξει άλλον επιθεωρητή.
+                   Αναφέρετε τον λόγο της απόρριψης:</p>
+                <textarea class="form-control" rows="4"
+                          placeholder="π.χ. αδυναμία κάλυψης της περιοχής/ημερομηνίας..."
+                          data-bind="value: rejectAssignComment, valueUpdate: 'input'"></textarea>
+                <small class="text-muted">Το σχόλιο είναι υποχρεωτικό.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-danger"
+                        data-bind="click: confirmRejectAssignment, enable: rejectAssignComment().trim().length > 0">
+                    Απόρριψη Ανάθεσης
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ Modal: Παρατηρήσεις απόρριψης ξενοδόχου ════ -->
+<div id="rejection-note-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="uil uil-comment-exclamation me-1"></i>
+                    Απόρριψη Τελικής Κατάταξης — <span data-bind="text: rejectionModalTitle"></span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-2">
+                    <small>Παρατηρήσεις του ξενοδόχου (κάθε καταχώρηση φέρει ημερομηνία/ώρα):</small>
+                </p>
+                <div class="border rounded bg-light p-2" style="white-space: pre-wrap; word-break: break-word;"
+                     data-bind="text: rejectionModalText"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Κλείσιμο</button>
+            </div>
+        </div>
+    </div>
+</div>

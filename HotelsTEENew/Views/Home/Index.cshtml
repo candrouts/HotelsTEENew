@@ -1,0 +1,341 @@
+
+
+@{
+    ViewBag.Title = "Analytics";
+    int _role = ViewBag.UserRole != null ? (int)ViewBag.UserRole : 0;
+}
+
+<!-- ════ Εκκρεμείς Ενέργειες (γεμίζει μέσω JS, όλοι οι ρόλοι) ════ -->
+<div id="pending-actions-card" class="row mt-2" style="display:none;">
+    <div class="col-12">
+        <div class="border card border-warning">
+            <div class="card-header py-2">
+                <h5 class="card-title mb-0">
+                    <i class="ri-notification-3-line text-warning me-1"></i>
+                    Εκκρεμείς Ενέργειες
+                    <span class="badge bg-warning ms-1" id="pending-actions-count"></span>
+                </h5>
+            </div>
+            <div class="list-group list-group-flush" id="pending-actions-list"></div>
+        </div>
+    </div>
+</div>
+
+@if (_role == 10)
+{
+<!-- ════════════════════════════════════════════════════
+     Dashboard Επιθεωρητή
+     ════════════════════════════════════════════════════ -->
+<div id="inspector-dashboard">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <a href="@Url.Action("Index","Certificate")" class="btn btn-sm btn-success"><i class="uil uil-list-ul me-1"></i> Οι Αιτήσεις μου</a>
+                </div>
+                <h4 class="page-title">Επισκόπηση Επιθεωρητή</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="row">
+        <div class="col-md-3 col-6">
+            <div class="border card"><div class="card-body py-2">
+                <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Ενεργές Αναθέσεις</h6>
+                <h3 class="my-1" id="insp-kpi-active">0</h3>
+            </div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="border card"><div class="card-body py-2">
+                <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Προς Αυτοψία</h6>
+                <h3 class="my-1 text-danger" id="insp-kpi-autopsydue">0</h3>
+            </div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="border card"><div class="card-body py-2">
+                <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Αναμονή Αποδοχής</h6>
+                <h3 class="my-1" id="insp-kpi-awaiting">0</h3>
+            </div></div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="border card"><div class="card-body py-2">
+                <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Ολοκληρωμένες</h6>
+                <h3 class="my-1 text-success" id="insp-kpi-completed">0</h3>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- RadialBars: κατανομή ενεργών ανά στάδιο -->
+        <div class="col-xl-4 col-md-6">
+            <div class="border card h-100">
+                <div class="card-header py-2">
+                    <h5 class="card-title mb-0">Κατανομή Ενεργών Αναθέσεων</h5>
+                    <small class="text-muted">ανά στάδιο, πλην ολοκληρωμένων</small>
+                </div>
+                <div class="card-body">
+                    <div id="insp-radial" style="min-height:280px;"></div>
+                    <div id="insp-radial-legend" class="row g-1 mt-1"></div>
+                    <div id="insp-radial-empty" class="text-center text-muted py-4" style="display:none;">
+                        Δεν υπάρχουν ενεργές αναθέσεις.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Προσεχείς Αυτοψίες -->
+        <div class="col-xl-4 col-md-6">
+            <div class="border card h-100">
+                <div class="card-header py-2">
+                    <h5 class="card-title mb-0"><i class="uil uil-calendar-alt me-1"></i> Προσεχείς Αυτοψίες</h5>
+                    <small class="text-muted">επόμενες 5 ημέρες &amp; εκπρόθεσμες</small>
+                </div>
+                <div class="card-body py-1">
+                    <div id="insp-upcoming"></div>
+                    <div id="insp-upcoming-empty" class="text-center text-muted py-4" style="display:none;">
+                        Δεν υπάρχουν προσεχείς ή εκπρόθεσμες αυτοψίες.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Σημειώσεις (TODO) -->
+        <div class="col-xl-4 col-md-12">
+            <div class="border card h-100">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="uil uil-notes me-1"></i> Οι Σημειώσεις μου</h5>
+                    <button type="button" class="btn btn-sm btn-soft-success" onclick="HotelsTeeCalendar.openNew()"><i class="mdi mdi-plus"></i></button>
+                </div>
+                <div class="card-body py-1" style="max-height:340px;overflow-y:auto;">
+                    <div id="insp-todo"></div>
+                    <div id="insp-todo-empty" class="text-center text-muted py-4" style="display:none;">
+                        Δεν υπάρχουν σημειώσεις.<br><small>Πατήστε + για να προσθέσετε.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ημερολόγιο -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="border card">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="uil uil-calendar-alt me-1"></i> Ημερολόγιο</h5>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-soft-success" onclick="HotelsTeeCalendar.openNew()"><i class="mdi mdi-plus me-1"></i>Σημείωση</button>
+                        <a href="@Url.Action("Index","Calendar")" class="btn btn-sm btn-link">Πλήρης προβολή</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-3 mb-2" style="font-size:12px;">
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#39afd1;"></span> Προγραμματισμένη</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ffbc00;"></span> Σήμερα</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#fa5c7c;"></span> Εκπρόθεσμη</span>
+                        <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1D9E75;"></span> Ολοκληρωμένη</span>
+                    </div>
+                    <div id="calendar-home"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Υποστηρικτικό υλικό -->
+    <div class="row">
+        <div class="col-12">
+            <div class="border card">
+                <div class="card-header py-2"><h5 class="card-title mb-0">Υποστηρικτικό Υλικό</h5></div>
+                <div class="card-body py-2">
+                    <a href="@Url.Content("~/assets/docs/odigos-efarmogis.pdf")" target="_blank" class="me-3"><i class="mdi mdi-file-document-outline me-1"></i>Πρακτικός Οδηγός Εφαρμογής</a>
+                    <a href="@Url.Content("~/assets/docs/egxeiridio-xrisis.pdf")" target="_blank" class="me-3"><i class="mdi mdi-book-open-outline me-1"></i>Εγχειρίδιο Χρήσης</a>
+                    <a href="@Url.Content("~/assets/docs/video-platformas.mp4")" target="_blank"><i class="mdi mdi-play-circle-outline me-1"></i>Βίντεο Λειτουργίας</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+}
+
+@if (_role == 1 || _role == 100)
+{
+<!-- ════════════════════════════════════════════════════
+     Dashboard Ξενοδόχου / Admin (γεμίζει μέσω JS)
+     ════════════════════════════════════════════════════ -->
+<div id="hotelier-dashboard" style="display:none;">
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item active">Αρχική Σελίδα</li>
+                    </ol>
+                </div>
+                <h4 class="page-title" id="dash-page-title">Επισκόπηση</h4>
+            </div>
+        </div>
+    </div>
+
+    @if (_role == 100)
+    {
+        <!-- ════ Πλήθος βεβαιώσεων ανά μετάλλιο (admin) ════ -->
+        <div id="admin-medal-cards" class="row" style="display:none;"></div>
+    }
+
+    <!-- ════ Ιστορικό Βεβαιώσεων (μόνο ξενοδόχος) ════ -->
+    <div id="dash-history" class="row" style="display:none;">
+        <div class="col-12">
+            <div class="border card">
+                <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="mdi mdi-seal text-success me-1"></i> Οι Βεβαιώσεις μου</h5>
+                    <a id="dash-start-new" href="@Url.Action("Index","Criteria")" class="btn btn-sm btn-success" style="display:none;">
+                        <i class="uil uil-plus-circle me-1"></i>Έναρξη Νέας Αξιολόγησης
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-centered mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Βεβαίωση</th>
+                                    <th>Έκδοση</th>
+                                    <th>Ισχύς έως</th>
+                                    <th>Βαθμολογία</th>
+                                    <th>Μετάλλιο</th>
+                                    <th>Προβολή</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dash-history-rows"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Δεν έχει υποβληθεί αυτοαξιολόγηση -->
+    <div id="dash-no-submission" class="row" style="display:none;">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="mdi mdi-information-outline me-1"></i>
+                <span id="dash-no-submission-text">Τα συγκριτικά γραφήματα θα είναι διαθέσιμα μόλις υποβάλετε οριστικά την αυτοαξιολόγησή σας.</span>
+                <a href="/Criteria" class="alert-link" id="dash-no-submission-link">Μετάβαση στα Κριτήρια</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="dash-content" style="display:none;">
+
+        <!-- ════ Η Βαθμολογία μου: φίλτρα σύγκρισης + charts ════ -->
+        <div class="row">
+            <div class="col-12">
+                <div class="border card mb-2">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="uil uil-chart-bar text-success me-1"></i>
+                            <span id="dash-charts-title">Η Βαθμολογία μου</span>
+                            <small class="text-muted fw-normal ms-1">— σύγκριση με τον Μ.Ο. των ξενοδοχείων</small>
+                        </h5>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label mb-1">Στάδιο</label>
+                                <select id="dash-filter-stage" class="form-select form-select-sm">
+                                    <option value="1">Αυτοαξιολόγηση</option>
+                                    <option value="3">Τελική Κατάταξη</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label mb-1">Κατηγορία καταλύματος</label>
+                                <select id="dash-filter-category" class="form-select form-select-sm">
+                                    <option value="">-- Όλες --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label mb-1">Περιφέρεια</label>
+                                <select id="dash-filter-periphery" class="form-select form-select-sm">
+                                    <option value="">-- Όλες --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label mb-1">Περιφ. Ενότητα</label>
+                                <select id="dash-filter-pe" class="form-select form-select-sm">
+                                    <option value="">-- Όλες --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label mb-1">Μέγεθος (κλίνες)</label>
+                                <select id="dash-filter-beds" class="form-select form-select-sm">
+                                    <option value="">-- Όλα --</option>
+                                    <option value="1-20">έως 20</option>
+                                    <option value="21-50">21 - 50</option>
+                                    <option value="51-100">51 - 100</option>
+                                    <option value="101-300">101 - 300</option>
+                                    <option value="301-">301+</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button id="dash-filter-clear" class="btn btn-sm btn-light w-100">
+                                    <i class="uil uil-times me-1"></i>Καθαρισμός
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-1">
+                            <small class="text-muted">
+                                Σύγκριση στο στάδιο <strong id="dash-stage-label">Αυτοαξιολόγηση</strong> —
+                                ο Μ.Ο. υπολογίζεται από <strong id="dash-others-count">0</strong> ξενοδοχεία στο ίδιο στάδιο (βάσει φίλτρων).
+                            </small>
+                            <small class="text-muted d-none" id="dash-no-final-hint">
+                                &nbsp;Η Τελική Κατάταξη θα ενεργοποιηθεί όταν ολοκληρωθεί η δική σας πιστοποίηση.
+                            </small>
+                        </div>
+
+                        <hr class="my-2" />
+
+                        <!-- ════ Τα 2 charts (μέσα στο ίδιο card) ════ -->
+                        <div class="row g-2">
+                            <!-- Chart 1: Κατηγορίες -->
+                            <div class="col-xl-6">
+                                <div class="border rounded h-100">
+                                    <div class="d-flex justify-content-between align-items-center px-2 pt-2">
+                                        <h5 class="header-title mb-0">Βαθμολογία ανά Κατηγορία</h5>
+                                        <small class="text-muted">Κλικ σε μπάρα για ανάλυση</small>
+                                    </div>
+                                    <div class="px-2 pb-2">
+                                        <div id="dash-cat-chart" class="apex-charts"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chart 2: Υποκατηγορίες επιλεγμένης κατηγορίας -->
+                            <div class="col-xl-6">
+                                <div class="border rounded h-100">
+                                    <div class="px-2 pt-2">
+                                        <h5 class="header-title mb-0" id="dash-sub-title">Υποκατηγορίες</h5>
+                                    </div>
+                                    <div class="px-2 pb-2">
+                                        <div id="dash-sub-placeholder" class="text-center text-muted py-5">
+                                            <i class="mdi mdi-gesture-tap font-24 d-block mb-1"></i>
+                                            Επιλέξτε μια κατηγορία από το αριστερό γράφημα<br />
+                                            για να δείτε την ανάλυση ανά υποκατηγορία.
+                                        </div>
+                                        <div id="dash-sub-chart" class="apex-charts"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <!-- /dash-content -->
+</div> <!-- /hotelier-dashboard -->
+}

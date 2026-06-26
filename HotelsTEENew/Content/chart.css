@@ -1,0 +1,325 @@
+﻿.criteria-scroll {
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+/* 1) ΜΗΝ βάζεις opacity στο parent */
+.criteria-disabled {
+    /* μην βάζεις opacity εδώ */
+    position: relative; /* αν δεν υπάρχει ήδη */
+}
+
+    /* 2) Οπτικά "σβήνουμε" ΟΛΑ εκτός από το switch */
+    .criteria-disabled .card-body :not(.form-check.form-switch):not(.form-check.form-switch *) {
+        opacity: 0.7;
+       
+    }
+
+    /* 3) Μπλοκάρουμε κλικ παντού εκτός από το switch */
+    .criteria-disabled .card-body * {
+        pointer-events: none;
+    }
+
+    .criteria-disabled .card-body .form-check.form-switch,
+    .criteria-disabled .card-body .form-check.form-switch * {
+        pointer-events: auto;
+        opacity: 1; 
+        position: relative;
+       
+    }
+
+.leftside-menu {
+    background: linear-gradient( 135deg, rgba(0, 25, 60, 0.82), rgba(0, 90, 50, 0.78) ) !important;
+}
+.bg-custom{
+    background: linear-gradient( 135deg, rgba(0, 25, 60, 0.82), rgba(0, 90, 50, 0.78) ) !important;
+}
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    color: var(--ct-nav-pills-link-active-color);
+    background: linear-gradient( 135deg, rgba(0, 25, 60, 0.82), rgba(0, 90, 50, 0.78) ) !important;
+}
+.tooltip {
+    z-index: 2000 !important;
+}
+
+
+.progress .tooltip {
+    z-index: 2000 !important;
+}
+
+.sticky-wrap {
+    position: sticky;
+    top: 70px;
+    z-index: 500;
+    background-color: white;
+}
+
+.nav.nav-pills.bg-nav-pills {
+    position: sticky;
+    top: 209px;
+    z-index: 100;
+}
+
+#v-pills-tab {
+    position: sticky;
+    top: 315px;
+    max-height: calc(100vh - 375px);
+    overflow: auto;
+    z-index: 100;
+}
+.cr-btn-outline-primary {
+    --ct-btn-color: #727cf5;
+    --ct-btn-border-color: #727cf5;
+    --ct-btn-hover-color: #fff;
+    --ct-btn-hover-bg: #727cf5;
+    --ct-btn-hover-border-color: #727cf5;
+    --ct-btn-focus-shadow-rgb: 114, 124, 245;
+    --ct-btn-active-color: #fff;
+    --ct-btn-active-bg: #fff;
+    --ct-btn-active-border-color: #727cf5;
+    --ct-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --ct-btn-disabled-color: #727cf5;
+    --ct-btn-disabled-bg: transparent;
+    --ct-btn-disabled-border-color: #727cf5;
+    --ct-gradient: none;
+}
+
+.nav-link.active > .inbox-item-date > .cr-btn-outline-primary {
+    --ct-btn-color: #fff !important;
+    --ct-btn-border-color: #fff !important;
+    --ct-btn-hover-bg: #fff !important;
+    --ct-btn-hover-color: #727cf5 !important;
+}
+
+.tier-wrap {
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.tier-bar {
+    position: relative;
+    height: 28px;
+    border-radius: 10px;
+    overflow: hidden
+}
+
+.tier-bands {
+    position: absolute;
+    inset: 0;
+    opacity: .55;
+    background: linear-gradient(90deg, #9ca3af 0% 16.66%, /* <20  */
+    #cd7f32 16.66% 37.5%, /* 20-45 Bronze */
+    #c0c0c0 37.5% 58.33%, /* 45-70 Silver */
+    #d4af37 58.33% 79.16%, /* 70-95 Gold */
+    #60a5fa 79.16% 100% /* 95-120 Platinum */
+    )
+}
+
+.tier-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: red;
+    opacity: .85;
+    top: 8px;
+    bottom: 8px;
+}
+
+
+.tier-needle {
+    position: absolute;
+    top: 6px;
+    bottom: 6px;
+    width: 0;
+    border-left: 3px solid #2563eb
+}
+
+.tier-scale {
+    position: relative;
+    height: 18px;
+    font-size: 12px;
+    color: #6b7280
+}
+
+    .tier-scale span {
+        position: absolute;
+        transform: translateX(-50%)
+    }
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px
+}
+
+    .badge.warn {
+        background: #fde68a;
+        color: #78350f
+    }
+
+    .badge.ok {
+        background: #bbf7d0;
+        color: #14532d
+    }
+
+.required {
+    border-left: 5px solid #e5533d;
+}
+
+
+/* =========================
+   RESPONSIVE ΓΙΑ TABLET / MOBILE
+   ========================== */
+@media (max-width: 991.98px) {
+
+    .sticky-wrap {
+        position: static;
+        top: auto;
+        overflow-x: auto;
+        margin-bottom: 0.75rem;
+        white-space: nowrap;
+        max-height: fit-content !important;
+    }
+
+    .nav.nav-pills.bg-nav-pills {
+        position: static;
+        top: auto;
+        margin-bottom: .5rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        display: block !important;
+    }
+    .nav.nav-pills.bg-nav-pills .nav-item {
+        display: inline-block;
+        flex: 0 0 auto; 
+    }
+
+    #v-pills-tab {
+        position: static;
+        top: auto;
+        overflow-x: auto;
+        margin-bottom: 0.75rem;
+        white-space: nowrap;
+        max-height:fit-content!important;
+    }
+    
+    #v-pills-tab > .nav {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        gap: 0.35rem;
+        padding-bottom: 0.35rem;
+    }
+
+    #v-pills-tab > .nav .nav-link .d-block {
+        display: none!important;
+    }
+     
+    #v-pills-tab > .nav .nav-link {
+        flex: 0 0 auto; 
+        display: flex; 
+        align-items: center;
+        width: auto !important; 
+        /*min-width: 140px;*/
+        padding: 0.35rem 0.6rem;
+        margin-bottom: 0;
+        border-radius: 999px;
+        justify-content: flex-start !important;
+    }
+            
+    #v-pills-tab > .nav .nav-link .d-none.d-md-block {
+        display: inline-block !important;
+    }
+
+    #v-pills-tab > .nav .nav-link .inbox-item-date {
+        display: inline-flex;
+        align-items: center;
+        margin-left: auto;
+    }
+
+    #v-pills-tab a.nav-link {
+        padding: 0.25rem 0.4rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    .criteria-scroll {
+        max-height:fit-content;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    html[data-sidenav-size=condensed]:not([data-layout=topnav]) .wrapper .content-page {
+    
+       min-height: fit-content!important;
+    }
+
+    .nav .nav-pills {
+        display: -webkit-inline-box !important;
+    }
+
+}
+
+/* =========================
+   LANDSCAPE ΚΙΝΗΤΑ / ΜΙΚΡΑ TABLETS (576px–991px)
+   ========================== */
+@media (min-width: 576px) and (max-width: 991.98px) {
+
+    
+    #v-pills-tab.col-sm-3 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        border-right: none !important; 
+    }
+    .tab-pane .col-sm-9 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;       
+    }
+
+   
+    #v-pills-tab {
+        white-space: normal !important;
+        overflow-x: visible !important;
+        max-height: none !important;
+    }
+
+    /* Το εσωτερικό .nav  */
+    #v-pills-tab > .nav {
+        display: block !important;
+    }
+
+    /* Κάθε subcategory να πιάνει όλο το πλάτος*/
+    #v-pills-tab > .nav .nav-link {
+        width: 100% !important;
+        flex: none !important;
+        border-radius: 0.75rem;           
+        margin-bottom: 0.35rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.85rem;
+    }
+}
+
+
+/* =========================
+   MOBILE LAYOUT
+   ========================== */
+    @media (max-width: 767.98px) {
+      
+        #v-pills-tab > .nav .nav-link {
+            min-width: 110px; 
+            font-size: 0.8rem;
+        }
+        .sticky-wrap {
+            position: sticky;
+            top: 70px;
+            z-index: 500;
+            background-color: white;
+        }
+        .criteria-scroll {
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+

@@ -1,0 +1,160 @@
+@{
+    ViewBag.Title = "Παροχές & Κριτήρια";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <button class="btn btn-sm btn-success" data-bind="click: openNewFeature">
+                    <i class="uil uil-plus me-1"></i> Νέα Ρύθμιση
+                </button>
+            </div>
+            <h4 class="page-title">Κεντρικές Ρυθμίσεις Καταλύματος &amp; Αντιστοιχίσεις Κριτηρίων</h4>
+        </div>
+    </div>
+</div>
+
+<!-- ko if: error -->
+<div class="alert alert-danger" data-bind="text: error"></div>
+<!-- /ko -->
+<!-- ko if: success -->
+<div class="alert alert-success" data-bind="text: success"></div>
+<!-- /ko -->
+
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info py-2">
+            <i class="mdi mdi-information-outline me-1"></i>
+            Κάθε ρύθμιση είναι «έχει / δεν έχει». Για κάθε αντιστοίχιση ορίζετε αν το κριτήριο
+            <strong>απενεργοποιείται όταν η παροχή ΛΕΙΠΕΙ</strong> (συνήθης περίπτωση) ή
+            <strong>όταν ΥΠΑΡΧΕΙ</strong> (για αμοιβαία αποκλειόμενα, π.χ. αποχέτευση).
+            Επιλέξιμα είναι μόνο τα κριτήρια με δυνατότητα «δεν ισχύει».
+        </div>
+    </div>
+</div>
+
+<!-- ko if: features().length === 0 && !loading() -->
+<div class="row"><div class="col-12"><div class="card"><div class="card-body text-center text-muted py-4">
+    Δεν υπάρχουν ρυθμίσεις ακόμη. Πατήστε «Νέα Ρύθμιση».
+</div></div></div></div>
+<!-- /ko -->
+
+<!-- ko foreach: features -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <!-- ko if: icon --><i data-bind="attr: { class: icon() }" class="me-1"></i><!-- /ko -->
+                    <span data-bind="text: title"></span>
+                    <!-- ko ifnot: isActive --><span class="badge bg-secondary ms-1">Ανενεργή</span><!-- /ko -->
+                    <span class="badge bg-light text-dark ms-1" data-bind="text: 'σειρά ' + displayOrder"></span>
+                </h5>
+                <div>
+                    <button class="btn btn-sm btn-light" data-bind="click: $root.openEditFeature">
+                        <i class="uil uil-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" data-bind="click: $root.deleteFeature">
+                        <i class="uil uil-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body py-2">
+                <!-- ko if: description -->
+                <p class="text-muted mb-2" data-bind="text: description"></p>
+                <!-- /ko -->
+
+                <h6 class="text-uppercase text-muted" style="font-size:11px;">Αντιστοιχισμένα κριτήρια</h6>
+                <!-- ko if: mappings().length === 0 -->
+                <p class="text-muted mb-2"><small>Καμία αντιστοίχιση ακόμη.</small></p>
+                <!-- /ko -->
+                <table class="table table-sm mb-2" data-bind="visible: mappings().length > 0">
+                    <tbody data-bind="foreach: mappings">
+                        <tr>
+                            <td style="width:120px;"><code data-bind="text: criteriaCode"></code></td>
+                            <td data-bind="text: criteriaTitle"></td>
+                            <td style="width:200px;">
+                                <!-- ko if: disableWhenPresent -->
+                                <span class="badge badge-warning-lighten">απενεργοποίηση όταν ΥΠΑΡΧΕΙ</span>
+                                <!-- /ko -->
+                                <!-- ko ifnot: disableWhenPresent -->
+                                <span class="badge badge-info-lighten">απενεργοποίηση όταν ΛΕΙΠΕΙ</span>
+                                <!-- /ko -->
+                            </td>
+                            <td style="width:40px;">
+                                <a href="javascript:void(0)" class="text-danger" data-bind="click: function(m){ $root.removeMapping($parent, m); }">
+                                    <i class="uil uil-times"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-7">
+                        <label class="form-label mb-0" style="font-size:12px;">Κριτήριο</label>
+                        <select class="form-select form-select-sm"
+                                data-bind="options: $root.criteria, optionsText: $root.criteriaLabel, optionsValue: 'id', value: newCriteriaID, optionsCaption: '-- επιλέξτε κριτήριο --'"></select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label mb-0" style="font-size:12px;">Απενεργοποίηση όταν</label>
+                        <select class="form-select form-select-sm" data-bind="value: newDisableWhenPresent">
+                            <option value="false">Λείπει η παροχή</option>
+                            <option value="true">Υπάρχει η παροχή</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-sm btn-primary w-100" data-bind="click: $root.addMapping">
+                            <i class="uil uil-plus me-1"></i> Προσθήκη
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /ko -->
+
+<!-- ════ Modal επεξεργασίας ρύθμισης ════ -->
+<div id="feature-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title">Ρύθμιση Καταλύματος</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2">
+                    <label class="form-label mb-0">Τίτλος</label>
+                    <input type="text" class="form-control form-control-sm" maxlength="200"
+                           data-bind="value: editTitle" placeholder="π.χ. Πισίνα" />
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Περιγραφή (προαιρετικά)</label>
+                    <textarea class="form-control form-control-sm" rows="2" data-bind="value: editDescription"></textarea>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label mb-0">Εικονίδιο (class)</label>
+                        <input type="text" class="form-control form-control-sm" maxlength="50"
+                               data-bind="value: editIcon" placeholder="π.χ. uil uil-swimmer" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label mb-0">Σειρά εμφάνισης</label>
+                        <input type="number" class="form-control form-control-sm" data-bind="value: editOrder" />
+                    </div>
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="feat-active" data-bind="checked: editActive" />
+                    <label class="form-check-label" for="feat-active">Ενεργή (εμφανίζεται στον ξενοδόχο)</label>
+                </div>
+                <div class="text-danger mt-2" data-bind="text: modalError, visible: modalError().length > 0"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Άκυρο</button>
+                <button class="btn btn-sm btn-success" data-bind="click: saveFeature">Αποθήκευση</button>
+            </div>
+        </div>
+    </div>
+</div>

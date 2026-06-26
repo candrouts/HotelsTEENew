@@ -1,0 +1,673 @@
+﻿<!DOCTYPE html>
+@{
+    var html_attributes = ViewBag.HTMLAttributes != null ? ViewBag.HTMLAttributes : "";
+    var body_class = ViewBag.BodyClass != null ? ViewBag.BodyClass : "";
+}
+<html lang="en" @html_attributes>
+
+<head>
+    <meta charset="utf-8" />
+    @{
+        var title = "Σύστημα Πιστοποίησης Βιωσιμότητας";
+    }
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
+    <meta content="Coderthemes" name="author" />
+
+    <!-- App favicon -->
+    <link rel="shortcut icon" href="~/assets/images/favicon.ico">
+
+    <!-- Theme Config Js -->
+    <script src="~/assets/js/hyper-config.js"></script>
+
+    <!-- Vendor css -->
+    <link href="~/assets/css/vendor.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- App css -->
+    <link href="~/assets/css/app.min.css" rel="stylesheet" type="text/css" id="app-style" />
+
+
+    <link href="~/assets/vendor/datatables/responsive.bootstrap5.min.css" rel="stylesheet" type="text/css">
+
+    <link href="~/assets/vendor/datatables/select.bootstrap5.min.css" rel="stylesheet" type="text/css">
+
+    <link href="~/assets/vendor/datatables/buttons.bootstrap5.min.css" rel="stylesheet" type="text/css">
+
+    <link href="~/assets/vendor/datatables/fixedHeader.bootstrap5.min.css" rel="stylesheet" type="text/css">
+
+    <link href="~/assets/css/unicons/css/unicons.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/remixicon/remixicon.css" rel="stylesheet" type="text/css" />
+    <link href="~/assets/css/mdi/css/materialdesignicons.min.css" rel="stylesheet" type="text/css" />
+
+    <link rel="stylesheet" type="text/css" href="~/Content/iCheck/all.css">
+
+
+    <link rel="stylesheet" type="text/css" href="~/Content/chart.css">
+
+</head>
+
+<body>
+
+
+
+
+
+    <div class="wrapper">
+
+        <!-- ========== Topbar Start ========== -->
+        <div class="navbar-custom">
+            <div class="topbar container-fluid">
+                <div class="d-flex align-items-center gap-lg-2 gap-1">
+
+                    <!-- Topbar Brand Logo -->
+                    <div class="logo-topbar">
+                        <!-- Logo light -->
+                        <a href=@Url.Action("Index", "Home") class="logo-light">
+                            <span class="logo-lg">
+                                <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="logo" style="width: 95px;height: 60px;">
+                            </span>
+                            <span class="logo-sm">
+                                <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="small logo">
+                            </span>
+                        </a>
+
+                        <!-- Logo Dark -->
+                        <a href=@Url.Action("Index", "Home") class="logo-dark">
+                            <span class="logo-lg">
+                                <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="dark logo" style="width: 95px;height: 60px;">
+                            </span>
+                            <span class="logo-sm">
+                                <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="small logo">
+                            </span>
+                        </a>
+                    </div>
+
+                    <!-- Sidebar Menu Toggle Button -->
+                    <button class="button-toggle-menu">
+                        <i class="mdi mdi-menu"></i>
+                    </button>
+
+                    <!-- Horizontal Menu Toggle Button -->
+                    <button class="navbar-toggle" data-bs-toggle="collapse" data-bs-target="#topnav-menu-content">
+                        <div class="lines">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </button>
+
+                    <!-- Topbar Search Form -->
+                    <!--<div class="app-search dropdown d-none d-lg-block">
+                        <form>
+                            <div class="input-group">
+                                <input type="search" class="form-control dropdown-toggle" placeholder="Search..." id="top-search">
+                                <span class="mdi mdi-magnify search-icon"></span>
+                                <button class="input-group-text btn btn-primary" type="submit">Search</button>
+                            </div>
+                        </form>
+
+                        <div class="dropdown-menu dropdown-menu-animated dropdown-lg" id="search-dropdown">-->
+                    <!-- item-->
+                    <!--<div class="dropdown-header noti-title">
+                        <h5 class="text-overflow mb-2">Found <span class="text-danger">17</span> results</h5>
+                    </div>-->
+                    <!-- item-->
+                    <!--<a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <i class="uil-notes font-16 me-1"></i>
+                        <span>Analytics Report</span>
+                    </a>-->
+                    <!-- item-->
+                    <!--<a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <i class="uil-life-ring font-16 me-1"></i>
+                        <span>How can I help you?</span>
+                    </a>-->
+                    <!-- item-->
+                    <!--<a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <i class="uil-cog font-16 me-1"></i>
+                        <span>User profile settings</span>
+                    </a>-->
+                    <!-- item-->
+                    <!--<div class="dropdown-header noti-title">
+                        <h6 class="text-overflow mb-2 text-uppercase">Users</h6>
+                    </div>
+
+                    <div class="notification-list">-->
+                    <!-- item-->
+                    <!--<a href="javascript:void(0);" class="dropdown-item notify-item">
+                        <div class="d-flex">
+                            <img class="d-flex me-2 rounded-circle" src="~/assets/images/users/avatar-2.jpg" alt="Generic placeholder image" height="32">
+                            <div class="w-100">
+                                <h5 class="m-0 font-14">Erwin Brown</h5>
+                                <span class="font-12 mb-0">UI Designer</span>
+                            </div>
+                        </div>
+                    </a>-->
+                    <!-- item-->
+                    <!--<a href="javascript:void(0);" class="dropdown-item notify-item">
+                                    <div class="d-flex">
+                                        <img class="d-flex me-2 rounded-circle" src="~/assets/images/users/avatar-5.jpg" alt="Generic placeholder image" height="32">
+                                        <div class="w-100">
+                                            <h5 class="m-0 font-14">Jacob Deo</h5>
+                                            <span class="font-12 mb-0">Developer</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>-->
+                </div>
+
+                <ul class="topbar-menu d-flex align-items-center gap-3">
+
+                    <!-- 🔔 Εκκρεμείς Ενέργειες -->
+                    <li class="dropdown notification-list">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button"
+                           aria-haspopup="false" aria-expanded="false" id="pending-bell">
+                            <i class="ri-notification-3-line font-22" data-bs-toggle="tooltip" title="Εκκρεμείς Ενέργειες"></i>
+                            <span class="noti-icon-badge" id="pending-bell-badge" style="display:none;"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg py-0">
+                            <div class="p-2 border-top-0 border-start-0 border-end-0 border-dashed border">
+                                <h6 class="m-0 font-16 fw-semibold">Εκκρεμείς Ενέργειες</h6>
+                            </div>
+                            <div id="pending-bell-list" style="max-height:320px;overflow-y:auto;"></div>
+                        </div>
+                    </li>
+
+                    <li class="dropdown notification-list" id="top-bar">
+                        <a class="nav-link dropdown-toggle arrow-none" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                            <i class="ri-building-4-fill font-22" data-bs-toggle="tooltip" title="Πληροφορίες Ξενοδοχείου, Δειγματοληψία"></i>
+                            <span class="noti-icon-badge"></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated dropdown-lg py-0">
+                            <div class="p-2 border-top-0 border-start-0 border-end-0 border-dashed border">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="m-0 font-16 fw-semibold"> Στοιχεία καταλύματος</h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="px-2" style="max-height: 350px;" data-simplebar>
+                                <a href="javascript:void(0);" class="dropdown-item p-0 notify-item card unread-noti shadow-none mb-2">
+                                    <div class="card-body">
+                                        <span class="float-end noti-close-btn text-muted"><i class="mdi mdi-close"></i></span>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="notify-icon bg-primary">
+                                                    <i class="mdi mdi-comment-account-outline"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 text-truncate ms-2">
+                                                <h5 class="noti-item-title fw-semibold font-14"><span class="d-none d-md-block" data-bind="html:hotelType()"></span></h5>
+                                                <h5 class="noti-item-title fw-semibold font-14"><span class="d-none d-md-block" data-bind="html:hotelTitle()"></span></h5>
+                                                <h5 class="noti-item-title fw-semibold font-14"><span class="d-none d-md-block" data-bind="html:'Κατηγορία:' + category()"></span></h5>
+                                                <h5 class="noti-item-title fw-semibold font-14"><span class="d-none d-md-block" data-bind="html:'Δωμάτια:' + totalRooms()"></span></h5>
+                                                <h5 class="noti-item-title fw-semibold font-14"><span class="d-none d-md-block" data-bind="html:'Κλίνες:' + totalBeds()"></span></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                                <div class="p-2 border-top-0 border-start-0 border-end-0 border-dashed border">
+                                    <div class="row align-items-center">
+                                        <div class="col">
+                                            <h6 class="m-0 font-16 fw-semibold"> Δειγματοληψία</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="d-none d-md-block p-2" data-bind="html: samplingText"></span>
+
+                                @*<div class="text-center">
+                                    <i class="mdi mdi-dots-circle mdi-spin text-muted h3 mt-0"></i>
+                                </div>*@
+                            </div>
+
+
+                            <a href="javascript:void(0);" class="dropdown-item text-center text-primary notify-item border-top py-2">
+                                Close
+                            </a>
+
+                        </div>
+                    </li>
+
+
+
+
+                    <li class="d-none d-md-inline-block">
+                        <a class="nav-link" href="" data-bs-toggle="tooltip" data-toggle="fullscreen" title="Fullscreen">
+                            <i class="ri-fullscreen-line font-22"></i>
+                        </a>
+                    </li>
+
+                    <li class="d-none d-md-inline-block">
+                        <a class="nav-link" data-bs-toggle="tooltip" href="@Url.Action("LogOff","Account")" title="Έξοδος">
+                            <i class="ri-logout-box-line font-22"></i>
+                        </a>
+                    </li>
+
+                    @*<li class="dropdown">
+                            <a class="nav-link dropdown-toggle arrow-none nav-user px-2" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" aria-expanded="false">
+                                <span class="account-user-avatar">
+                                    <img src="~/assets/images/users/avatar-1.jpg" alt="user-image" width="32" class="rounded-circle">
+                                </span>
+                                <span class="d-lg-flex flex-column gap-1 d-none">
+                                    <h5 class="my-0">Dominic Keller</h5>
+                                    <h6 class="my-0 fw-normal">Founder</h6>
+                                </span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end dropdown-menu-animated profile-dropdown">
+
+                                <div class=" dropdown-header noti-title">
+                                    <h6 class="text-overflow m-0">Welcome !</h6>
+                                </div>
+
+
+                                <a href="javascript:void(0);" class="dropdown-item">
+                                    <i class="mdi mdi-account-circle me-1"></i>
+                                    <span>My Account</span>
+                                </a>
+
+
+                                <a href="javascript:void(0);" class="dropdown-item">
+                                    <i class="mdi mdi-account-edit me-1"></i>
+                                    <span>Settings</span>
+                                </a>
+
+
+                                <a href="javascript:void(0);" class="dropdown-item">
+                                    <i class="mdi mdi-lifebuoy me-1"></i>
+                                    <span>Support</span>
+                                </a>
+
+
+                                <a href="javascript:void(0);" class="dropdown-item">
+                                    <i class="mdi mdi-lock-outline me-1"></i>
+                                    <span>Lock Screen</span>
+                                </a>
+
+
+                                <a href="@Url.Action("LogOff","Account")" class="dropdown-item">
+                                    <i class="mdi mdi-logout me-1"></i>
+                                    <span>Logout</span>
+                                </a>
+                            </div>
+                        </li>*@
+                </ul>
+            </div>
+        </div>
+        <!-- ========== Topbar End ========== -->
+        <!-- ========== Left Sidebar Start ========== -->
+        <div class="leftside-menu">
+
+            <!-- Brand Logo Light -->
+            <a href=@Url.Action("Index", "Home") class="logo logo-light">
+                <span class="logo-lg">
+                    <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="logo" style="width: 95px;height: 60px;">
+                </span>
+                <span class="logo-sm">
+                    <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="small logo">
+                </span>
+            </a>
+
+            <!-- Brand Logo Dark -->
+            <a href=@Url.Action("Index", "Dashboards") class="logo logo-dark">
+                <span class="logo-lg">
+                    <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="dark logo" style="width: 95px;height: 60px;">
+                </span>
+                <span class="logo-sm">
+                    <img src="@Url.Content("~/Content/xee_logo_smaller.png")" alt="small logo">
+                </span>
+            </a>
+
+            <!-- Sidebar Hover Menu Toggle Button -->
+            <div class="button-sm-hover" data-bs-toggle="tooltip" data-bs-placement="right" title="Show Full Sidebar">
+                <i class="ri-checkbox-blank-circle-line align-middle"></i>
+            </div>
+
+            <!-- Full Sidebar Menu Close Button -->
+            <div class="button-close-fullsidebar">
+                <i class="ri-close-fill align-middle"></i>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="h-100" id="leftside-menu-container" data-simplebar>
+                <!-- Leftbar User -->
+                <div class="leftbar-user">
+                    <a href=@Url.Action("Profile", "Pages")>
+                        <img src="~/assets/images/users/avatar-1.jpg" alt="user-image" height="42" class="rounded-circle shadow-sm">
+                        <span class="leftbar-user-name mt-2">Dominic Keller</span>
+                    </a>
+                </div>
+
+                <!--- Sidemenu -->
+                <ul class="side-nav">
+
+                    <!-- ko if : role() == 1 -->
+
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Home") class="side-nav-link">
+                            <i class="uil-home-alt"></i>
+                            @*<span class="badge bg-success float-end">5</span>*@
+                            <span> Αρχική Σελίδα </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Criteria") class="side-nav-link">
+                            <i class="uil-calender"></i>
+                            <span> Αυτοαξιολόγηση  </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "InspectorSelection") class="side-nav-link">
+                            <i class="uil-user-check"></i>
+                            <span> Αίτηση Αξιολόγησης </span>
+                        </a>
+                    </li>
+                    <!-- /ko -->
+                    <!-- ko if : role() == 10 -->
+
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Home") class="side-nav-link">
+                            <i class="uil-home-alt"></i>
+                            @*<span class="badge bg-success float-end">5</span>*@
+                            <span> Αρχική Σελίδα </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Certificate") class="side-nav-link">
+                            <i class="uil-calender"></i>
+                            <span> Αιτήσεις </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Calendar") class="side-nav-link">
+                            <i class="uil-calendar-alt"></i>
+                            <span> Ημερολόγιο </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "InspectorProfile") class="side-nav-link">
+                            <i class="uil-map-marker"></i>
+                            <span> Προφίλ </span>
+                        </a>
+                    </li>
+                    <!-- /ko -->
+                    <!-- ko if : role() == 100 -->
+
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Home") class="side-nav-link">
+                            <i class="uil-home-alt"></i>
+                            <span> Αρχική Σελίδα </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "Certificate") class="side-nav-link">
+                            <i class="uil-calender"></i>
+                            <span> Αιτήσεις </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminInspectors") class="side-nav-link">
+                            <i class="uil-users-alt"></i>
+                            <span> Επιθεωρητές </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminMedals") class="side-nav-link">
+                            <i class="uil-award"></i>
+                            <span> Βαθμίδες &amp; Βάσεις </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminNotifications") class="side-nav-link">
+                            <i class="uil-envelope-alt"></i>
+                            <span> Ειδοποιήσεις </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminCertTemplate") class="side-nav-link">
+                            <i class="uil-file-alt"></i>
+                            <span> Πρότυπο Βεβαίωσης </span>
+                        </a>
+                    </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminFeatures") class="side-nav-link">
+                            <i class="uil-sliders-v-alt"></i>
+                            <span> Παροχές &amp; Κριτήρια </span>
+                        </a>
+                    </li>
+                    <!-- /ko -->
+                </ul>
+                <!--- End Sidemenu -->
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <!-- ========== Left Sidebar End ========== -->
+
+        <div class="content-page" id="container">
+
+
+
+
+            <div class="content">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
+
+
+            </div>
+
+
+            <div id="modal-loader" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true" style="z-index:2000;">
+                <div class="modal-dialog" style="width:250px;">
+                    <div class="modal-content">
+                        <div class="modal-body" style="text-align:center;">
+                            <div class="spinner-border avatar-lg text-primary" role="status"></div>
+                            @*<div class="spinner-grow avatar-lg text-secondary" role="status"></div>*@
+                        </div>
+                    </div><!-- /.modal-content -->
+                </div><!-- /.modal-dialog -->
+            </div><!-- /.modal -->
+            <!-- Footer Start -->
+            <footer class="footer">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-6">
+                            @DateTime.Now.Year © ΞΕΝΟΔΟΧΕΙΑΚΟ ΕΠΙΜΕΛΗΤΗΡΙΟ ΕΛΛΑΔΟΣ
+                        </div>
+                        <div class="col-md-6">
+                            @*<div class="text-md-end footer-links d-none d-md-block">
+                                    <a href="javascript: void(0);">About</a>
+                                    <a href="javascript: void(0);">Support</a>
+                                    <a href="javascript: void(0);">Contact Us</a>
+                                </div>*@
+                        </div>
+                    </div>
+                </div>
+            </footer>
+            <!-- end Footer -->
+
+
+
+
+
+            <input type="hidden" id="currentView" value="@ViewBag.currentView" />
+        </div>
+
+
+
+    </div>
+
+
+
+    <script src="~/Scripts/jquery-3.7.0.min.js" type="text/javascript"></script>
+
+
+    @*<script src="~/Scripts/bootstrap.min.js" type="text/javascript"></script>*@
+    @*<script src="~/Scripts/bootstrap.bundle.min.js" type="text/javascript"></script>*@
+
+    <script src="~/Scripts/knockout.js"></script>
+
+    <script src="~/assets/js/vendor.min.js"></script>
+
+
+    <script src="~/assets/js/app.js"></script>
+
+
+    <script src="~/assets/vendor/apexcharts/apexcharts.min.js"></script>
+
+    <!-- Apex Chart RadialBar Demo js -->
+    @*<script src="~/assets/js/pages/demo.apex-radialbar.js"></script>*@
+
+
+
+    <!-- Code Highlight js -->
+    <script src="~/assets/vendor/prismjs/prism.js"></script>
+    <script src="~/assets/vendor/prismjs/prism-normalize-whitespace.min.js"></script>
+    <script src="~/assets/vendor/clipboard/clipboard.min.js"></script>
+    <script src="~/assets/js/hyper-syntax.js"></script>
+    <script src="~/assets/js/hyper-syntax.js"></script>
+
+    <!-- Datatables js -->
+    <script src="~/assets/vendor/datatables/dataTables.min.js"></script>
+    <script src="~/assets/vendor/datatables/dataTables.bootstrap5.min.js"></script>
+    <script src="~/assets/vendor/datatables/dataTables.responsive.min.js"></script>
+    <script src="~/assets/vendor/datatables/responsive.bootstrap5.min.js"></script>
+
+    <script src="~/assets/vendor/datatables/dataTables.buttons.min.js"></script>
+    <script src="~/assets/vendor/datatables/buttons.bootstrap5.min.js"></script>
+    <script src="~/assets/vendor/datatables/buttons.html5.min.js"></script>
+    <script src="~/assets/vendor/datatables/buttons.print.min.js"></script>
+    <script src="~/assets/vendor/datatables/jszip.min.js"></script>
+    <script src="~/assets/vendor/datatables/pdfmake.min.js"></script>
+    <script src="~/assets/vendor/datatables/vfs_fonts.js"></script>
+
+    <script src="~/assets/vendor/datatables/dataTables.select.min.js"></script>
+
+    <script src="~/assets/vendor/datatables/dataTables.fixedHeader.min.js"></script>
+    <!-- Dropzone File Upload js -->
+    <script src="~/assets/vendor/dropzone/dropzone-min.js"></script>
+
+
+
+    <!-- init js -->
+    <script src="~/assets/js/ui/component.fileupload.js"></script>
+
+
+    <!-- Datatable Custom js -->
+    @*<script src="~/assets/js/pages/demo.datatable-init.js"></script>*@
+
+    <script src="~/Scripts/icheck.js"></script>
+
+
+
+    @*<script src="~/assets/js/hyper-app.js"></script>
+        <script src="~/assets/js/hyper-layout.js"></script>*@
+
+    <script src="~/Scripts/Handlers.js"></script>
+    <script src="~/Scripts/pageGuide.js"></script>
+
+
+
+
+
+    <script src="~/Scripts/ViewModels/CriteriaViewModel.js?v=1.9"></script>
+    <script src="~/Scripts/ViewModels/MenuViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/CertificateViewModel.js?v=2.8"></script>
+    <script src="~/Scripts/ViewModels/TopBarViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/InspectorSelectionViewModel.js?v=1.2"></script>
+    <script src="~/Scripts/ViewModels/InspectorProfileViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/HomeDashboardViewModel.js?v=1.8"></script>
+    <script src="~/Scripts/ViewModels/HomeInspectorDashboard.js"></script>
+    <script src="~/assets/vendor/fullcalendar/index.global.min.js"></script>
+    <script src="~/Scripts/ViewModels/Calendar.js"></script>
+    <script src="~/Scripts/ViewModels/AdminInspectorsViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/AdminNotificationsViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/AdminMedalsViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/AdminCertTemplateViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/AdminFeaturesViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/PendingActionsViewModel.js"></script>
+
+
+    <script>
+        Dropzone.autoDiscover = false;
+    </script>
+
+
+    <script type="text/javascript">
+
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            new bootstrap.Tooltip(document.body, {
+                selector: '[data-bs-toggle="tooltip"]',
+                container: 'body',
+                boundary: 'window'
+            });
+        });
+
+        function showLoader() {
+            $("#modal-loader").modal("show")
+        }
+
+        function hideLoader() {
+            $("#modal-loader").modal("hide")
+        }
+
+
+        $(document).ready(function () {
+            //  App.init();
+            //showLoader();
+
+        });
+
+        ko.applyBindings(new MenuViewModel(), document.getElementById("leftside-menu-container"));
+
+
+
+        var documentView = $("#currentView").val();
+
+        if (documentView == "Criteria/Index") {
+            ko.applyBindings(new CriteriaViewModel(), document.getElementById("container"));
+            ko.applyBindings(new TopBarViewModel(), document.getElementById("top-bar"));
+        }
+        else if (documentView == "Certificate/Index") {
+            ko.applyBindings(new CertificateViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "Certificate/ViewCertificate") {
+            ko.applyBindings(new ViewCertificateViewModel(), document.getElementById("container"));
+            ko.applyBindings(new TopBarViewModel(), document.getElementById("top-bar"));
+        }
+        else if (documentView == "InspectorSelection/Index") {
+            ko.applyBindings(new InspectorSelectionViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "InspectorProfile/Index") {
+            ko.applyBindings(new InspectorProfileViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminInspectors/Index") {
+            ko.applyBindings(new AdminInspectorsViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminNotifications/Index") {
+            ko.applyBindings(new AdminNotificationsViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminMedals/Index") {
+            ko.applyBindings(new AdminMedalsViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminCertTemplate/Index") {
+            ko.applyBindings(new AdminCertTemplateViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminFeatures/Index") {
+            ko.applyBindings(new AdminFeaturesViewModel(), document.getElementById("container"));
+        }
+
+
+        function refreshHotelCriteriaFiles(hotelCriteriaID, criteriaFileID) {
+            ko.contextFor(document.getElementById("container")).$data.fetchHotelCriteriaFiles(hotelCriteriaID, criteriaFileID);
+        }
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,622 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<!-- ════ Full-page loader (αποθήκευση/υποβολή κριτηρίων) ════ -->
+<div id="page-loader" style="position:fixed; inset:0; background:rgba(255,255,255,0.85); z-index:3000; display:none; align-items:center; justify-content:center;">
+    <div class="text-center">
+        <div class="spinner-border avatar-lg text-primary" role="status"></div>
+        <h5 class="mt-3" id="page-loader-text">Αποθήκευση κριτηρίων...</h5>
+        <p class="text-muted mb-0"><small>Παρακαλώ περιμένετε, μην κλείσετε τη σελίδα.</small></p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Αρχική</a></li>
+                    <li class="breadcrumb-item active">Αυτοαξιολόγηση</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Αυτοαξιολόγηση</h4>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════ Ενεργή αίτηση σε εξέλιξη: τα κριτήρια δεν επεξεργάζονται εδώ ════ -->
+<div class="row" data-bind="visible: applicationInProgress">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-body text-center py-5">
+                <i class="uil uil-clipboard-notes text-info" style="font-size:48px;"></i>
+                <h4 class="mt-2">Έχετε ενεργή αίτηση αξιολόγησης σε εξέλιξη</h4>
+                <p class="text-muted mb-1">
+                    Η αυτοαξιολόγησή σας έχει υποβληθεί και η αίτηση βρίσκεται στη διαδικασία
+                    αξιολόγησης από τον επιθεωρητή. Δεν απαιτείται καμία ενέργεια στη σελίδα αυτή.
+                </p>
+                <p class="text-muted">
+                    Μπορείτε να παρακολουθείτε την εξέλιξη της διαδικασίας και να δείτε τα κριτήρια
+                    (σε προβολή) από την «Υποβολή Αίτησης».
+                </p>
+                <a href="@Url.Action("Index","InspectorSelection")" class="btn btn-info mt-1">
+                    <i class="uil uil-arrow-right me-1"></i> Μετάβαση στην Υποβολή Αίτησης
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════ Δεν υπάρχει ενεργή αυτοαξιολόγηση — επιβεβαίωση πριν δημιουργηθεί νέα ════ -->
+<div class="row" data-bind="visible: needsNewAssessment">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-body text-center py-5">
+                <i class="uil uil-file-plus-alt text-info" style="font-size:48px;"></i>
+                <h4 class="mt-2">Δεν έχετε ενεργή αυτοαξιολόγηση</h4>
+                <p class="text-muted mb-1">
+                    Θέλετε να ξεκινήσετε <strong>νέα αυτοαξιολόγηση</strong> του καταλύματός σας;
+                </p>
+                <p class="text-muted">
+                    <i class="mdi mdi-information-outline me-1"></i>
+                    Αν έχετε προηγούμενη ολοκληρωμένη αξιολόγηση, η νέα θα <strong>προσυμπληρωθεί</strong>
+                    με τα κριτήρια και τα τεκμήριά της — μπορείτε να τα τροποποιήσετε ελεύθερα πριν την υποβολή.
+                </p>
+                <button class="btn btn-success mt-1" data-bind="click: startAssessment">
+                    <i class="uil uil-play me-1"></i> Ναι, Έναρξη Αυτοαξιολόγησης
+                </button>
+                <a href="@Url.Action("Index","Home")" class="btn btn-light mt-1 ms-1">Όχι, Επιστροφή στην Αρχική</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" data-bind="visible: !applicationInProgress() && !needsNewAssessment()">
+
+    <!-- ════ Κάρτα: Χαρακτηριστικά & Παροχές Καταλύματος ════ -->
+    <!-- ko if: hasFeatures -->
+    <div class="col-12">
+        <div id="guide-features" class="border card border-info mb-2" style="background-color:#eef6fc;">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
+                <h5 class="card-title mb-0">
+                    <i class="uil uil-building me-1 text-info"></i> Χαρακτηριστικά &amp; Παροχές Καταλύματος
+                    <!-- ko ifnot: allFeaturesAnswered -->
+                    <span class="badge bg-warning ms-1">Συμπληρώστε</span>
+                    <!-- /ko -->
+                    <!-- ko if: disabledByFeaturesCount() > 0 -->
+                    <span class="badge bg-secondary ms-1" data-bind="text: disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
+                    <!-- /ko -->
+                </h5>
+                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(!featuresCollapsed()); }">
+                    <span data-bind="text: featuresCollapsed() ? 'Επεξεργασία ▾' : 'Σύμπτυξη ▴'"></span>
+                </a>
+            </div>
+            <div class="card-body py-2" data-bind="visible: !featuresCollapsed()">
+                <p class="text-muted mb-2" style="font-size:13px;">
+                    Δηλώστε τις βασικές παροχές. Όσα κριτήρια δεν αφορούν το κατάλυμά σας απενεργοποιούνται αυτόματα.
+                </p>
+                <div data-bind="foreach: features">
+                    <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
+                        <div class="flex-grow-1 pe-2">
+                            <strong>
+                                <!-- ko if: icon --><i data-bind="attr: { class: icon }" class="me-1"></i><!-- /ko -->
+                                <span data-bind="text: title"></span>
+                            </strong>
+                            <!-- ko if: description -->
+                            <br /><small class="text-muted" data-bind="text: description"></small>
+                            <!-- /ko -->
+                        </div>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn"
+                                    data-bind="click: function(){ $root.setFeature($data, true); },
+                                               css: { 'btn-success': answered() && hasFeature() === true, 'btn-outline-secondary': !(answered() && hasFeature() === true) },
+                                               enable: $root.enableAll()">Ναι</button>
+                            <button type="button" class="btn"
+                                    data-bind="click: function(){ $root.setFeature($data, false); },
+                                               css: { 'btn-danger': answered() && hasFeature() === false, 'btn-outline-secondary': !(answered() && hasFeature() === false) },
+                                               enable: $root.enableAll()">Όχι</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- ko if: featuresCollapsed() -->
+            <div class="card-body py-2">
+                <div data-bind="foreach: features" style="display:inline;">
+                    <span class="badge me-1 mb-1"
+                          data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
+                                     css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
+                </div>
+            </div>
+            <!-- /ko -->
+        </div>
+    </div>
+    <!-- /ko -->
+
+    <div id="guide-bar" class="sticky-wrap tier-wrap col-xl-12">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <div>
+                <strong data-bind="text: tierLabel"></strong>
+                <span class="text-muted">(<span data-bind="text: totalScore"></span>/95)</span>
+                <!-- ko if: isDemoted() -->
+                <span id="guide-demote" class="badge bg-warning ms-1" data-bs-toggle="tooltip"
+                      data-bind="attr: { title: gatingMessage }">
+                    <i class="uil uil-lock-alt"></i> <span data-bind="text: gatingMessage"></span>
+                </span>
+                <!-- /ko -->
+            </div>
+            <span id="guide-nexttier" class="badge" data-bind="text: nextTierDeltaText, css: nextTierBadgeClass"></span>
+        </div>
+
+        <div class="tier-bar">
+            <div class="tier-bands"></div>
+            <div class="tier-fill" data-bind="style: { width: progressPct }"></div>
+            <div class="tier-needle" data-bind="style: { left: progressPct }"></div>
+        </div>
+
+        <div class="tier-scale">
+            <span style="left:0%">0</span>
+            <span style="left:17.79%">15</span>
+            <span style="left:36.84%">35</span>
+            <span style="left:57.89%">55</span>
+            <span style="left:78.94%">75</span>
+            <span style="left:100%">95</span>
+        </div>
+        <hr style="margin:0!important" />
+
+
+        <div id="guide-actions" class="float-end ">
+            <a class="btn btn-sm btn-success mx-2 mt-1"
+               data-bind="click: enableAll() ? saveData : null,
+                          css: { 'disabled': !enableAll() },
+                          attr: { 'aria-disabled': !enableAll() }">
+                <i class="uil uil-message me-1"></i> Υποβολή
+            </a>
+        </div>
+        <div class="float-end ">
+            <a class="btn btn-sm btn-primary mx-2 mt-1"
+               data-bind="click: enableAll() ? saveDataTemp : null,
+                          css: { 'disabled': !enableAll() },
+                          attr: { 'aria-disabled': !enableAll() }">
+                <i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ════ Επεξήγηση σελίδας (legend, collapsible) ════ -->
+    <div class="col-12 mb-2">
+        <a class="text-muted" data-bs-toggle="collapse" href="#page-legend" role="button" style="font-size:12px;">
+            <i class="mdi mdi-help-circle text-info me-1" style="font-size:15px;vertical-align:-2px;"></i> Επεξήγηση σελίδας
+        </a>
+        <div class="collapse" id="page-legend">
+            <div class="card mb-0 mt-1"><div class="card-body py-2" style="font-size:12px;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Μπάρα βαθμολογίας:</strong> δείχνει τη συνολική (αναγμένη) βαθμολογία 0–95 και τη βαθμίδα/μετάλιο που επιτυγχάνετε.</p>
+                        <p class="mb-1"><span class="badge bg-warning"><i class="uil uil-lock-alt"></i></span> <strong>Υποβιβασμός:</strong> η συνολική σας αντιστοιχεί σε ανώτερο μετάλιο, αλλά υπολείπεστε στις ελάχιστες βάσεις κάποιων πυλώνων.</p>
+                        <p class="mb-0"><span class="badge bg-light text-dark border">λείπουν Χ βαθμοί</span> <strong>Δεξιά:</strong> πόσοι πόντοι για την επόμενη βαθμίδα.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Κουμπιά πυλώνων:</strong> «αρχική βαθμολογία → αναγωγή» στις μονάδες του πυλώνα.</p>
+                        <p class="mb-1"><span class="badge bg-success"><i class="mdi mdi-check"></i></span> καλύπτει την ελάχιστη βάση του πυλώνα &nbsp; <span class="badge bg-danger"><i class="mdi mdi-lock"></i></span> υπολείπεται (δείχνει το ζητούμενο ελάχιστο).</p>
+                        <p class="mb-0"><strong>Προσωρινή Αποθήκευση:</strong> αποθήκευση χωρίς οριστικοποίηση. <strong>Υποβολή:</strong> οριστική — δεν αλλάζει μετά.</p>
+                    </div>
+                </div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="col-sm-12">
+
+        <ul id="guide-pillars" class="nav nav-pills bg-nav-pills nav-justified mb-3 tier-wrap">
+            <!-- ko foreach: {data: categories, as: 'category'}  -->
+            <li class="nav-item">
+                <a data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0" data-bind="attr: { 'href': '#tab-'+category.id() },css:{ 'active': $index() == 0 }">
+                    <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                    <span class="d-none d-md-block" data-bind="html:category.title"></span>
+                    <p class="inbox-item-date">
+                        <button type="button" class="btn btn-sm cr-btn-outline-primary px-1 py-0" data-bs-toggle="tooltip"
+                                data-bind="attr: { title: 'Βαθμολογία ' + category.rawPoints() + ' από ' + category.maxGrade() + ' → αναγωγή στις ' + totalUnits() + ' μονάδες του πυλώνα' }">
+                            <span data-bind="html: category.rawPoints()"></span>
+                            <i class="mdi mdi-arrow-right-thin"></i>
+                            <strong data-bind="html: category.totalPoints()"></strong>
+                        </button>
+                        <!-- Ένδειξη βάσης πυλώνα για το μετάλιο-βάσει-συνόλου -->
+                        <!-- ko if: $root.usePillarThresholds() && $root.byTotalTier() && $root.pillarRequired($root.byTotalTier().id, category) > 0 -->
+                        <!-- ko if: $root.pillarMeets($root.byTotalTier().id, category) -->
+                        <span class="badge bg-success" data-bs-toggle="tooltip"
+                              data-bind="attr: { title: 'Καλύπτει την ελάχιστη βάση του πυλώνα για ' + $root.byTotalTier().title + ' (απαιτούνται ' + $root.pillarRequired($root.byTotalTier().id, category).toFixed(1) + ' μόρ., έχει ' + category.totalPoints() + ')' }">
+                            <i class="mdi mdi-check"></i>
+                        </span>
+                        <!-- /ko -->
+                        <!-- ko ifnot: $root.pillarMeets($root.byTotalTier().id, category) -->
+                        <span class="badge bg-danger" data-bs-toggle="tooltip"
+                              data-bind="attr: { title: 'Δεν καλύπτει την ελάχιστη βάση του πυλώνα για ' + $root.byTotalTier().title + ' (απαιτούνται ' + $root.pillarRequired($root.byTotalTier().id, category).toFixed(1) + ' μόρ., έχει ' + category.totalPoints() + ')' }">
+                            <i class="mdi mdi-lock"></i> <span data-bind="text: $root.pillarRequired($root.byTotalTier().id, category).toFixed(1)"></span>
+                        </span>
+                        <!-- /ko -->
+                        <!-- /ko -->
+                    </p>
+                </a>
+            </li>
+            <!-- /ko  -->
+
+        </ul>
+
+        <div class="tab-content">
+
+
+            <!-- ko foreach: { data: categories, as: 'category' }  -->
+            <div class="tab-pane" data-bind="attr: { 'id': 'tab-'+category.id() }, css:{ 'active show': $index() == 0  }">
+
+                <div class="row">
+                    <div id="v-pills-tab" class="col-sm-3 mb-2 mb-sm-0 guide-subpillars" style="border-right: var(--ct-border-width) var(--ct-border-style) var(--ct-border-color) !important;">
+                        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical" data-bind="attr:{ 'id': 'pills-tab-'+category.id() }">
+
+                            <!-- ko foreach: { data: category.categories, as: 'subCategory' }  -->
+                            <div class="progress " style="height: 5px;">
+                                <div class="progress-bar progress-bar-striped bg-danger" role="progressbar"
+                                     data-bind="attr:{'id':'subTab-'+subCategory.id(),  'aria-valuenow': Math.round(subCategory.completedCriteria()),  'aria-valuemax': subCategory.totalTrackable(), 'aria-label': remainingText()},style:{ 'width' : subCategory.percentSelectCriteria() + '%' },css:{'bg-danger': percentSelectCriteria() < 50,'bg-warning': percentSelectCriteria() >= 50 && percentSelectCriteria() < 100, 'bg-success': percentSelectCriteria() === 100 }, bsTooltip: remainingText()"></div>
+                            </div>
+                            <a class="d-flex justify-content-between nav-link shadow-lg p-2 mb-2 rounded" data-bs-toggle="pill" role="tab" aria-selected="true" data-bind="attr:{ 'id':'subTab-'+subCategory.id(),'href':'#subTabPane-'+subCategory.id(),'aria-controls':'subTabPane-'+subCategory.id() },css:{ 'active': $index() == 0 }">
+
+                                <!-- Ρύθμιση για Left panel HELPER -->
+                                <span role="button" tabindex="0"
+                                      data-bs-toggle="offcanvas"
+                                      data-bind="attr: { 'data-bs-target': '#settings-' + subCategory.id() }">
+                                    <i class="ri-settings-3-line font-22" data-bs-toggle="tooltip" title="Βοήθεια"></i>
+                                </span>
+
+                                <i class="mdi mdi-home-variant d-md-none d-block"></i>
+                                <span class="d-none d-md-block" data-bind="html:title"></span>
+                                <p class="inbox-item-date">
+                                    <button type="button" class="btn btn-sm cr-btn-outline-primary px-1 py-0" data-bs-toggle="tooltip" title="Η βαθμολογία σου / Μέγιστη Βαθμολογία"> <span data-bind="html:subCategory.totalPoints() + ' / ' + subCategory.maxGrade()"></span> </button>
+                                </p>
+                                @*<span class="badge badge-success-lighten" data-bind="html:subCategory.totalPoints"></span>*@
+
+                            </a>
+
+                            <!-- /ko  -->
+                        </div>
+                    </div> <!-- end col-->
+
+                    <div class="col-sm-9">
+                        <div class="tab-content criteria-scroll" data-bind="attr:{ 'id': 'pills-tabContent-'+category.id() }">
+
+                            <!-- ko foreach: { data: category.categories, as: 'subCategory' }  -->
+                            <div class="tab-pane fade" role="tabpanel" data-bind="attr:{ 'id': 'subTabPane-'+subCategory.id(),'aria-labelledby':'subTab-'+subCategory.id() }, css:{ 'active show': $index() == 0  }">
+
+
+                                <!-- ko foreach : criteria  -->
+                                <div class="col-xs-12">
+                                    <div class="card " data-bind="@*visible:  expandPEA ,*@ css: { 'criteria-disabled': isDisabled() }" role="group" data-bind-aria-disabled="isDisabled() ? 'true' : 'false'">
+                                        <div class="card-body" data-bind="css: {'required': isRequired()}">
+                                            <!-- ko if : canShowNotApplicableSwitch() === true && !featureMapped() -->
+                                            <div class="float-end form-check form-switch">
+
+                                                <input type="checkbox" class="form-check-input" id="customSwitch1" data-bind="checked:isApplicable, enable: $root.enableAll()">
+
+                                                <label class="form-check-label" for="customSwitch1" data-bind="text: isApplicable() ? '👍 Εφαρμόζεται' : '👉 Επαναφορά', css: { 'text-success': isApplicable, 'text-danger': !isApplicable() }"></label>
+
+                                            </div>
+
+                                            <!-- /ko  -->
+                                            <!-- ko if: featureDisabled() -->
+                                            <div class="float-end">
+                                                <span class="badge badge-secondary-lighten" data-bs-toggle="tooltip"
+                                                      data-bind="attr: { title: featureReason }">
+                                                    <i class="uil uil-lock-alt me-1"></i><span data-bind="text: featureReason"></span>
+                                                </span>
+                                            </div>
+                                            <!-- /ko -->
+                                            <h4>
+                                                <span class="badge badge-info-lighten" data-bind="html:code"></span>&nbsp;&nbsp;
+                                                <!-- ko if : isRequired() === true -->
+                                                <i class="ri-lock-fill text-danger me-1" data-bs-toggle="tooltip" title="Υποχρεωτικό κριτήριο"></i>&nbsp;&nbsp;
+                                                <!-- /ko  -->
+                                                <span data-bind="html:title"></span>
+                                                <span class="badge bg-danger ms-2" data-bind="visible: isDisabled">Μη εφαρμόσιμο</span>
+                                                <span class="badge bg-danger ms-2" data-bind="visible: isHeritage">Δεν Αφορά (Δ/Α)</span>
+                                            </h4>
+
+                                            @*<p data-bind="html: description"></p>*@
+                                            <p class="mb-2">
+                                                <!-- ko if : displayedDescription() != "" -->
+                                                <b>Μεθοδολογία Εφαρμογής/Ελέγχου : </b>
+                                                <span data-bind="html: displayedDescription "></span>
+                                                <!-- ko if: canToggle() -->
+                                                <a href="#" class="badge badge-success-lighten"
+                                                   data-bind="text: isExpanded() ? 'Less' : 'More', click: toggleExpand"></a>
+                                                <!-- /ko -->
+                                                <!-- /ko -->
+                                            </p>
+
+                                            <ul class="nav nav-tabs nav-bordered mb-3 no-scroll-tabs guide-crit-tabs" data-bind="css: { 'pe-none': isDisabled() }">
+                                                <li class="nav-item">
+                                                    <a data-bs-toggle="tab" aria-expanded="false" class="nav-link active" data-bind="attr:{ 'href': '#crtieria-tab1-'+id() }">
+                                                        Επιλογή
+                                                    </a>
+                                                </li>
+
+                                                <li class="nav-item">
+                                                    <a data-bs-toggle="tab" aria-expanded="true" class="nav-link" data-bind="attr:{ 'href': '#crtieria-tab3-'+id() }">
+                                                        Παραδείγματα Πρακτικής Εφαρμογής
+                                                    </a>
+                                                </li>
+                                                <!-- ko if : needsFiles() == true -->
+                                                <li class="nav-item">
+                                                    <a data-bs-toggle="tab" aria-expanded="true" class="nav-link" data-bind="attr:{ 'href': '#crtieria-tab4-'+id() }">
+                                                        Τεκμήρια
+                                                    </a>
+                                                </li>
+                                                <!-- /ko -->
+                                            </ul> <!-- end nav-->
+                                            <div class="tab-content" data-bind="css: { 'pe-none': isDisabled() }, attr:{ 'aria-hidden': isDisabled() ? 'true' : 'false' }">
+                                                <div class="tab-pane show active" id="dismissing-alerts-preview" data-bind="attr:{ 'id': 'crtieria-tab1-'+id() }">
+
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+
+
+                                                            <!-- ko if : criteriaType() == 1 || criteriaType() == 3  -->
+                                                            @*<input type="checkbox" data-bind="iCheckCheckBox: isChecked" /> &nbsp;&nbsp;Επιλογή<br /><br />*@
+                                                            <div style="margin-bottom:10px;">
+                                                                <!-- ko if: isRequired() -->
+                                                                <input type="checkbox" data-bind="attr:{ 'name':'criteria-'+id(), 'id':'criteria-'+id()+'-yes','value':maxGrade },iCheckCheckBox: isChecked, enable: enabled() && $root.enableAll() == true" /> &nbsp;&nbsp;Ναι
+                                                                <!-- /ko -->
+                                                                <!-- ko if: !isRequired() -->
+                                                                <input type="radio" data-bind="attr:{ 'name':'criteria-'+id(), 'id':'criteria-'+id()+'-yes','value':maxGrade },iCheckRadio: isChecked, enable: enabled() && $root.enableAll() == true" /> &nbsp;&nbsp;Ναι
+                                                                <!-- /ko -->
+
+                                                            </div>
+                                                            <div>
+                                                                <!-- ko if: isRequired() -->
+                                                                <input type="checkbox" data-bind="attr:{ 'name':'criteria-'+id(), 'id':'criteria-'+id()+'-no','value':0 },iCheckCheckBox: isNotChecked, enable: enabled() && $root.enableAll() == true && !isRequired()" /> &nbsp;&nbsp;Όχι
+                                                                <!-- /ko -->
+                                                                <!-- ko if: !isRequired() -->
+                                                                <input type="radio" data-bind="attr:{ 'name':'criteria-'+id(), 'id':'criteria-'+id()+'-no','value':0 },iCheckRadio: isNotChecked, enable: enabled() && $root.enableAll() == true && !isRequired()" /> &nbsp;&nbsp;Όχι
+                                                                <!-- /ko -->
+                                                                <!-- ko if: isRequired() -->
+                                                                <span class="ms-2 text-muted small">
+                                                                    👉 Υποχρεωτικό κριτήριο δεν επιτρέπεται η επιλογή ΌΧΙ.
+                                                                </span>
+                                                                <!-- /ko -->
+                                                            </div>
+                                                            <!-- /ko  -->
+                                                            <!-- ko if : criteriaType() == 2  -->
+                                                            <label for="example-select" class="form-label">Επιλογή</label>
+                                                            @*<select class="form-select" data-bind="options: options,  value: value,
+                                                                optionsText: function(item) { return item;}, optionsValue: function(item) { return item;}
+                                                                , optionsCaption: 'Επιλέξτε'"></select>*@
+                                                            <select class="form-select"
+                                                                    data-bind="options: options,
+                                                                                optionsText: 'text',
+                                                                                optionsValue: 'value',
+                                                                                value: value,
+                                                                                optionsCaption: 'Επιλέξτε', enable: enabled() && $root.enableAll() == true"></select>
+                                                            <!-- /ko  -->
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+
+
+                                                <div class="tab-pane" data-bind="attr:{ 'id': 'crtieria-tab3-'+id() }">
+                                                    <span data-bind="html:notes1"></span>
+                                                </div> <!-- end preview code-->
+                                                <!-- ko if : needsFiles() == true -->
+                                                <div class="tab-pane" data-bind="attr:{ 'id': 'crtieria-tab4-'+id() }">
+
+                                                    <!-- ko foreach : files -->
+                                                    <div data-bind="html: title " style="font-size:13px;font-weight:bold;"></div>
+                                                    <div data-bind="html: description " style="font-size:12px;"></div>
+
+                                                    <!-- end file preview template -->
+                                                    <br /><br />
+                                                    <!--  /ko -->
+
+                                                </div>
+                                                <!-- /ko -->
+
+                                            </div> <!-- end tab-content-->
+
+                                        </div> <!-- end card-body-->
+                                    </div> <!-- end card-->
+                                </div>
+
+                                <!-- /ko  -->
+
+
+
+
+                            </div>
+                            <!-- /ko  -->
+
+                        </div> <!-- end tab-content-->
+                    </div> <!-- end col-->
+                </div>
+                <!-- end row-->
+
+
+
+            </div>
+            <!-- /ko  -->
+        </div>
+
+    </div>
+</div>
+
+
+<div id="required-alert-modal-save" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-warning">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="ri-error-warning-line h1"></i>
+                    <h4 class="mt-2">Προσοχή!</h4>
+                    <p class="mt-3" data-bind="text: requiredModalMessage"></p>
+                    <ul class="text-start mt-2" data-bind="foreach: requiredModalItems, visible: requiredModalItems().length > 0">
+                        <li data-bind="text: $data"></li>
+                    </ul>
+
+                    <button type="button" class="btn btn-light my-2" data-bs-dismiss="modal">Κλείσιμο</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="success-alert-modal-save" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-success">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="ri-check-line h1"></i>
+                    <h4 class="mt-2">Επιτυχία!</h4>
+                    <p class="mt-3">Η αποθήκευση των κριτηρίων υποβλήθηκε επιτυχώς.</p>
+                    <button type="button" class="btn btn-light my-2" data-bs-dismiss="modal">Κλείσιμο</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div id="success-alert-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-success">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="ri-check-line h1"></i>
+                    <h4 class="mt-2">Επιτυχία!</h4>
+                    <p class="mt-3">Η υποβολή των κριτηρίων υποβλήθηκε επιτυχώς.</p>
+                    <button type="button" class="btn btn-light my-2" data-bs-dismiss="modal">Κλείσιμο</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<div id="danger-alert-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content modal-filled bg-danger">
+            <div class="modal-body p-4">
+                <div class="text-center">
+                    <i class="ri-close-circle-line h1"></i>
+                    <h4 class="mt-2">Αποτυχία!</h4>
+                    <p class="mt-3">Κάτι πήγε στραβά, παρακαλούμε επαναφορτώστε τη σελίδα και προσπαθήστε πάλι.</p>
+                    <button type="button" class="btn btn-light my-2" data-bs-dismiss="modal">Κλείσιμο</button>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div id="info-header-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="info-header-modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header text-bg-info border-0">
+                <h4 class="modal-title" id="info-header-modalLabel">Ειδοποίηση</h4>
+            </div>
+            <div class="modal-body">
+
+                <p>Σίγουρα θέλετε να υποβάλλετε τα κριτήρια; Μετά την υποβολή δεν θα μπορείτε να τα τροποποιήσετε.</p>
+
+                <!-- Μετάλιο που θα λάβει -->
+                <div class="alert mb-0" data-bind="css: isDemoted() ? 'alert-warning' : 'alert-success'">
+                    <div>
+                        <i class="mdi mdi-medal me-1"></i>
+                        Με βάση τις τρέχουσες απαντήσεις σας θα λάβετε:
+                        <strong data-bind="text: tierLabel"></strong>
+                        <span class="text-muted">(συνολική βαθμολογία <span data-bind="text: totalScore"></span>/95)</span>
+                    </div>
+                    <!-- ko if: isDemoted() -->
+                    <hr class="my-2" />
+                    <div>
+                        Αν και η συνολική σας βαθμολογία αντιστοιχεί σε
+                        <strong data-bind="text: byTotalTier() ? byTotalTier().title : ''"></strong>,
+                        υπολείπεστε στις ελάχιστες βάσεις των πυλώνων:
+                        <strong data-bind="text: blockedPillarNames().join(', ')"></strong>.
+                    </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Ακύρωση</button>
+                <button type="button" class="btn btn-info" data-bind="click: saveDataSubmit">Οριστική Υποβολή</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- helper panel -->
+<!-- ko foreach: { data: categories, as: 'category' }  -->
+<!-- ko foreach: { data: category.categories, as: 'subCategory' }  -->
+
+<div class="offcanvas offcanvas-end"
+     tabindex="-1"
+     data-bind="attr: { id: 'settings-' + subCategory.id() }">
+    <div class="d-flex align-items-center bg-custom p-3 offcanvas-header">
+        <h5 class="text-white m-0">Βοήθεια προς επιθεωρητές</h5>
+        <button type="button" class="btn-close btn-close-white ms-auto"
+                data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <div class="offcanvas-body p-0">
+        <div data-simplebar class="h-100">
+            <div class="card mb-0 p-3">
+                <!-- ko if : description()  -->
+                <h5 class="mt-0 font-16 fw-bold mb-3">
+                    Περιγραφή & Στόχος
+                </h5>
+                <div class="row mb-3">
+                    <span data-bind="html: description()"></span>
+                </div>
+                <!-- /ko -->
+                <!-- ko if : examples()  -->
+                <h5 class="mt-0 font-16 fw-bold mb-3">
+                    Παραδείγματα Πρακτικής Εφαρμογής
+                </h5>
+                <div class="row">
+                    <span data-bind="html: examples()"></span>
+                </div>
+                <!-- /ko -->
+
+            </div>
+        </div>
+    </div>
+
+    <div class="offcanvas-footer border-top p-3 text-center">
+        <!-- να δούμε εάν θέλουμε κάτι -->
+    </div>
+</div>
+
+<!-- /ko -->
+<!-- /ko -->
+<script>
+    (function () {
+        function steps() {
+            return [
+                { sel: "#guide-features", title: "Χαρακτηριστικά & Παροχές Καταλύματος", text: "Ξεκινήστε εδώ: δηλώστε με «Ναι/Όχι» τις βασικές παροχές του καταλύματός σας (π.χ. πισίνα, κήπος, κουζίνα). Όσα κριτήρια δεν αφορούν το κατάλυμά σας απενεργοποιούνται αυτόματα και δεν μετρούν στη βαθμολογία. Μπορείτε να συμπτύξετε την κάρτα μετά τη συμπλήρωση." },
+                { sel: "#guide-bar", title: "Η βαθμολογία σας", text: "Η μπάρα δείχνει τη συνολική (αναγμένη) βαθμολογία 0–95 και το μετάλιο που επιτυγχάνετε. Ενημερώνεται ζωντανά καθώς συμπληρώνετε κριτήρια." },
+                { sel: "#guide-demote", title: "Υποβιβασμός βαθμίδας", text: "Η συνολική σας βαθμολογία αντιστοιχεί σε ανώτερο μετάλιο, αλλά υπολείπεστε στις ελάχιστες βάσεις ενός ή περισσότερων πυλώνων — εδώ φαίνεται ποιοι." },
+                { sel: "#guide-nexttier", title: "Επόμενη βαθμίδα", text: "Πόσοι πόντοι συνολικής βαθμολογίας λείπουν για το επόμενο μετάλιο." },
+                { sel: "#guide-pillars", title: "Πυλώνες", text: "Κάθε κουμπί δείχνει «αρχική βαθμολογία → αναγωγή» στις μονάδες του πυλώνα. Το πράσινο ✓ ή κόκκινο 🔒 δείχνει αν καλύπτετε την ελάχιστη βάση του πυλώνα για το μετάλιο-στόχο." },
+                { sel: ".guide-subpillars", title: "Υποπυλώνες", text: "Εδώ αναλύονται οι υποπυλώνες. Η μπάρα προόδου και η βαθμολογία δείχνουν πόσα κριτήρια έχετε ολοκληρώσει." },
+                { sel: ".guide-crit-tabs", title: "Καρτέλες κριτηρίου", text: "Κάθε κριτήριο έχει: «Επιλογή» (η απάντησή σας), «Παραδείγματα Πρακτικής Εφαρμογής» (καθοδήγηση) και «Τεκμήρια» (μεταφόρτωση υποστηρικτικών αρχείων). Το «More» στη μεθοδολογία εμφανίζει πλήρη επεξήγηση." },
+                { sel: "#guide-actions", title: "Αποθήκευση & Υποβολή", text: "«Προσωρινή Αποθήκευση»: αποθηκεύει χωρίς οριστικοποίηση. «Υποβολή»: οριστική — εμφανίζει το μετάλιο που θα λάβετε και δεν αλλάζει μετά." }
+            ];
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            if (window.PageGuide) PageGuide.register("guide_seen_criteria", "#guide-pillars .nav-item", steps);
+        });
+    })();
+</script>

@@ -1,0 +1,149 @@
+@{
+    ViewBag.Title = "Ειδοποιήσεις";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="notif-saved-toast" style="display:none; position:fixed; top:70px; right:20px; z-index:4000;"
+     class="alert alert-success shadow">
+    <i class="uil uil-check-circle me-1"></i>Το πρότυπο αποθηκεύτηκε
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Αρχική</a></li>
+                    <li class="breadcrumb-item active">Ειδοποιήσεις</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Διαχείριση Ειδοποιήσεων</h4>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs nav-bordered mb-3">
+    <li class="nav-item">
+        <a href="#tab-templates" data-bs-toggle="tab" class="nav-link active">
+            <i class="uil uil-envelope-edit me-1"></i>Πρότυπα
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#tab-log" data-bs-toggle="tab" class="nav-link" data-bind="click: loadLog">
+            <i class="uil uil-history me-1"></i>Ιστορικό Αποστολών
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+
+    <!-- ════ Πρότυπα ════ -->
+    <div class="tab-pane show active" id="tab-templates">
+        <div class="row" data-bind="foreach: events">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <span data-bind="text: title"></span>
+                            <!-- ko if: isActive -->
+                            <span class="badge bg-success ms-1">Ενεργό</span>
+                            <!-- /ko -->
+                            <!-- ko ifnot: isActive -->
+                            <span class="badge bg-secondary ms-1">Ανενεργό</span>
+                            <!-- /ko -->
+                        </h5>
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input" data-bind="checked: isActive">
+                            <label class="form-check-label"><small>Ενεργό</small></label>
+                        </div>
+                    </div>
+                    <div class="card-body py-2">
+                        <p class="text-muted mb-2"><small data-bind="text: description"></small></p>
+
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label mb-1">Παραλήπτης</label>
+                                <select class="form-select form-select-sm" data-bind="value: recipientType">
+                                    <option value="1">Ξενοδόχος</option>
+                                    <option value="2">Ανατεθειμένος Επιθεωρητής</option>
+                                    <option value="3">Διαχειριστής (Admin)</option>
+                                    <option value="4">Συγκεκριμένο email</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4" data-bind="visible: recipientType() == 4 || recipientType() == '4'">
+                                <label class="form-label mb-1">Custom email</label>
+                                <input type="email" class="form-control form-control-sm" data-bind="value: customEmail" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label mb-1">Διαθέσιμα πεδία (tokens)</label>
+                                <div>
+                                    <!-- ko foreach: tokens -->
+                                    <span class="badge bg-light text-dark border me-1" style="cursor:pointer;"
+                                          data-bind="text: $data, click: function(){ $parent.insertToken($data); }"></span>
+                                    <!-- /ko -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                            <label class="form-label mb-1">Θέμα</label>
+                            <input type="text" class="form-control form-control-sm" data-bind="value: subject" />
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label mb-1">Κείμενο (HTML)</label>
+                            <textarea class="form-control form-control-sm dash-body-input" rows="4"
+                                      data-bind="value: body"></textarea>
+                        </div>
+
+                        <div class="mt-2 text-end">
+                            <button class="btn btn-sm btn-success" data-bind="click: $root.saveTemplate">
+                                <i class="uil uil-save me-1"></i>Αποθήκευση
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ Ιστορικό ════ -->
+    <div class="tab-pane" id="tab-log">
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm table-centered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ημ/νία</th>
+                                <th>Γεγονός</th>
+                                <th>Παραλήπτης</th>
+                                <th>Θέμα</th>
+                                <th>Κατάσταση</th>
+                            </tr>
+                        </thead>
+                        <tbody data-bind="foreach: log">
+                            <tr>
+                                <td><small data-bind="text: sentDate"></small></td>
+                                <td><small data-bind="text: eventKey"></small></td>
+                                <td><small data-bind="text: toEmail"></small></td>
+                                <td><small data-bind="text: subject"></small></td>
+                                <td>
+                                    <!-- ko if: success -->
+                                    <span class="badge bg-success">Επιτυχία</span>
+                                    <!-- /ko -->
+                                    <!-- ko ifnot: success -->
+                                    <span class="badge bg-danger" data-bs-toggle="tooltip" data-bind="attr: { title: error }">Αποτυχία</span>
+                                    <!-- /ko -->
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!-- ko if: log().length === 0 -->
+                    <div class="text-center text-muted py-4">Δεν υπάρχουν καταχωρήσεις.</div>
+                    <!-- /ko -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

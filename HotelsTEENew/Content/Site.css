@@ -1,0 +1,74 @@
+﻿/* Set padding to keep content from hitting the edges */
+.body-content {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+/*input,
+select,
+textarea {
+    max-width: 280px;
+}*/
+
+.leftside-menu {
+    background: linear-gradient( 135deg, rgba(0, 25, 60, 0.82), rgba(0, 90, 50, 0.78) )!important;
+}
+
+.login-bg {
+    min-height: 100vh;
+    background: url('https://straife.com/hubfs/Straife%20Trust%20Through%20Compliance%20and%20ESG%20blog.png') center center / cover no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    /* ΘΕΣΜΙΚΟ ΚΡΑΤΙΚΟ OVERLAY */
+    .login-bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient( 135deg, rgba(0, 25, 60, 0.82), rgba(0, 90, 50, 0.78) );
+    }
+
+.login-info-panel {
+    width: 100%;
+    background: linear-gradient(160deg, #0b3c68, #0e6b4f);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+    .login-info-panel h3 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        line-height: 1.5;
+        letter-spacing: 0.4px;
+    }
+
+    .login-info-panel small {
+        margin-top: 12px;
+        display: block;
+        font-size: 0.78rem;
+        opacity: 0.85;
+    }
+
+@media (max-width: 767.98px) {
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+    }
+}
+

@@ -1,0 +1,51 @@
+@{
+    ViewBag.Title = "Πρότυπο Βεβαίωσης";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="cert-saved-toast" style="display:none; position:fixed; top:70px; right:20px; z-index:4000;"
+     class="alert alert-success shadow"><i class="uil uil-check-circle me-1"></i>Αποθηκεύτηκε</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Αρχική</a></li>
+                    <li class="breadcrumb-item active">Πρότυπο Βεβαίωσης</li>
+                </ol>
+            </div>
+            <h4 class="page-title">Πρότυπο Εγγράφου Βεβαίωσης</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="uil uil-file-edit-alt me-1"></i> Πρότυπο (HTML)</h5>
+                <div>
+                    <button class="btn btn-sm btn-light" data-bind="click: preview"><i class="uil uil-eye me-1"></i>Προεπισκόπηση</button>
+                    <button class="btn btn-sm btn-success" data-bind="click: save"><i class="uil uil-save me-1"></i>Αποθήκευση</button>
+                </div>
+            </div>
+            <div class="card-body py-2">
+                <p class="text-muted mb-2"><small>
+                    Το έγγραφο παράγεται αντικαθιστώντας τα πεδία (tokens) με τα στοιχεία της κάθε βεβαίωσης.
+                    Κάντε κλικ σε ένα πεδίο για εισαγωγή στο σημείο του κειμένου.
+                </small></p>
+
+                <div class="mb-2">
+                    <!-- ko foreach: tokens -->
+                    <span class="badge bg-light text-dark border me-1 mb-1" style="cursor:pointer;"
+                          data-bind="text: $data, click: function(){ $parent.insertToken($data); }"></span>
+                    <!-- /ko -->
+                </div>
+
+                <textarea id="cert-template-body" class="form-control" rows="22"
+                          style="font-family:monospace;font-size:12px;" data-bind="value: body"></textarea>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,28 @@
+@{
+    ViewBag.Title = "Ημερολόγιο";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">Ημερολόγιο</h4>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-3 mb-2" style="font-size:12px;">
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#39afd1;"></span> Προγραμματισμένη αυτοψία</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ffbc00;"></span> Σήμερα</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#fa5c7c;"></span> Εκπρόθεσμη</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#1D9E75;"></span> Ολοκληρωμένη</span>
+                    <span class="text-muted"><i class="mdi mdi-information-outline"></i> Πατήστε σε ημέρα για νέα σημείωση</span>
+                </div>
+                <div id="calendar-full"></div>
+            </div>
+        </div>
+    </div>
+</div>
