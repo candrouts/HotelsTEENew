@@ -230,6 +230,9 @@
     <Compile Include="ViewModels\InspectorDashboardViewModels.cs" />
     <Compile Include="Controllers\AdminFeaturesController.cs" />
     <Compile Include="Controllers\AdminFeaturesApiController.cs" />
+    <Compile Include="Controllers\AdminCriteriaController.cs" />
+    <Compile Include="Controllers\AdminCriteriaApiController.cs" />
+    <Compile Include="ViewModels\AdminCriteriaViewModels.cs" />
     <Compile Include="Models\PropertyFeature.cs" />
     <Compile Include="Models\FeatureCriteriaMap.cs" />
     <Compile Include="Models\HotelCriteriaFeature.cs" />
@@ -838,6 +841,7 @@
     <None Include="Properties\PublishProfiles\greencert - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\greencert - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\greencert - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\greencertnew - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\Handlers.js" />
     <Content Include="Scripts\pageGuide.js" />
@@ -864,6 +868,7 @@
     <Content Include="Scripts\ViewModels\HomeInspectorDashboard.js" />
     <Content Include="Scripts\ViewModels\Calendar.js" />
     <Content Include="Scripts\ViewModels\AdminFeaturesViewModel.js" />
+    <Content Include="Scripts\ViewModels\AdminCriteriaViewModel.js" />
     <Content Include="Scripts\ViewModels\PendingActionsViewModel.js" />
     <Content Include="Scripts\ViewModels\InspectorProfileViewModel.js" />
     <Content Include="Scripts\ViewModels\InspectorSelectionViewModel.js" />
@@ -895,6 +900,7 @@
     <Content Include="Views\AdminCertTemplate\Index.cshtml" />
     <Content Include="Views\Calendar\Index.cshtml" />
     <Content Include="Views\AdminFeatures\Index.cshtml" />
+    <Content Include="Views\AdminCriteria\Index.cshtml" />
     <Content Include="Views\InspectorProfile\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>

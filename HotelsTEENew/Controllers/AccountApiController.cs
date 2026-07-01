@@ -89,7 +89,17 @@ namespace HotelsTEE.Controllers
                     }
                 }
 
-                return Ok(new ApiAnswer { success = false, responseText = "Your message successfuly sent!" });
+                // Αποτυχία σύνδεσης: ξεχωρίζουμε το «κλειδωμένος λογαριασμός» ώστε ο
+                // χρήστης να σταματήσει τις προσπάθειες (αντί να τον κλειδώνει παραπάνω).
+                bool locked = false;
+                try
+                {
+                    MembershipUser mu = Membership.GetUser(model.UserName);
+                    locked = mu != null && mu.IsLockedOut;
+                }
+                catch (Exception) { }
+
+                return Ok(new ApiAnswer { success = false, responseText = locked ? "locked" : "invalid" });
 
             }
             catch (Exception e)

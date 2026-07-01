@@ -54,5 +54,7 @@ namespace HotelsTEE.Models
 
         public bool? notApplicable { get; set; }
 
+        public bool? isRequired { get; set; }
+
     }
 }

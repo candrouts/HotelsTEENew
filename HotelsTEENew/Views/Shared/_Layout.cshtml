@@ -437,6 +437,12 @@
                             <span> Παροχές &amp; Κριτήρια </span>
                         </a>
                     </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminCriteria") class="side-nav-link">
+                            <i class="uil-list-ul"></i>
+                            <span> Πυλώνες &amp; Κριτήρια </span>
+                        </a>
+                    </li>
                     <!-- /ko -->
                 </ul>
                 <!--- End Sidemenu -->
@@ -588,6 +594,7 @@
     <script src="~/Scripts/ViewModels/AdminMedalsViewModel.js"></script>
     <script src="~/Scripts/ViewModels/AdminCertTemplateViewModel.js"></script>
     <script src="~/Scripts/ViewModels/AdminFeaturesViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/AdminCriteriaViewModel.js"></script>
     <script src="~/Scripts/ViewModels/PendingActionsViewModel.js"></script>
 
 
@@ -660,6 +667,9 @@
         }
         else if (documentView == "AdminFeatures/Index") {
             ko.applyBindings(new AdminFeaturesViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminCriteria/Index") {
+            ko.applyBindings(new AdminCriteriaViewModel(), document.getElementById("container"));
         }
 
 

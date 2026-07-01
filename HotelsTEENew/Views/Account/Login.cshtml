@@ -31,6 +31,14 @@
                             @*<p class="text-muted mb-4">Παρακαλούμε εισάγετε τα στοχιεία σύνδεσής σας.</p>*@
                         </div>
 
+                        <!-- Μήνυμα σφάλματος -->
+                        <!-- ko if: error -->
+                        <div class="alert alert-danger d-flex align-items-center py-2">
+                            <i class="mdi mdi-alert-circle-outline me-1"></i>
+                            <span data-bind="text: errorMessage"></span>
+                        </div>
+                        <!-- /ko -->
+
 
 
                         <div class="mb-3">
@@ -57,7 +65,14 @@
                         </div>
 
                         <div class="mb-3 mb-0 text-center">
-                            <button class="btn login-info-panel" data-bind="click: submitLogin"> Είσοδος </button>
+                            <button class="btn login-info-panel" data-bind="click: submitLogin, disable: isLoading">
+                                <!-- ko if: isLoading -->
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Σύνδεση...
+                                <!-- /ko -->
+                                <!-- ko ifnot: isLoading -->
+                                Είσοδος
+                                <!-- /ko -->
+                            </button>
                         </div>
 
                         <div class="row mt-3">

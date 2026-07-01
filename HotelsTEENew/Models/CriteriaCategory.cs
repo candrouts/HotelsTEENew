@@ -17,6 +17,10 @@ namespace HotelsTEE.Models
 
         public string title { get; set; }
 
+        public string description { get; set; }
+
+        public string examples { get; set; }
+
         public int order { get; set; }
 
         public decimal? totalUnits { get; set; }

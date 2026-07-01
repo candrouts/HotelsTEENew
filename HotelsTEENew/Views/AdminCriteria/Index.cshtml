@@ -1,0 +1,244 @@
+@{
+    ViewBag.Title = "Διαχείριση Κριτηρίων";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <button class="btn btn-sm btn-success" data-bind="click: openNewPillar">
+                    <i class="uil uil-plus me-1"></i> Νέος Πυλώνας
+                </button>
+            </div>
+            <h4 class="page-title">Διαχείριση Πυλώνων, Υποπυλώνων &amp; Κριτηρίων</h4>
+        </div>
+    </div>
+</div>
+
+<!-- ko if: error --><div class="alert alert-danger" data-bind="text: error"></div><!-- /ko -->
+<!-- ko if: success --><div class="alert alert-success" data-bind="text: success"></div><!-- /ko -->
+
+<div class="alert alert-warning py-2">
+    <i class="mdi mdi-alert-outline me-1"></i>
+    Οι αλλαγές σε <strong>βάρος, μέγιστο βαθμό, τύπο, μονάδες</strong> επηρεάζουν τη βαθμολόγηση <strong>νέων</strong> αξιολογήσεων.
+    Το ιστορικό δεν αλλάζει. Η «Απενεργοποίηση/Απόσυρση» αποκρύπτει από νέες αξιολογήσεις χωρίς απώλεια ιστορικού.
+</div>
+
+<!-- ═══════════ Δέντρο ═══════════ -->
+<!-- ko foreach: pillars -->
+<div class="card mb-2">
+    <div class="card-header py-2 d-flex justify-content-between align-items-center" style="cursor:pointer;" data-bind="click: function(){ expanded(!expanded()); }">
+        <h5 class="card-title mb-0">
+            <i data-bind="css: expanded() ? 'uil uil-angle-down' : 'uil uil-angle-right'"></i>
+            <span data-bind="text: title"></span>
+            <span class="badge bg-light text-dark ms-1" data-bind="text: 'σειρά ' + order"></span>
+            <!-- ko ifnot: isActive --><span class="badge bg-secondary ms-1">Ανενεργός</span><!-- /ko -->
+            <span class="badge badge-primary-lighten ms-1" data-bind="text: (subPillars ? subPillars.length : 0) + ' υποπυλώνες'"></span>
+        </h5>
+        <div data-bind="clickBubble: false">
+            <button class="btn btn-sm btn-soft-success" data-bind="click: $root.openNewSubPillar"><i class="uil uil-plus"></i> Υποπυλώνας</button>
+            <button class="btn btn-sm btn-light" data-bind="click: $root.openEditPillar"><i class="uil uil-edit"></i></button>
+            <button class="btn btn-sm btn-light" data-bind="click: $root.toggleCategory" title="Ενεργό/Ανενεργό"><i class="uil uil-toggle-on"></i></button>
+            <button class="btn btn-sm btn-outline-danger" data-bind="click: $root.deleteCategory, enable: canDelete, css: { disabled: !canDelete }" title="Διαγραφή (μόνο αν άδειος)"><i class="uil uil-trash-alt"></i></button>
+        </div>
+    </div>
+
+    <div class="card-body py-2" data-bind="visible: expanded">
+        <!-- ko if: description --><p class="text-muted mb-2" data-bind="text: description"></p><!-- /ko -->
+
+        <!-- ko foreach: subPillars -->
+        <div class="border rounded mb-2">
+            <div class="px-2 py-1 d-flex justify-content-between align-items-center bg-light" style="cursor:pointer;" data-bind="click: function(){ expanded(!expanded()); }">
+                <div>
+                    <i data-bind="css: expanded() ? 'uil uil-angle-down' : 'uil uil-angle-right'"></i>
+                    <strong data-bind="text: title"></strong>
+                    <span class="badge bg-light text-dark ms-1" data-bind="text: 'σειρά ' + order"></span>
+                    <!-- ko ifnot: isActive --><span class="badge bg-secondary ms-1">Ανενεργός</span><!-- /ko -->
+                    <span class="badge badge-info-lighten ms-1" data-bind="text: (criteria ? criteria.length : 0) + ' κριτήρια'"></span>
+                    <!-- ko if: totalUnits != null --><span class="text-muted ms-1" data-bind="text: 'μονάδες: ' + totalUnits"></span><!-- /ko -->
+                </div>
+                <div data-bind="clickBubble: false">
+                    <button class="btn btn-sm btn-soft-primary" data-bind="click: $root.openNewCriterion"><i class="uil uil-plus"></i> Κριτήριο</button>
+                    <button class="btn btn-sm btn-light" data-bind="click: $root.openEditSubPillar"><i class="uil uil-edit"></i></button>
+                    <button class="btn btn-sm btn-light" data-bind="click: $root.toggleCategory"><i class="uil uil-toggle-on"></i></button>
+                    <button class="btn btn-sm btn-outline-danger" data-bind="click: $root.deleteCategory, enable: canDelete, css: { disabled: !canDelete }"><i class="uil uil-trash-alt"></i></button>
+                </div>
+            </div>
+
+            <div class="p-2" data-bind="visible: expanded">
+                <!-- ko if: criteria.length === 0 --><p class="text-muted mb-0"><small>Κανένα κριτήριο.</small></p><!-- /ko -->
+                <table class="table table-sm mb-0" data-bind="visible: criteria.length > 0">
+                    <thead class="table-light">
+                        <tr><th style="width:100px;">Κωδικός</th><th>Τίτλος</th><th style="width:160px;">Τύπος</th><th style="width:60px;">Βάρος</th><th style="width:80px;">Ισχύς</th><th style="width:150px;"></th></tr>
+                    </thead>
+                    <tbody data-bind="foreach: criteria">
+                        <tr>
+                            <td><code data-bind="text: code"></code>
+                                <!-- ko if: isRequired --><i class="ri-lock-fill text-danger" title="Υποχρεωτικό"></i><!-- /ko -->
+                            </td>
+                            <td><span data-bind="text: title"></span></td>
+                            <td><small data-bind="text: $root.typeLabel(criteriaType)"></small></td>
+                            <td data-bind="text: weight"></td>
+                            <td>
+                                <!-- ko if: isActiveNow --><span class="badge badge-success-lighten">Ενεργό</span><!-- /ko -->
+                                <!-- ko ifnot: isActiveNow --><span class="badge badge-secondary-lighten">Ανενεργό</span><!-- /ko -->
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-soft-info" data-bind="click: $root.openFiles" title="Απαιτούμενα τεκμήρια">
+                                    <i class="uil uil-paperclip"></i> <span data-bind="text: filesCount"></span>
+                                </button>
+                                <button class="btn btn-sm btn-light" data-bind="click: $root.openEditCriterion"><i class="uil uil-edit"></i></button>
+                                <!-- ko if: isActiveNow -->
+                                <button class="btn btn-sm btn-light" data-bind="click: $root.retireCriterion" title="Απόσυρση"><i class="uil uil-eye-slash"></i></button>
+                                <!-- /ko -->
+                                <!-- ko ifnot: isActiveNow -->
+                                <button class="btn btn-sm btn-light" data-bind="click: $root.reactivateCriterion" title="Επανενεργοποίηση"><i class="uil uil-eye"></i></button>
+                                <!-- /ko -->
+                                <button class="btn btn-sm btn-outline-danger" data-bind="click: $root.deleteCriterion, enable: !inUse, css: { disabled: inUse }" title="Διαγραφή (μόνο αν αχρησιμοποίητο)"><i class="uil uil-trash-alt"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- /ko -->
+    </div>
+</div>
+<!-- /ko -->
+
+<!-- ═══════════ Modal Κατηγορίας ═══════════ -->
+<div id="cat-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title" data-bind="text: cmContext"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2">
+                    <div class="col-md-8"><label class="form-label mb-0">Τίτλος</label><input class="form-control form-control-sm" data-bind="value: cmTitle" /></div>
+                    <div class="col-md-2"><label class="form-label mb-0">Σειρά</label><input type="number" class="form-control form-control-sm" data-bind="value: cmOrder" /></div>
+                    <div class="col-md-2 d-flex align-items-end"><div class="form-check"><input type="checkbox" class="form-check-input" id="cm-active" data-bind="checked: cmActive" /><label class="form-check-label" for="cm-active">Ενεργός</label></div></div>
+                    <div class="col-12"><label class="form-label mb-0">Περιγραφή</label><textarea class="form-control form-control-sm" rows="2" data-bind="value: cmDescription"></textarea></div>
+                    <div class="col-12"><label class="form-label mb-0">Παραδείγματα</label><textarea class="form-control form-control-sm" rows="2" data-bind="value: cmExamples"></textarea></div>
+                    <div class="col-md-6"><label class="form-label mb-0">Μονάδες (totalUnits)</label><input type="number" step="any" class="form-control form-control-sm" data-bind="value: cmTotalUnits" /></div>
+                    <div class="col-md-6"><label class="form-label mb-0">Μέγιστος Βαθμός</label><input type="number" step="any" class="form-control form-control-sm" data-bind="value: cmMaxGrade" /></div>
+                </div>
+                <div class="text-danger mt-2" data-bind="text: cmError, visible: cmError().length > 0"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Άκυρο</button>
+                <button class="btn btn-sm btn-success" data-bind="click: saveCategory">Αποθήκευση</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ Modal Κριτηρίου ═══════════ -->
+<div id="crit-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title" data-bind="text: crContext"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2">
+                    <div class="col-md-2"><label class="form-label mb-0">Κωδικός</label><input class="form-control form-control-sm" data-bind="value: crCode" /></div>
+                    <div class="col-md-8"><label class="form-label mb-0">Τίτλος</label><input class="form-control form-control-sm" data-bind="value: crTitle" /></div>
+                    <div class="col-md-2"><label class="form-label mb-0">Σειρά</label><input type="number" class="form-control form-control-sm" data-bind="value: crOrder" /></div>
+                    <div class="col-12"><label class="form-label mb-0">Περιγραφή / Μεθοδολογία</label><textarea class="form-control form-control-sm" rows="3" data-bind="value: crDescription"></textarea></div>
+
+                    <div class="col-md-3"><label class="form-label mb-0">Τύπος</label>
+                        <select class="form-select form-select-sm" data-bind="value: crType">
+                            <option value="1">1 · Ναι/Όχι (υποχρεωτικό)</option>
+                            <option value="2">2 · Αριθμητικό / Επιλογή</option>
+                            <option value="3">3 · Ναι/Όχι (προαιρετικό)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2"><label class="form-label mb-0">Βάρος</label><input type="number" class="form-control form-control-sm" data-bind="value: crWeight" /></div>
+                    <div class="col-md-2"><label class="form-label mb-0">Μέγ. Βαθμός</label><input type="number" step="any" class="form-control form-control-sm" data-bind="value: crMaxGrade" /></div>
+                    <div class="col-md-5 d-flex align-items-end gap-3">
+                        <div class="form-check"><input type="checkbox" class="form-check-input" id="cr-req" data-bind="checked: crIsRequired" /><label class="form-check-label" for="cr-req">Υποχρεωτικό</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input" id="cr-files" data-bind="checked: crNeedsFiles" /><label class="form-check-label" for="cr-files">Τεκμήρια</label></div>
+                        <div class="form-check"><input type="checkbox" class="form-check-input" id="cr-na" data-bind="checked: crNotApplicable" /><label class="form-check-label" for="cr-na">«Δεν ισχύει»</label></div>
+                    </div>
+
+                    <div class="col-md-4"><label class="form-label mb-0">gradesList</label><input class="form-control form-control-sm" data-bind="value: crGradesList" /></div>
+                    <div class="col-md-4"><label class="form-label mb-0">gradesOptions</label><input class="form-control form-control-sm" data-bind="value: crGradesOptions" /></div>
+                    <div class="col-md-4"><label class="form-label mb-0">selectList (JSON)</label><input class="form-control form-control-sm" data-bind="value: crSelectList" /></div>
+
+                    <div class="col-md-6"><label class="form-label mb-0">Σημειώσεις 1</label><textarea class="form-control form-control-sm" rows="2" data-bind="value: crNotes1"></textarea></div>
+                    <div class="col-md-6"><label class="form-label mb-0">Σημειώσεις 2</label><textarea class="form-control form-control-sm" rows="2" data-bind="value: crNotes2"></textarea></div>
+
+                    <div class="col-md-3"><label class="form-label mb-0">Ισχύς από</label><input type="date" class="form-control form-control-sm" data-bind="value: crDateFrom" /></div>
+                    <div class="col-md-3"><label class="form-label mb-0">Ισχύς έως</label><input type="date" class="form-control form-control-sm" data-bind="value: crDateTo" /></div>
+                </div>
+                <div class="text-danger mt-2" data-bind="text: crError, visible: crError().length > 0"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Άκυρο</button>
+                <button class="btn btn-sm btn-success" data-bind="click: saveCriterion">Αποθήκευση</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ Modal Τεκμηρίων Κριτηρίου ═══════════ -->
+<div id="files-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title"><i class="uil uil-paperclip me-1"></i> Απαιτούμενα Τεκμήρια — <span data-bind="text: filesContext"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="text-muted">Τα τεκμήρια που πρέπει να μεταφορτώσει ο ξενοδόχος για το κριτήριο.</small>
+                    <button class="btn btn-sm btn-success" data-bind="click: newFile"><i class="uil uil-plus me-1"></i>Νέο τεκμήριο</button>
+                </div>
+
+                <!-- Inline φόρμα προσθήκης/επεξεργασίας -->
+                <!-- ko if: showFileForm -->
+                <div class="border rounded p-2 mb-2 bg-light">
+                    <div class="row g-2">
+                        <div class="col-md-9"><label class="form-label mb-0">Τίτλος</label><input class="form-control form-control-sm" data-bind="value: fTitle" /></div>
+                        <div class="col-md-3 d-flex align-items-end"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-active" data-bind="checked: fActive" /><label class="form-check-label" for="f-active">Ενεργό</label></div></div>
+                        <div class="col-12"><label class="form-label mb-0">Περιγραφή</label><textarea class="form-control form-control-sm" rows="3" data-bind="value: fDescription"></textarea></div>
+                    </div>
+                    <div class="text-danger mt-1" data-bind="text: fError, visible: fError().length > 0"></div>
+                    <div class="text-end mt-2">
+                        <button class="btn btn-sm btn-light" data-bind="click: cancelFileForm">Άκυρο</button>
+                        <button class="btn btn-sm btn-success" data-bind="click: saveFile">Αποθήκευση</button>
+                    </div>
+                </div>
+                <!-- /ko -->
+
+                <!-- ko if: critFiles().length === 0 --><p class="text-muted"><small>Δεν υπάρχουν τεκμήρια.</small></p><!-- /ko -->
+                <table class="table table-sm" data-bind="visible: critFiles().length > 0">
+                    <thead class="table-light"><tr><th>Τίτλος</th><th style="width:80px;">Ισχύς</th><th style="width:130px;"></th></tr></thead>
+                    <tbody data-bind="foreach: critFiles">
+                        <tr>
+                            <td>
+                                <strong data-bind="text: title"></strong>
+                                <!-- ko if: description --><br /><small class="text-muted" data-bind="text: description"></small><!-- /ko -->
+                            </td>
+                            <td>
+                                <!-- ko if: isActive --><span class="badge badge-success-lighten">Ενεργό</span><!-- /ko -->
+                                <!-- ko ifnot: isActive --><span class="badge badge-secondary-lighten">Ανενεργό</span><!-- /ko -->
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-light" data-bind="click: $root.editFile"><i class="uil uil-edit"></i></button>
+                                <button class="btn btn-sm btn-light" data-bind="click: $root.toggleFile" title="Ενεργό/Ανενεργό"><i class="uil uil-toggle-on"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" data-bind="click: $root.deleteFile, enable: !inUse, css: { disabled: inUse }" title="Διαγραφή (μόνο αν αχρησιμοποίητο)"><i class="uil uil-trash-alt"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Κλείσιμο</button>
+            </div>
+        </div>
+    </div>
+</div>
