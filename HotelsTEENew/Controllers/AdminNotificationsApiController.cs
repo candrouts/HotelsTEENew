@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.Utils;
 using HotelsTEE.ViewModels;
@@ -98,8 +98,8 @@ namespace HotelsTEE.Controllers
                 unitOfWork.Save();
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminNotificationsApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }

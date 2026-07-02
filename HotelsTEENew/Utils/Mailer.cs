@@ -72,7 +72,7 @@ namespace HotelsTEE.Utils
                 return true;
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "Mailer.cs");
                 return false;
             }
         }
@@ -137,7 +137,7 @@ namespace HotelsTEE.Utils
 
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "Mailer.cs");
                 // Mailer.SendEmailException(e);
             }
 

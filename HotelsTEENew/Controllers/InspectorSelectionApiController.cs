@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -121,8 +121,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs");
                 return Ok(new InspectorInitialDataViewModel
                 {
                     hotelCriteriaStatus = 0,
@@ -333,8 +333,8 @@ namespace HotelsTEE.Controllers
                     .ToList();
                 return Ok(pes);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs");
                 return Ok(new List<ELSTATAreaViewModel>());
             }
         }
@@ -413,8 +413,8 @@ namespace HotelsTEE.Controllers
                     .ToList();
                 return Ok(inspectors);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs");
                 return Ok(new List<InspectorSearchViewModel>());
             }
         }
@@ -498,8 +498,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }
@@ -566,7 +566,7 @@ namespace HotelsTEE.Controllers
                 // Αυτόματη έκδοση & αποθήκευση της βεβαίωσης (PDF/HTML) με σύνδεση
                 // certificateFileID + ανάρτηση στη Διαύγεια (η Διαύγεια μόνο όταν enabled).
                 try { Utils.CertificateDocService.IssueAndStore(unitOfWork, certID); }
-                catch (Exception) { /* η αποτυχία εγγράφου δεν ακυρώνει την αποδοχή */ }
+                catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs"); /* η αποτυχία εγγράφου δεν ακυρώνει την αποδοχή */ }
 
                 // Ειδοποίηση: εκδόθηκε βεβαίωση → ξενοδόχος
                 Utils.NotificationService.Fire("CERTIFICATE_ISSUED", certID,
@@ -578,8 +578,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }
@@ -629,8 +629,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "InspectorSelectionApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }

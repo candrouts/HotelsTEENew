@@ -170,7 +170,7 @@ namespace HotelsTEE.Controllers
                 return Ok(results);
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
 
                 return Ok(results);
             }
@@ -324,8 +324,8 @@ namespace HotelsTEE.Controllers
                             if (oldFeats.Count > 0)
                                 unitOfWork.Save();
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception exLog)
+                        { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CertificateApiController.cs");
                             // Δεν μπλοκάρει τη δημιουργία της νέας έκδοσης
                         }
 
@@ -357,8 +357,8 @@ namespace HotelsTEE.Controllers
                             if (oldFiles.Count > 0)
                                 unitOfWork.Save();
                         }
-                        catch (Exception)
-                        {
+                        catch (Exception exLog)
+                        { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CertificateApiController.cs");
                             // Η αντιγραφή τεκμηρίων δεν πρέπει να μπλοκάρει τη δημιουργία της νέας έκδοσης
                         }
 
@@ -372,7 +372,7 @@ namespace HotelsTEE.Controllers
 
                     }
                     catch (Exception e)
-                    {
+                    { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
 
                     }
                 }
@@ -493,7 +493,7 @@ namespace HotelsTEE.Controllers
                 return Ok(results);
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
 
                 return Ok(results);
             }
@@ -554,8 +554,8 @@ namespace HotelsTEE.Controllers
                 ans.success = true;
                 return Ok(ans);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CertificateApiController.cs");
                 return Ok(ans);
             }
         }
@@ -660,7 +660,7 @@ namespace HotelsTEE.Controllers
 
                             }
                             catch (Exception e)
-                            {
+                            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
 
                             }
 
@@ -749,7 +749,7 @@ namespace HotelsTEE.Controllers
                 return Ok(new ApiAnswer() { success = true });
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
                 return Ok(new ApiAnswer() { success = false });
 
             }
@@ -817,7 +817,7 @@ namespace HotelsTEE.Controllers
                 return Ok(new  { success = true, message = "Η ημερομηνία αυτοψίας ενημερώθηκε και οριστικοποιήθηκε." });
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
                 return Ok(new { success = false, message = e.Message });
             }
         }
@@ -862,7 +862,7 @@ namespace HotelsTEE.Controllers
                 return Ok(new { success = true, message = "Η ημερομηνία αυτοψίας έγινε αποδεκτή." });
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
                 return Ok(new { success = false, message = e.Message });
             }
         }
@@ -937,7 +937,7 @@ namespace HotelsTEE.Controllers
                 return Ok(new { success = true, message = "Η ανάθεση απορρίφθηκε." });
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
                 return Ok(new { success = false, message = e.Message });
             }
         }
@@ -964,7 +964,7 @@ namespace HotelsTEE.Controllers
                 return Ok(results);
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
 
                 return Ok(results);
             }
@@ -1013,7 +1013,7 @@ namespace HotelsTEE.Controllers
                 }
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateApiController.cs");
                 return Ok(new ApiAnswer() { success = false });
             }
 

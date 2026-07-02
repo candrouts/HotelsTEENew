@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -88,8 +88,8 @@ namespace HotelsTEE.Controllers
                 result.success = true;
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminFeaturesApiController.cs");
                 return Ok(result);
             }
         }
@@ -138,8 +138,8 @@ namespace HotelsTEE.Controllers
                 res.id = f.featureID;
                 return Ok(res);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminFeaturesApiController.cs");
                 res.message = "Σφάλμα αποθήκευσης.";
                 return Ok(res);
             }
@@ -169,8 +169,8 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminFeaturesApiController.cs");
                 return Ok(res);
             }
         }
@@ -219,8 +219,8 @@ namespace HotelsTEE.Controllers
                 res.id = m.mapID;
                 return Ok(res);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminFeaturesApiController.cs");
                 res.message = "Σφάλμα αποθήκευσης.";
                 return Ok(res);
             }
@@ -245,8 +245,8 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminFeaturesApiController.cs");
                 return Ok(res);
             }
         }

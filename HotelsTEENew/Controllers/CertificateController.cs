@@ -32,8 +32,8 @@ namespace HotelsTEE.Controllers
                 string mime = MimeMapping.GetMimeMapping(file.fileName);
                 return File(stream, mime, file.fileName);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CertificateController.cs");
                 return HttpNotFound();
             }
         }
@@ -63,7 +63,7 @@ namespace HotelsTEE.Controllers
                 if (user != null && user.role == 1)
                     readOnly = true;
             }
-            catch (Exception) { }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CertificateController.cs"); }
 
             ViewBag.CurrentView = "Certificate/ViewCertificate";
             ViewBag.Mode = mode;
@@ -101,7 +101,7 @@ namespace HotelsTEE.Controllers
                 AzureStorage.AzureStorage.SaveFileToPaintings(file, hotelCriteriaID, folderToUpload).Wait();
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateController.cs");
                 string ca = "";
             }
 

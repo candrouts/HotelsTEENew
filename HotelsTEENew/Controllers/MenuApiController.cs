@@ -46,7 +46,7 @@ namespace HotelsTEE.Controllers
 
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "MenuApiController.cs");
                 //Utils.Mailer.SendEmailException(e);
                 //Utils.ExceptionHandler.ToDetailedString(e);
                 return Ok(new ApiAnswer { success = false, responseText = "Your message successfuly sent!" });

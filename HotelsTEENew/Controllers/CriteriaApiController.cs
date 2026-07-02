@@ -141,8 +141,8 @@ namespace HotelsTEE.Controllers
                                 if (oldFiles.Count > 0)
                                     unitOfWork.Save();
                             }
-                            catch (Exception)
-                            {
+                            catch (Exception exLog)
+                            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CriteriaApiController.cs");
                                 // Τα τεκμήρια δεν μπλοκάρουν τη δημιουργία του νέου κύκλου
                             }
                         }
@@ -179,8 +179,8 @@ namespace HotelsTEE.Controllers
                                 if (best.Any())
                                     unitOfWork.Save();
                             }
-                            catch (Exception)
-                            {
+                            catch (Exception exLog)
+                            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CriteriaApiController.cs");
                                 // Η προσυμπλήρωση ρυθμίσεων δεν μπλοκάρει τη δημιουργία του κύκλου
                             }
                         }
@@ -194,8 +194,8 @@ namespace HotelsTEE.Controllers
                             .FirstOrDefault();
 
                     }
-                    catch(Exception e)
-                    {
+                    catch (Exception e)
+                    { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaApiController.cs");
 
                     }
                 }
@@ -304,7 +304,7 @@ namespace HotelsTEE.Controllers
                 return Ok(results);
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaApiController.cs");
 
                 return Ok(results);
             }
@@ -358,8 +358,8 @@ namespace HotelsTEE.Controllers
                 ans.success = true;
                 return Ok(ans);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CriteriaApiController.cs");
                 return Ok(ans);
             }
         }
@@ -462,8 +462,8 @@ namespace HotelsTEE.Controllers
                                 }
                              
                             }
-                            catch(Exception e)
-                            {
+                            catch (Exception e)
+                            { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaApiController.cs");
 
                             }
 
@@ -514,8 +514,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(new ApiAnswer() { success = true });
             }
-            catch(Exception e)
-            {
+            catch (Exception e)
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaApiController.cs");
                 return Ok(new ApiAnswer() { success = false });
 
             }
@@ -547,7 +547,7 @@ namespace HotelsTEE.Controllers
                 return Ok(results);
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaApiController.cs");
 
                 return Ok(results);
             }
@@ -596,7 +596,7 @@ namespace HotelsTEE.Controllers
                 }
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaApiController.cs");
                 return Ok(new ApiAnswer() { success = false });
             }
 

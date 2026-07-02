@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using Newtonsoft.Json;
 using System;
@@ -131,14 +131,14 @@ namespace HotelsTEE.Utils
                         uow.Save();
                     }
                 }
-                catch (Exception) { /* το κατέβασμα δεν είναι κρίσιμο */ }
+                catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "DiaugeiaService.cs"); /* το κατέβασμα δεν είναι κρίσιμο */ }
 
                 result.success = true;
                 result.ada = json.ada;
                 return result;
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "DiaugeiaService.cs");
                 try { Mailer.SendEmailException(e); } catch { }
                 result.message = e.Message;
                 return result;

@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -82,8 +82,8 @@ namespace HotelsTEE.Controllers
                 unitOfWork.Save();
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminMedalsApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }
@@ -137,8 +137,8 @@ namespace HotelsTEE.Controllers
                 unitOfWork.Save();
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminMedalsApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }

@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -124,7 +124,7 @@ namespace HotelsTEE.Utils
 
             // Ανάρτηση στη Διαύγεια — εκτελείται μόνο όταν diaugeia.enabled=1 (go-live)
             try { DiaugeiaService.Post(uow, cert, doc.bytes); }
-            catch (Exception) { /* η ανάρτηση δεν μπλοκάρει την έκδοση/αποθήκευση */ }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "CertificateDocService.cs"); /* η ανάρτηση δεν μπλοκάρει την έκδοση/αποθήκευση */ }
 
             return doc;
         }
@@ -203,7 +203,7 @@ namespace HotelsTEE.Utils
                 return res;
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CertificateDocService.cs");
                 res.message = e.Message;
                 return res;
             }

@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -112,8 +112,8 @@ namespace HotelsTEE.Controllers
                 result.success = true;
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs");
                 return Ok(result);
             }
         }
@@ -154,7 +154,7 @@ namespace HotelsTEE.Controllers
                 res.success = true; res.id = c.id;
                 return Ok(res);
             }
-            catch (Exception) { res.message = "Σφάλμα αποθήκευσης."; return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); res.message = "Σφάλμα αποθήκευσης."; return Ok(res); }
         }
 
         [Route("api/AdminCriteriaApi/ToggleCategory")]
@@ -173,7 +173,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); return Ok(res); }
         }
 
         [Route("api/AdminCriteriaApi/DeleteCategory")]
@@ -199,7 +199,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { res.message = "Σφάλμα διαγραφής."; return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); res.message = "Σφάλμα διαγραφής."; return Ok(res); }
         }
 
         // ── Κριτήριο ────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ namespace HotelsTEE.Controllers
                 res.success = true; res.id = c.id;
                 return Ok(res);
             }
-            catch (Exception) { res.message = "Σφάλμα αποθήκευσης."; return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); res.message = "Σφάλμα αποθήκευσης."; return Ok(res); }
         }
 
         // Ενεργοποίηση/απενεργοποίηση κριτηρίου μέσω παραθύρου ισχύος (dateTo)
@@ -283,7 +283,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); return Ok(res); }
         }
 
         [Route("api/AdminCriteriaApi/DeleteCriterion")]
@@ -310,7 +310,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { res.message = "Σφάλμα διαγραφής."; return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); res.message = "Σφάλμα διαγραφής."; return Ok(res); }
         }
 
         // ── Τεκμήρια κριτηρίου (TEE_Criteria_Files) ─────────────────────
@@ -340,7 +340,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); return Ok(res); }
         }
 
         [Route("api/AdminCriteriaApi/SaveCriterionFile")]
@@ -375,7 +375,7 @@ namespace HotelsTEE.Controllers
                 res.success = true; res.id = f.id;
                 return Ok(res);
             }
-            catch (Exception) { res.message = "Σφάλμα αποθήκευσης."; return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); res.message = "Σφάλμα αποθήκευσης."; return Ok(res); }
         }
 
         [Route("api/AdminCriteriaApi/ToggleCriterionFile")]
@@ -394,7 +394,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); return Ok(res); }
         }
 
         [Route("api/AdminCriteriaApi/DeleteCriterionFile")]
@@ -421,7 +421,7 @@ namespace HotelsTEE.Controllers
                 res.success = true;
                 return Ok(res);
             }
-            catch (Exception) { res.message = "Σφάλμα διαγραφής."; return Ok(res); }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminCriteriaApiController.cs"); res.message = "Σφάλμα διαγραφής."; return Ok(res); }
         }
     }
 }

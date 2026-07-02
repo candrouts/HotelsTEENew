@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -48,8 +48,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "PendingActionsApiController.cs");
                 return Ok(result);
             }
         }

@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -123,7 +123,7 @@ namespace HotelsTEE.Controllers
                 });
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "AdminInspectorsController.cs");
                 return Json(new { success = false, message = e.Message });
             }
         }

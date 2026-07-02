@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -53,8 +53,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(new { success = true, inspectors = inspectors });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminInspectorsApiController.cs");
                 return Ok(new { success = false });
             }
         }
@@ -103,8 +103,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(new { success = true, perifereies = result });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminInspectorsApiController.cs");
                 return Ok(new { success = false });
             }
         }
@@ -145,8 +145,8 @@ namespace HotelsTEE.Controllers
                 unitOfWork.Save();
                 return Ok(new ApiAnswer { success = true });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminInspectorsApiController.cs");
                 return Ok(new ApiAnswer { success = false });
             }
         }

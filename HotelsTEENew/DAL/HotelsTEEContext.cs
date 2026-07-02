@@ -9,6 +9,13 @@ namespace HotelsTEE.DAL
 {
     public class HotelsTEEContext : DbContext
     {
+        // Database-first βάση (χωρίς Code First Migrations): απενεργοποιούμε τον
+        // initializer ώστε το EF να μην ψάχνει τον πίνακα __MigrationHistory
+        // (error 208 στο App Insights σε κάθε app start).
+        static HotelsTEEContext()
+        {
+            Database.SetInitializer<HotelsTEEContext>(null);
+        }
 
         public DbSet<CriteriaCategory> CriteriaCategories { get; set; }
         public DbSet<Criteria> Criteria { get; set; }

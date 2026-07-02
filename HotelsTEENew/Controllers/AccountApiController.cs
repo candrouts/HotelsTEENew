@@ -97,13 +97,13 @@ namespace HotelsTEE.Controllers
                     MembershipUser mu = Membership.GetUser(model.UserName);
                     locked = mu != null && mu.IsLockedOut;
                 }
-                catch (Exception) { }
+                catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AccountApiController.cs"); }
 
                 return Ok(new ApiAnswer { success = false, responseText = locked ? "locked" : "invalid" });
 
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "AccountApiController.cs");
                 //Utils.Mailer.SendEmailException(e);
                 //Utils.ExceptionHandler.ToDetailedString(e);
                 return Ok(new ApiAnswer { success = false, responseText = "Your message successfuly sent!" });

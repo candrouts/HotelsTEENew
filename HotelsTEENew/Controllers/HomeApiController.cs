@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -312,8 +312,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 return Ok(result);
             }
         }
@@ -371,7 +371,7 @@ namespace HotelsTEE.Controllers
                     if (!cert.certificateFileID.HasValue)
                     {
                         try { Utils.CertificateDocService.IssueAndStore(unitOfWork, cert.certificateID); }
-                        catch (Exception) { }
+                        catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs"); }
                     }
 
                     HotelCriteria v3 = group.FirstOrDefault(x => x.version == 3);
@@ -396,8 +396,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 return Ok(result);
             }
         }
@@ -499,8 +499,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 return Ok(result);
             }
         }
@@ -629,8 +629,8 @@ namespace HotelsTEE.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 return Ok(result);
             }
         }
@@ -692,8 +692,8 @@ namespace HotelsTEE.Controllers
                 result.noteID = note.noteID;
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 result.message = "Σφάλμα αποθήκευσης.";
                 return Ok(result);
             }
@@ -717,8 +717,8 @@ namespace HotelsTEE.Controllers
                 result.success = true;
                 return Ok(result);
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 return Ok(result);
             }
         }
@@ -796,117 +796,11 @@ namespace HotelsTEE.Controllers
                     medals = result
                 });
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeApiController.cs");
                 return Ok(new { success = false });
             }
         }
 
-        // ── Έναρξη Νέας Αξιολόγησης ──────────────────────────────────────
-        // Νέα v1 (status=1, isFinished=0), προσυμπληρωμένη από την τελευταία
-        // ολοκληρωμένη v3 (κριτήρια + τεκμήρια).
-        [Route("api/HomeApi/StartNewCycle")]
-        [HttpPost]
-        public IHttpActionResult StartNewCycle()
-        {
-            try
-            {
-                HotelDetailsViewModel hotel = GetOwnHotel();
-                if (hotel == null)
-                    return Ok(new ApiAnswer { success = false });
-
-                // Δεν επιτρέπεται αν υπάρχει ήδη ενεργός κύκλος
-                bool hasActive = unitOfWork.HotelCriteriaRepository
-                    .Get(x => x.hotelID == hotel.hotelID
-                           && x.exploitingCompanyID == hotel.exploitingCompanyID
-                           && x.version == 1 && x.isFinished == false)
-                    .Any();
-                if (hasActive)
-                    return Ok(new ApiAnswer { success = false });
-
-                // Πηγή προσυμπλήρωσης: η πιο πρόσφατη ολοκληρωμένη τελική κατάταξη (v3)
-                HotelCriteria sourceV3 = unitOfWork.HotelCriteriaRepository
-                    .Get(x => x.hotelID == hotel.hotelID
-                           && x.exploitingCompanyID == hotel.exploitingCompanyID
-                           && x.version == 3 && x.status == 2 && x.isFinished == true)
-                    .OrderByDescending(x => x.id)
-                    .FirstOrDefault();
-
-                HotelCriteria newV1 = new HotelCriteria
-                {
-                    hotelID = hotel.hotelID,
-                    exploitingCompanyID = hotel.exploitingCompanyID,
-                    version = 1,
-                    status = 1,
-                    isFinished = false,
-                    creationDatetime = DateTime.Now,
-                    maxPoints = sourceV3 != null ? sourceV3.maxPoints : 0,
-                    totalPoints = sourceV3 != null ? sourceV3.totalPoints : 0,
-                    medalID = sourceV3 != null ? sourceV3.medalID : null
-                };
-                unitOfWork.HotelCriteriaRepository.Insert(newV1);
-
-                if (sourceV3 != null)
-                {
-                    // Αντιγραφή απαντήσεων κριτηρίων
-                    List<HotelCriteria_Criteria> oldCriteria = unitOfWork.HotelCriteria_CriteriaRepository
-                        .Get(x => x.hotelCriteriaID == sourceV3.id).ToList();
-                    foreach (var z in oldCriteria)
-                    {
-                        unitOfWork.HotelCriteria_CriteriaRepository.Insert(new HotelCriteria_Criteria
-                        {
-                            criteriaID = z.criteriaID,
-                            hotelCriteria = newV1,
-                            isApplicable = z.isApplicable,
-                            isChecked = z.isChecked,
-                            isNotChecked = z.isNotChecked,
-                            points = z.points,
-                            value = z.value
-                        });
-                    }
-                }
-
-                unitOfWork.Save();
-
-                // Αντιγραφή τεκμηρίων (metadata + Azure) από την v3
-                if (sourceV3 != null)
-                {
-                    try
-                    {
-                        List<HotelCriteria_CriteriaFile> oldFiles = unitOfWork.HotelCriteria_CriteriaFileRepository
-                            .Get(x => x.hotelCriteriaID == sourceV3.id).ToList();
-
-                        foreach (var f in oldFiles)
-                        {
-                            unitOfWork.HotelCriteria_CriteriaFileRepository.Insert(new HotelCriteria_CriteriaFile
-                            {
-                                hotelCriteriaID = newV1.id,
-                                criteriaFileID = f.criteriaFileID,
-                                fileName = f.fileName,
-                                fileType = f.fileType,
-                                creationDateTime = DateTime.Now
-                            });
-
-                            AzureStorage.AzureStorage.CopyFileBetweenCriteria(
-                                sourceV3.id.ToString(), newV1.id.ToString(),
-                                f.criteriaFileID.ToString(), f.fileName);
-                        }
-
-                        if (oldFiles.Count > 0)
-                            unitOfWork.Save();
-                    }
-                    catch (Exception)
-                    {
-                        // Τα τεκμήρια δεν μπλοκάρουν την έναρξη του νέου κύκλου
-                    }
-                }
-
-                return Ok(new ApiAnswer { success = true });
-            }
-            catch (Exception)
-            {
-                return Ok(new ApiAnswer { success = false });
-            }
-        }
     }
 }

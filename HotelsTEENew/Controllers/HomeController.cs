@@ -28,7 +28,7 @@ namespace HotelsTEE.Controllers
                     .FirstOrDefault();
                 if (user != null) role = user.role;
             }
-            catch (Exception) { }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "HomeController.cs"); }
 
             ViewBag.UserRole = role;
 

@@ -1,4 +1,4 @@
-using HotelsTEE.DAL;
+﻿using HotelsTEE.DAL;
 using HotelsTEE.Models;
 using HotelsTEE.ViewModels;
 using System;
@@ -52,7 +52,7 @@ namespace HotelsTEE.Utils
                         if (!ok) error = "Αποτυχία αποστολής (SMTP).";
                     }
                     catch (Exception ex)
-                    {
+                    { HotelsTEE.Utils.ErrorLogger.Log(ex, "NotificationService.cs");
                         ok = false;
                         error = ex.Message;
                     }
@@ -60,8 +60,8 @@ namespace HotelsTEE.Utils
                     Log(uow, eventKey, toEmail, subject, ok, error);
                 }
             }
-            catch (Exception)
-            {
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "NotificationService.cs");
                 // swallow — οι ειδοποιήσεις δεν μπλοκάρουν ποτέ τη ροή
             }
         }
@@ -128,7 +128,7 @@ namespace HotelsTEE.Utils
                 });
                 uow.Save();
             }
-            catch (Exception) { }
+            catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "NotificationService.cs"); }
         }
 
         private static string SafeAppSetting(string key)

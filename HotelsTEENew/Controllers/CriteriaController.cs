@@ -56,7 +56,7 @@ namespace HotelsTEE.Controllers
 
             }
             catch (Exception e)
-            {
+            { HotelsTEE.Utils.ErrorLogger.Log(e, "CriteriaController.cs");
                 string ca = "";
             }
 
