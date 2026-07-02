@@ -261,6 +261,17 @@ namespace HotelsTEE.DAL
             }
         }
 
+        private GenericRepository<AiDocumentCheck> aiDocumentCheckRepository;
+        public GenericRepository<AiDocumentCheck> AiDocumentCheckRepository
+        {
+            get
+            {
+                if (this.aiDocumentCheckRepository == null)
+                    this.aiDocumentCheckRepository = new GenericRepository<AiDocumentCheck>(context);
+                return aiDocumentCheckRepository;
+            }
+        }
+
         public void Save()
         {
             context.SaveChanges();

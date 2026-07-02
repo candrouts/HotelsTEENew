@@ -410,7 +410,29 @@
                                                                         <a target="_blank" class="text-muted fw-bold"
                                                                            data-bind="html: fileName, attr: { href: '/Certificate/GetFile/' + id() }"></a>
                                                                         <p class="mb-0" data-dz-size></p>
+                                                                        <!-- ko if: aiVerdict() -->
+                                                                        <div class="mt-1">
+                                                                            <span data-bind="attr: { class: $root.aiBadgeClass(aiVerdict()) }">
+                                                                                <i class="mdi mdi-robot-outline me-1"></i><span data-bind="text: $root.aiBadgeLabel(aiVerdict())"></span>
+                                                                            </span>
+                                                                            <br /><small class="text-muted" data-bind="text: aiSummary"></small>
+                                                                        </div>
+                                                                        <!-- /ko -->
                                                                     </div>
+                                                                    <!-- ko if: $root.aiEnabled() && !$root.readOnly() -->
+                                                                    <div class="col-auto">
+                                                                        <button type="button" class="btn btn-sm btn-soft-info"
+                                                                                data-bind="click: $root.runAiCheck, disable: aiChecking()"
+                                                                                title="AI προ-έλεγχος τεκμηρίου">
+                                                                            <!-- ko if: aiChecking() -->
+                                                                            <span class="spinner-border spinner-border-sm me-1"></span>Έλεγχος...
+                                                                            <!-- /ko -->
+                                                                            <!-- ko ifnot: aiChecking() -->
+                                                                            <i class="mdi mdi-robot-outline me-1"></i>AI Έλεγχος
+                                                                            <!-- /ko -->
+                                                                        </button>
+                                                                    </div>
+                                                                    <!-- /ko -->
                                                                     @if (!_readOnly)
                                                                     {
                                                                     <!-- ko if: $root.enableAll() -->

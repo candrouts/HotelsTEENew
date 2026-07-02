@@ -608,6 +608,58 @@ function ViewCertificateViewModel() {
         self.disabledByFeaturesCount(disabledCount);
     };
 
+    // ── AI Προ-έλεγχος Τεκμηρίων ─────────────────────────────────────
+    self.aiEnabled = ko.observable(false);
+    self.aiFileIndex = {};   // fileID -> uploaded file object
+
+    self.initAiFile = function (f) {
+        f.aiVerdict = ko.observable(null);    // ok | warn | fail | null
+        f.aiSummary = ko.observable("");
+        f.aiChecking = ko.observable(false);
+        self.aiFileIndex[f.id()] = f;
+    };
+
+    self.aiBadgeClass = function (v) {
+        return v === "ok" ? "badge bg-success" : v === "fail" ? "badge bg-danger" : "badge bg-warning";
+    };
+    self.aiBadgeLabel = function (v) {
+        return v === "ok" ? "AI: Κατάλληλο" : v === "fail" ? "AI: Ακατάλληλο" : "AI: Με επιφύλαξη";
+    };
+
+    self.fetchAiChecks = function () {
+        if (!self.hotelCriteriaID()) return;
+        $.ajax({
+            type: "POST", url: "/api/AiApi/GetDocumentChecks", contentType: "application/json",
+            data: JSON.stringify({ hotelCriteriaID: self.hotelCriteriaID() }), dataType: "json",
+            success: function (r) {
+                if (!r || !r.success) return;
+                self.aiEnabled(r.aiEnabled === true);
+                (r.checks || []).forEach(function (c) {
+                    var f = self.aiFileIndex[c.fileID];
+                    if (f) { f.aiVerdict(c.verdict); f.aiSummary(c.summary || ""); }
+                });
+            }
+        });
+    };
+
+    self.runAiCheck = function (f) {
+        if (f.aiChecking()) return;
+        f.aiChecking(true);
+        $.ajax({
+            type: "POST", url: "/api/AiApi/CheckDocument", contentType: "application/json",
+            data: JSON.stringify({ fileID: f.id() }), dataType: "json",
+            success: function (r) {
+                f.aiChecking(false);
+                if (r && r.success) { f.aiVerdict(r.verdict); f.aiSummary(r.summary || ""); }
+                else { f.aiVerdict("warn"); f.aiSummary((r && r.message) || "Σφάλμα ελέγχου."); }
+            },
+            error: function () {
+                f.aiChecking(false);
+                f.aiVerdict("warn"); f.aiSummary("Σφάλμα επικοινωνίας.");
+            }
+        });
+    };
+
     self.fetchData = function () {
 
         //setTimeout(function () { self.showLoader(); }, 10);
@@ -958,6 +1010,7 @@ function ViewCertificateViewModel() {
                                                     var newFileFile = {};
                                                     newFileFile.fileName = ko.observable(fi.fileName);
                                                     newFileFile.id = ko.observable(fi.id);
+                                                    self.initAiFile(newFileFile);
 
                                                     newFile.uploadedFiles.push(newFileFile);
 
@@ -1221,6 +1274,9 @@ function ViewCertificateViewModel() {
 
                 // Εφαρμογή κανόνων κεντρικών ρυθμίσεων στα κριτήρια (live disable)
                 self.applyFeatureRules();
+
+                // AI: φόρτωση αποτελεσμάτων προ-ελέγχου τεκμηρίων
+                self.fetchAiChecks();
 
                 self.hideLoader();
                 //  window.jQuery.FileUpload.init();
@@ -1519,6 +1575,7 @@ function ViewCertificateViewModel() {
                                                     var newFileFile = {};
                                                     newFileFile.fileName = ko.observable(fi.fileName);
                                                     newFileFile.id = ko.observable(fi.id);
+                                                    self.initAiFile(newFileFile);
 
                                                     f.uploadedFiles.push(newFileFile);
 
