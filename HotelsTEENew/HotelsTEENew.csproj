@@ -216,6 +216,7 @@
     <Compile Include="Utils\FeatureRules.cs" />
     <Compile Include="Utils\ErrorLogger.cs" />
     <Compile Include="Utils\AiService.cs" />
+    <Compile Include="Controllers\AiApiController.cs" />
     <Compile Include="Utils\DiaugeiaService.cs" />
     <Compile Include="Models\CertificateFile.cs" />
     <Compile Include="Models\CertificateTemplate.cs" />
