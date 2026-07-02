@@ -829,7 +829,6 @@
     <Content Include="assets\data\ajax_demo_children.json" />
     <Content Include="assets\docs\egxeiridio-xrisis.pdf" />
     <Content Include="assets\docs\odigos-efarmogis.pdf" />
-    <Content Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
     <Content Include="bin\roslyn\csc.exe.config" />
     <Content Include="bin\roslyn\csc.rsp" />
     <Content Include="bin\roslyn\csi.exe.config" />
@@ -907,7 +906,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="obj\Debug\TempPE\" />
     <Folder Include="Views\TopBarApi\" />
   </ItemGroup>
   <ItemGroup>
