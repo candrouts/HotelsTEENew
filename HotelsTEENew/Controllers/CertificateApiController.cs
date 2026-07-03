@@ -996,6 +996,12 @@ namespace HotelsTEE.Controllers
 
 
 
+                    // Καθαρισμός και των αποτελεσμάτων AI ελέγχου του τεκμηρίου
+                    var aiChecks = unitOfWork.AiDocumentCheckRepository
+                        .Get(x => x.hotelCriteriaFileID == model.id).ToList();
+                    foreach (var c in aiChecks)
+                        unitOfWork.AiDocumentCheckRepository.Delete(c);
+
                     unitOfWork.HotelCriteria_CriteriaFileRepository.Delete(file);
 
                     AzureStorage.AzureStorage.RemoveFileFromFolder(file.hotelCriteriaID.ToString(), file.criteriaFileID.ToString(), file.fileName).Wait();

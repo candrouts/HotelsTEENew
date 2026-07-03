@@ -1603,6 +1603,8 @@ function ViewCertificateViewModel() {
 
                 }
 
+                // Επαναφόρτωση αποτελεσμάτων AI ελέγχου (η λίστα ξαναχτίστηκε)
+                self.fetchAiChecks();
 
                 //self.hideLoader();
             }
