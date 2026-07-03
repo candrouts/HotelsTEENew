@@ -60,6 +60,8 @@ namespace HotelsTEE.DAL
 
         public DbSet<AiCriteriaInstruction> AiCriteriaInstructions { get; set; }
 
+        public DbSet<AiChatLog> AiChatLogs { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 

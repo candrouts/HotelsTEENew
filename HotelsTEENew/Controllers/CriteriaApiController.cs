@@ -275,6 +275,9 @@ namespace HotelsTEE.Controllers
                     .Select(t => new ThresholdCellViewModel { medalID = t.medalID, categoryID = t.categoryID, minValue = t.minValue, isPercent = t.isPercent })
                     .ToList();
 
+                // AI Σύμβουλος: διαθέσιμος όταν το AI είναι ενεργό
+                results.aiEnabled = Utils.AiService.IsEnabled();
+
                 // Κεντρικές ρυθμίσεις/παροχές (ενεργές) + αντιστοιχίσεις + απαντήσεις του κύκλου
                 List<PropertyFeature> activeFeatures = unitOfWork.PropertyFeatureRepository
                     .Get(x => x.isActive).OrderBy(x => x.displayOrder).ThenBy(x => x.featureID).ToList();

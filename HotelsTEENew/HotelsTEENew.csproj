@@ -219,6 +219,7 @@
     <Compile Include="Controllers\AiApiController.cs" />
     <Compile Include="Models\AiDocumentCheck.cs" />
     <Compile Include="Models\AiCriteriaInstruction.cs" />
+    <Compile Include="Models\AiChatLog.cs" />
     <Compile Include="Utils\DiaugeiaService.cs" />
     <Compile Include="Models\CertificateFile.cs" />
     <Compile Include="Models\CertificateTemplate.cs" />
@@ -845,6 +846,7 @@
     <None Include="Properties\PublishProfiles\greencert - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\greencert - ReadOnly - FTP.pubxml" />
     <None Include="Properties\PublishProfiles\greencert - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\greencertai - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\greencertnew - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\Handlers.js" />

@@ -36,6 +36,9 @@ namespace HotelsTEE.ViewModels
         // δεν δημιουργούμε αυτόματα — ζητάμε επιβεβαίωση από τον χρήστη.
         public bool needsNewAssessment { get; set; }
 
+        // AI (ai branch): διαθεσιμότητα AI λειτουργιών στο UI
+        public bool aiEnabled { get; set; }
+
         // Κεντρικές ρυθμίσεις/παροχές καταλύματος + αντιστοιχίσεις + απαντήσεις κύκλου
         public List<PropertyFeatureClientViewModel> features { get; set; }
         public List<FeatureMapClientViewModel> featureMaps { get; set; }

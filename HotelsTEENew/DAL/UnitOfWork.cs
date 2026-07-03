@@ -283,6 +283,17 @@ namespace HotelsTEE.DAL
             }
         }
 
+        private GenericRepository<AiChatLog> aiChatLogRepository;
+        public GenericRepository<AiChatLog> AiChatLogRepository
+        {
+            get
+            {
+                if (this.aiChatLogRepository == null)
+                    this.aiChatLogRepository = new GenericRepository<AiChatLog>(context);
+                return aiChatLogRepository;
+            }
+        }
+
         public void Save()
         {
             context.SaveChanges();

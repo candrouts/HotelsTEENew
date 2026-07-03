@@ -17,6 +17,17 @@ namespace HotelsTEE.Controllers
         public decimal hotelCriteriaID { get; set; }   // για GetDocumentChecks
     }
 
+    public class AiChatMessage
+    {
+        public string role { get; set; }      // user | assistant
+        public string content { get; set; }
+    }
+
+    public class AiAdviseRequest
+    {
+        public System.Collections.Generic.List<AiChatMessage> messages { get; set; }
+    }
+
     // AI endpoints (ai branch / greencertai) — όλα πίσω από ai.enabled.
     [Authorize]
     public class AiApiController : ApiController
@@ -260,6 +271,149 @@ namespace HotelsTEE.Controllers
             {
                 Utils.ErrorLogger.Log(ex, "AiApiController.CheckDocument");
                 return Ok(new { success = false, message = "Σφάλμα ελέγχου — δείτε το TEE_ErrorLog." });
+            }
+        }
+
+        // ── AI Σύμβουλος Βιωσιμότητας (ξενοδόχος) ───────────────────────
+        // Multi-turn chat με πλήρες context: κριτήρια, απαντήσεις, βαθμολογία,
+        // μετάλλια/βάσεις πυλώνων. Ημερήσιο όριο μηνυμάτων ανά χρήστη.
+        [Route("api/AiApi/Advise")]
+        [HttpPost]
+        public IHttpActionResult Advise([FromBody] AiAdviseRequest req)
+        {
+            try
+            {
+                if (!Utils.AiService.IsEnabled())
+                    return Ok(new { success = false, message = "Ο AI Σύμβουλος δεν είναι διαθέσιμος." });
+
+                UserViewModel user = CurrentUser();
+                if (user == null || user.role != 1)
+                    return Ok(new { success = false, message = "Ο Σύμβουλος είναι διαθέσιμος μόνο σε ξενοδόχους." });
+
+                if (req == null || req.messages == null || req.messages.Count == 0)
+                    return Ok(new { success = false, message = "Κενό μήνυμα." });
+
+                // Ημερήσιο όριο (έλεγχος κόστους)
+                DateTime today = DateTime.Today;
+                string uname = User.Identity.Name;
+                int todayCount = unitOfWork.AiChatLogRepository
+                    .Get(x => x.userName == uname && x.logDateTime >= today).Count();
+                if (todayCount >= 40)
+                    return Ok(new { success = false, message = "Συμπληρώσατε το ημερήσιο όριο ερωτήσεων. Δοκιμάστε ξανά αύριο." });
+
+                // ── Context: κατάλυμα + ενεργή αυτοαξιολόγηση ────────────
+                string sql = "Select * from V_TEE_HotelDetails where UserName = @UserName";
+                HotelDetailsViewModel hotel = unitOfWork.context.Database
+                    .SqlQuery<HotelDetailsViewModel>(sql, new SqlParameter("@UserName", uname))
+                    .FirstOrDefault();
+                if (hotel == null)
+                    return Ok(new { success = false, message = "Δεν βρέθηκε το κατάλυμα." });
+
+                HotelCriteria v1 = unitOfWork.HotelCriteriaRepository
+                    .Get(x => x.hotelID == hotel.hotelID && x.exploitingCompanyID == hotel.exploitingCompanyID
+                           && x.version == 1 && x.isFinished == false)
+                    .FirstOrDefault();
+
+                List<HotelCriteria_Criteria> answers = v1 != null
+                    ? unitOfWork.HotelCriteria_CriteriaRepository.Get(x => x.hotelCriteriaID == v1.id).ToList()
+                    : new List<HotelCriteria_Criteria>();
+                Dictionary<decimal, HotelCriteria_Criteria> ansByCrit = answers
+                    .GroupBy(a => a.criteriaID).ToDictionary(g => g.Key, g => g.First());
+
+                // Δομή: πυλώνες/υποπυλώνες + ενεργά κριτήρια
+                List<CategoryViewModel> cats = unitOfWork.context.Database
+                    .SqlQuery<CategoryViewModel>("Select * from V_TEE_Categories where isActive=1").ToList();
+                Dictionary<decimal, CategoryViewModel> catById = cats.GroupBy(c => c.id).ToDictionary(g => g.Key, g => g.First());
+
+                List<Criteria> crits = unitOfWork.CriteriaRepository
+                    .Get(c => c.dateFrom <= DateTime.Now && c.dateTo >= DateTime.Now).ToList();
+
+                // Τρέχουσα βαθμολογία/μετάλλιο (αν υπάρχει ενεργή αυτοαξιολόγηση) — χωρίς Save
+                string scoreInfo = "Δεν υπάρχει ενεργή αυτοαξιολόγηση σε εξέλιξη.";
+                if (v1 != null && answers.Count > 0)
+                {
+                    var eval = Utils.ScoringHelper.ApplyMedal(unitOfWork, v1, answers);
+                    Medal awarded = v1.medalID.HasValue ? unitOfWork.MedalRepository.GetByID(v1.medalID.Value) : null;
+                    scoreInfo = "Τρέχουσα συνολική βαθμολογία: " + (v1.totalScore ?? 0).ToString("0.##") + "/95. " +
+                                "Τρέχον μετάλλιο: " + (awarded != null ? awarded.title : "-") + ".";
+                }
+
+                // Μετάλλια + όρια
+                List<Medal> medals = unitOfWork.MedalRepository.Get().OrderBy(m => m.min).ToList();
+                string medalsInfo = string.Join(" | ", medals.Select(m => m.title + ": " + m.min + "-" + m.max));
+
+                // Γραμμές κριτηρίων (συμπυκνωμένες): code|τίτλος|πυλώνας|max μονάδες|απάντηση
+                var lines = new List<string>();
+                foreach (var c in crits.OrderBy(c => c.categoryID).ThenBy(c => c.order))
+                {
+                    CategoryViewModel sub; catById.TryGetValue(c.categoryID, out sub);
+                    CategoryViewModel pillar = null;
+                    if (sub != null && sub.parentID.HasValue) catById.TryGetValue(sub.parentID.Value, out pillar);
+
+                    string answer = "(αναπάντητο)";
+                    HotelCriteria_Criteria a;
+                    if (ansByCrit.TryGetValue(c.id, out a))
+                    {
+                        if (a.isApplicable == false) answer = "Δεν ισχύει";
+                        else if (c.criteriaType == 2) answer = string.IsNullOrEmpty(a.value) ? "(αναπάντητο)" : ("τιμή=" + a.value + " (" + (a.points ?? 0) + "μ)");
+                        else answer = a.isChecked == true ? ("ΝΑΙ (" + (a.points ?? 0) + "μ)") : (a.isNotChecked == true ? "ΟΧΙ (0μ)" : "(αναπάντητο)");
+                    }
+
+                    lines.Add(c.code + "|" + c.title + "|" + (pillar != null ? pillar.title : "-") +
+                              "|max " + (c.weight * c.maxGrade) + "μ" +
+                              (c.isRequired == true ? "|ΥΠΟΧΡΕΩΤΙΚΟ" : "") + "|" + answer);
+                }
+
+                string system =
+                    "Είσαι ο «AI Σύμβουλος Βιωσιμότητας» του Συστήματος Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων (ΞΕΕ). " +
+                    "Βοηθάς τον ξενοδόχο να καταλάβει τα κριτήρια, να βελτιώσει τη βαθμολογία του και να ετοιμάσει τα σωστά τεκμήρια.\n" +
+                    "ΚΑΝΟΝΕΣ:\n" +
+                    "- Απαντάς ΜΟΝΟ για το σύστημα πιστοποίησης, τα κριτήρια, τη βαθμολογία και τα τεκμήρια. Για οτιδήποτε άλλο, αρνήσου ευγενικά.\n" +
+                    "- Βασίζεσαι ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην επινοείς κριτήρια ή βαθμούς.\n" +
+                    "- Όταν προτείνεις βελτιώσεις, ξεκίνα από αναπάντητα/αρνητικά κριτήρια με τους περισσότερους βαθμούς και ανάφερε τους κωδικούς τους.\n" +
+                    "- Οι βαθμοί κριτηρίων είναι αρχικοί (raw)· η συνολική βαθμολογία 0-95 προκύπτει με αναγωγή ανά πυλώνα — μίλα ενδεικτικά, μην υπόσχεσαι ακριβή τελικά νούμερα.\n" +
+                    "- Απαντάς στα ελληνικά, φιλικά και συνοπτικά (έως ~150 λέξεις), με λίστες όπου βοηθά.\n\n" +
+                    "ΣΤΟΙΧΕΙΑ ΚΑΤΑΛΥΜΑΤΟΣ: " + hotel.hotelTitle + ", κατηγορία " + hotel.category +
+                    ", " + hotel.totalRooms + " δωμάτια / " + hotel.totalBeds + " κλίνες.\n" +
+                    scoreInfo + "\nΚλίμακα μεταλλίων (συνολική 0-95): " + medalsInfo + "\n\n" +
+                    "ΚΡΙΤΗΡΙΑ (κωδικός|τίτλος|πυλώνας|μέγιστοι βαθμοί|απάντηση):\n" + string.Join("\n", lines);
+
+                // Ιστορικό: τα τελευταία 12 μηνύματα, με όρια μήκους
+                var history = new List<KeyValuePair<string, string>>();
+                foreach (var m in req.messages.Skip(Math.Max(0, req.messages.Count - 12)))
+                {
+                    string role = m.role == "assistant" ? "assistant" : "user";
+                    string content = (m.content ?? "");
+                    if (content.Length > 1500) content = content.Substring(0, 1500);
+                    history.Add(new KeyValuePair<string, string>(role, content));
+                }
+
+                string reply = Utils.AiService.ChatConversation(system, history, 0.3m, 900);
+                if (string.IsNullOrEmpty(reply))
+                    return Ok(new { success = false, message = "Ο Σύμβουλος δεν απάντησε — δοκιμάστε ξανά." });
+
+                // Καταγραφή (τελευταία ερώτηση + απάντηση)
+                try
+                {
+                    string lastQ = history.Count > 0 ? history[history.Count - 1].Value : "";
+                    if (lastQ.Length > 2000) lastQ = lastQ.Substring(0, 2000);
+                    unitOfWork.AiChatLogRepository.Insert(new AiChatLog
+                    {
+                        userName = uname,
+                        question = lastQ,
+                        answer = reply,
+                        logDateTime = DateTime.Now
+                    });
+                    unitOfWork.Save();
+                }
+                catch (Exception exLog) { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AiApiController.Advise.Log"); }
+
+                return Ok(new { success = true, reply = reply });
+            }
+            catch (Exception ex)
+            {
+                Utils.ErrorLogger.Log(ex, "AiApiController.Advise");
+                return Ok(new { success = false, message = "Σφάλμα — δοκιμάστε ξανά." });
             }
         }
 

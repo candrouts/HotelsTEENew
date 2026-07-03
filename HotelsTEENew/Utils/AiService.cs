@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
@@ -38,6 +39,27 @@ namespace HotelsTEE.Utils
         // Επιστρέφει το κείμενο απάντησης του μοντέλου, ή null σε σφάλμα.
         public static string Chat(string systemPrompt, string userMessage, decimal temperature = 0.2m, int maxTokens = 1500)
         {
+            var msgs = new List<object>
+            {
+                new { role = "system", content = systemPrompt ?? "" },
+                new { role = "user", content = userMessage ?? "" }
+            };
+            return ChatRaw(msgs, temperature, maxTokens);
+        }
+
+        // Multi-turn συνομιλία: system + ιστορικό μηνυμάτων [(role, content), ...]
+        public static string ChatConversation(string systemPrompt,
+            List<KeyValuePair<string, string>> history, decimal temperature = 0.3m, int maxTokens = 1200)
+        {
+            var msgs = new List<object> { new { role = "system", content = systemPrompt ?? "" } };
+            if (history != null)
+                foreach (var m in history)
+                    msgs.Add(new { role = m.Key, content = m.Value ?? "" });
+            return ChatRaw(msgs, temperature, maxTokens);
+        }
+
+        private static string ChatRaw(List<object> messages, decimal temperature, int maxTokens)
+        {
             if (!IsEnabled()) return null;
 
             try
@@ -49,11 +71,7 @@ namespace HotelsTEE.Utils
 
                 var payload = new
                 {
-                    messages = new object[]
-                    {
-                        new { role = "system", content = systemPrompt ?? "" },
-                        new { role = "user", content = userMessage ?? "" }
-                    },
+                    messages = messages,
                     temperature = temperature,
                     max_tokens = maxTokens
                 };
