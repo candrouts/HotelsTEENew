@@ -248,6 +248,8 @@ function HomeDashboard() {
                     if (h.hasV3) actions += viewBtn(3, "Τελική", "success", "uil-award");
                     if (h.hasFile) actions += '<a class="btn btn-sm btn-outline-dark py-0 me-1" target="_blank" href="/CertificateDoc/View/' +
                         h.certificateID + '"><i class="uil-file-check-alt"></i> Βεβαίωση</a>';
+                    if (data.aiEnabled && h.hasV3) actions += '<a class="btn btn-sm btn-outline-info py-0 me-1 green-profile-btn" href="javascript:void(0)" data-cert="' +
+                        h.certificateID + '"><i class="mdi mdi-leaf"></i> Πράσινο Προφίλ (AI)</a>';
 
                     var validBadge = h.isValid
                         ? '<span class="badge badge-success-lighten ms-1">Σε ισχύ</span>'
@@ -271,6 +273,43 @@ function HomeDashboard() {
 
     // Η «Έναρξη Νέας Αξιολόγησης» είναι πλέον link προς /Criteria, όπου ο χρήστης
     // επιβεβαιώνει (panel) πριν δημιουργηθεί η νέα αυτοαξιολόγηση.
+
+    // ── Πράσινο Προφίλ (AI, #3β) ───────────────────────────────────
+    $(document).off("click.greenProfile").on("click.greenProfile", ".green-profile-btn", function () {
+        var certId = $(this).data("cert");
+        var $btn = $(this);
+        $btn.addClass("disabled").html('<span class="spinner-border spinner-border-sm me-1"></span>Σύνταξη...');
+
+        $.ajax({
+            type: "POST", url: "/api/AiApi/GreenProfile", contentType: "application/json",
+            data: JSON.stringify({ certificateID: certId }), dataType: "json",
+            success: function (r) {
+                $btn.removeClass("disabled").html('<i class="mdi mdi-leaf"></i> Πράσινο Προφίλ (AI)');
+                if (r && r.success) {
+                    $("#green-profile-text").text(r.text);
+                    $("#green-profile-modal").modal("show");
+                } else {
+                    alert((r && r.message) || "Σφάλμα δημιουργίας προφίλ.");
+                }
+            },
+            error: function () {
+                $btn.removeClass("disabled").html('<i class="mdi mdi-leaf"></i> Πράσινο Προφίλ (AI)');
+                alert("Σφάλμα επικοινωνίας.");
+            }
+        });
+    });
+
+    $(document).off("click.greenProfileCopy").on("click.greenProfileCopy", "#green-profile-copy", function () {
+        var $b = $(this);
+        var done = function () { $b.html('<i class="mdi mdi-check me-1"></i>Αντιγράφηκε'); setTimeout(function () { $b.html('<i class="mdi mdi-content-copy me-1"></i>Αντιγραφή'); }, 2000); };
+        try { navigator.clipboard.writeText($("#green-profile-text").text()).then(done); }
+        catch (e) {
+            var ta = document.createElement("textarea");
+            ta.value = $("#green-profile-text").text();
+            document.body.appendChild(ta); ta.select();
+            document.execCommand("copy"); document.body.removeChild(ta); done();
+        }
+    });
 
     // ── Φόρτωση δεδομένων ──────────────────────────────────────────
     self.fetchData = function (isFirstLoad) {

@@ -28,6 +28,11 @@ namespace HotelsTEE.Controllers
         public System.Collections.Generic.List<AiChatMessage> messages { get; set; }
     }
 
+    public class AiReportRequest
+    {
+        public decimal certificateID { get; set; }
+    }
+
     // AI endpoints (ai branch / greencertai) — όλα πίσω από ai.enabled.
     [Authorize]
     public class AiApiController : ApiController
@@ -413,6 +418,201 @@ namespace HotelsTEE.Controllers
             catch (Exception ex)
             {
                 Utils.ErrorLogger.Log(ex, "AiApiController.Advise");
+                return Ok(new { success = false, message = "Σφάλμα — δοκιμάστε ξανά." });
+            }
+        }
+
+        // Κοινό: συμπυκνωμένες γραμμές απαντήσεων μιας έκδοσης, ομαδοποιημένες ανά πυλώνα.
+        private string BuildAnswerLines(HotelCriteria hc, out string hotelName)
+        {
+            hotelName = "";
+            try
+            {
+                string sqlH = "Select top 1 hotelTitle from V_TEE_HotelDetails where hotelID = @hotelID and exploitingCompanyID = @companyID";
+                hotelName = unitOfWork.context.Database.SqlQuery<string>(sqlH,
+                    new SqlParameter("@hotelID", hc.hotelID ?? ""),
+                    new SqlParameter("@companyID", hc.exploitingCompanyID ?? "")).FirstOrDefault() ?? "";
+            }
+            catch (Exception) { }
+
+            List<HotelCriteria_Criteria> answers = unitOfWork.HotelCriteria_CriteriaRepository
+                .Get(x => x.hotelCriteriaID == hc.id).ToList();
+            Dictionary<decimal, HotelCriteria_Criteria> ansByCrit = answers
+                .GroupBy(a => a.criteriaID).ToDictionary(g => g.Key, g => g.First());
+
+            List<CategoryViewModel> cats = unitOfWork.context.Database
+                .SqlQuery<CategoryViewModel>("Select * from V_TEE_Categories where isActive=1").ToList();
+            Dictionary<decimal, CategoryViewModel> catById = cats.GroupBy(c => c.id).ToDictionary(g => g.Key, g => g.First());
+
+            List<Criteria> crits = unitOfWork.CriteriaRepository
+                .Get(c => c.dateFrom <= DateTime.Now && c.dateTo >= DateTime.Now).ToList();
+
+            var lines = new List<string>();
+            foreach (var c in crits.OrderBy(c => c.categoryID).ThenBy(c => c.order))
+            {
+                CategoryViewModel sub; catById.TryGetValue(c.categoryID, out sub);
+                CategoryViewModel pillar = null;
+                if (sub != null && sub.parentID.HasValue) catById.TryGetValue(sub.parentID.Value, out pillar);
+
+                string answer = "(αναπάντητο)";
+                HotelCriteria_Criteria a;
+                if (ansByCrit.TryGetValue(c.id, out a))
+                {
+                    if (a.isApplicable == false) answer = "Δεν ισχύει";
+                    else if (c.criteriaType == 2) answer = string.IsNullOrEmpty(a.value) ? "(αναπάντητο)" : ("τιμή=" + a.value + " (" + (a.points ?? 0) + "μ)");
+                    else answer = a.isChecked == true ? ("ΝΑΙ (" + (a.points ?? 0) + "μ)") : (a.isNotChecked == true ? "ΟΧΙ" : "(αναπάντητο)");
+                }
+
+                lines.Add(c.code + "|" + c.title + "|" + (pillar != null ? pillar.title : "-") + "|" + answer);
+            }
+            return string.Join("\n", lines);
+        }
+
+        // ── #3α: Σχέδιο τεχνικής έκθεσης αυτοψίας (επιθεωρητής/admin) ──
+        [Route("api/AiApi/DraftReport")]
+        [HttpPost]
+        public IHttpActionResult DraftReport([FromBody] AiReportRequest req)
+        {
+            try
+            {
+                if (!Utils.AiService.IsEnabled())
+                    return Ok(new { success = false, message = "Το AI είναι απενεργοποιημένο." });
+                if (req == null || req.certificateID <= 0)
+                    return Ok(new { success = false, message = "Λείπει η αίτηση." });
+
+                // Έκδοση αυτοψίας (v2) — εκεί βασίζεται η έκθεση· fallback στην τελική (v3)
+                HotelCriteria hc = unitOfWork.HotelCriteriaRepository
+                    .Get(x => x.certificateID == req.certificateID && x.version == 2).FirstOrDefault()
+                    ?? unitOfWork.HotelCriteriaRepository
+                    .Get(x => x.certificateID == req.certificateID && x.version == 3).FirstOrDefault();
+                if (hc == null)
+                    return Ok(new { success = false, message = "Δεν υπάρχει αυτοψία για αυτή την αίτηση." });
+
+                if (!CanCheck(hc))
+                    return Ok(new { success = false, message = "Δεν επιτρέπεται." });
+
+                string hotelName;
+                string lines = BuildAnswerLines(hc, out hotelName);
+
+                string medalTitle = "-";
+                if (hc.medalID.HasValue)
+                {
+                    Medal m = unitOfWork.MedalRepository.GetByID(hc.medalID.Value);
+                    if (m != null) medalTitle = m.title;
+                }
+
+                HotelierCertificate cert = unitOfWork.HotelierCertificateRepository.GetByID(req.certificateID);
+                string autopsyDate = cert != null && cert.autopsyDateTime.HasValue
+                    ? cert.autopsyDateTime.Value.ToString("dd/MM/yyyy") : "-";
+
+                // Σύνοψη AI ελέγχων τεκμηρίων (αν υπάρχουν)
+                decimal hcId = hc.id;
+                List<decimal> fileIds = unitOfWork.HotelCriteria_CriteriaFileRepository
+                    .Get(x => x.hotelCriteriaID == hcId).Select(x => x.id).ToList();
+                var docChecks = unitOfWork.AiDocumentCheckRepository
+                    .Get(x => fileIds.Contains(x.hotelCriteriaFileID)).ToList();
+                string docSummary = docChecks.Count == 0 ? "Δεν έχουν γίνει AI έλεγχοι τεκμηρίων." :
+                    "AI έλεγχοι τεκμηρίων: " + docChecks.Count(x => x.verdict == "ok") + " κατάλληλα, " +
+                    docChecks.Count(x => x.verdict == "warn") + " με επιφύλαξη, " +
+                    docChecks.Count(x => x.verdict == "fail") + " ακατάλληλα.";
+
+                string system =
+                    "Είσαι βοηθός επιθεωρητή του Συστήματος Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων. " +
+                    "Συντάσσεις ΣΧΕΔΙΟ τεχνικής έκθεσης αυτοψίας στα ελληνικά, σε επίσημο αλλά απλό ύφος, " +
+                    "βασισμένο ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που δίνονται (μην επινοείς ευρήματα). Δομή:\n" +
+                    "1. ΕΙΣΑΓΩΓΗ (κατάλυμα, ημερομηνία αυτοψίας, αντικείμενο)\n" +
+                    "2. ΕΥΡΗΜΑΤΑ ΑΝΑ ΠΥΛΩΝΑ (σύνοψη δυνατών σημείων και ελλείψεων, με αναφορά κωδικών κριτηρίων)\n" +
+                    "3. ΤΕΚΜΗΡΙΩΣΗ (κατάσταση τεκμηρίων)\n" +
+                    "4. ΣΥΜΠΕΡΑΣΜΑ (συνολική εικόνα, βαθμολογία και προτεινόμενη βαθμίδα)\n" +
+                    "Στο τέλος γράψε: «Το παρόν αποτελεί σχέδιο που συντάχθηκε με υποβοήθηση AI και τελεί υπό την έγκριση του επιθεωρητή.» " +
+                    "Έκταση ~300-400 λέξεις.";
+
+                string user =
+                    "Κατάλυμα: " + hotelName + "\n" +
+                    "Ημερομηνία αυτοψίας: " + autopsyDate + "\n" +
+                    "Συνολική βαθμολογία (αναγμένη): " + (hc.totalScore ?? 0).ToString("0.##") + "/95, Βαθμίδα: " + medalTitle + "\n" +
+                    docSummary + "\n\n" +
+                    "ΑΠΑΝΤΗΣΕΙΣ ΚΡΙΤΗΡΙΩΝ (κωδικός|τίτλος|πυλώνας|απάντηση):\n" + lines;
+
+                string reply = Utils.AiService.Chat(system, user, 0.3m, 1600);
+                if (string.IsNullOrEmpty(reply))
+                    return Ok(new { success = false, message = "Το μοντέλο δεν απάντησε — δοκιμάστε ξανά." });
+
+                return Ok(new { success = true, text = reply });
+            }
+            catch (Exception ex)
+            {
+                Utils.ErrorLogger.Log(ex, "AiApiController.DraftReport");
+                return Ok(new { success = false, message = "Σφάλμα — δείτε το TEE_ErrorLog." });
+            }
+        }
+
+        // ── #3β: «Πράσινο Προφίλ» καταλύματος (ξενοδόχος) ───────────────
+        // Marketing κείμενο (ελληνικά + αγγλικά) από τα επιτεύγματα της
+        // πιο πρόσφατης ολοκληρωμένης αξιολόγησης.
+        [Route("api/AiApi/GreenProfile")]
+        [HttpPost]
+        public IHttpActionResult GreenProfile([FromBody] AiReportRequest req)
+        {
+            try
+            {
+                if (!Utils.AiService.IsEnabled())
+                    return Ok(new { success = false, message = "Το AI είναι απενεργοποιημένο." });
+
+                UserViewModel user = CurrentUser();
+                if (user == null || user.role != 1)
+                    return Ok(new { success = false, message = "Διαθέσιμο μόνο σε ξενοδόχους." });
+
+                string sql = "Select * from V_TEE_HotelDetails where UserName = @UserName";
+                HotelDetailsViewModel hotel = unitOfWork.context.Database
+                    .SqlQuery<HotelDetailsViewModel>(sql, new SqlParameter("@UserName", User.Identity.Name))
+                    .FirstOrDefault();
+                if (hotel == null)
+                    return Ok(new { success = false, message = "Δεν βρέθηκε το κατάλυμα." });
+
+                // Τελική κατάταξη (v3) της ζητούμενης αίτησης — με έλεγχο ιδιοκτησίας
+                HotelCriteria v3 = unitOfWork.HotelCriteriaRepository
+                    .Get(x => x.certificateID == req.certificateID && x.version == 3
+                           && x.hotelID == hotel.hotelID && x.exploitingCompanyID == hotel.exploitingCompanyID)
+                    .FirstOrDefault();
+                if (v3 == null)
+                    return Ok(new { success = false, message = "Δεν βρέθηκε ολοκληρωμένη αξιολόγηση." });
+
+                string hotelName;
+                string lines = BuildAnswerLines(v3, out hotelName);
+
+                string medalTitle = "-";
+                if (v3.medalID.HasValue)
+                {
+                    Medal m = unitOfWork.MedalRepository.GetByID(v3.medalID.Value);
+                    if (m != null) medalTitle = m.title;
+                }
+
+                string system =
+                    "Είσαι copywriter τουρισμού. Γράφεις το «Πράσινο Προφίλ» ενός καταλύματος: " +
+                    "ένα ελκυστικό κείμενο για το site/booking του, βασισμένο ΑΠΟΚΛΕΙΣΤΙΚΑ στα πιστοποιημένα επιτεύγματά του " +
+                    "(κριτήρια με ΝΑΙ ή θετική τιμή) — ΠΟΤΕ σε ελλείψεις ή αναπάντητα, και χωρίς υπερβολές/greenwashing.\n" +
+                    "Δομή απάντησης:\n" +
+                    "=== ΕΛΛΗΝΙΚΑ ===\n(τίτλος + 2-3 παράγραφοι + 4-6 bullets με τα δυνατά σημεία)\n" +
+                    "=== ENGLISH ===\n(ίδιο περιεχόμενο στα αγγλικά)\n" +
+                    "Ανάφερε τη βαθμίδα πιστοποίησης. Μη χρησιμοποιείς κωδικούς κριτηρίων — φυσική γλώσσα. Έκταση ~150 λέξεις ανά γλώσσα.";
+
+                string userMsg =
+                    "Κατάλυμα: " + hotelName + ", κατηγορία " + hotel.category + ", " +
+                    hotel.totalRooms + " δωμάτια.\n" +
+                    "Πιστοποίηση: βαθμίδα " + medalTitle + " (βαθμολογία " + (v3.totalScore ?? 0).ToString("0.##") + "/95) " +
+                    "στο Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων (ΞΕΕ).\n\n" +
+                    "ΠΙΣΤΟΠΟΙΗΜΕΝΑ ΣΤΟΙΧΕΙΑ (κωδικός|τίτλος|πυλώνας|απάντηση):\n" + lines;
+
+                string reply = Utils.AiService.Chat(system, userMsg, 0.5m, 1400);
+                if (string.IsNullOrEmpty(reply))
+                    return Ok(new { success = false, message = "Το μοντέλο δεν απάντησε — δοκιμάστε ξανά." });
+
+                return Ok(new { success = true, text = reply });
+            }
+            catch (Exception ex)
+            {
+                Utils.ErrorLogger.Log(ex, "AiApiController.GreenProfile");
                 return Ok(new { success = false, message = "Σφάλμα — δοκιμάστε ξανά." });
             }
         }

@@ -671,6 +671,54 @@ function ViewCertificateViewModel() {
         });
     };
 
+    // ── AI Σχέδιο Έκθεσης Αυτοψίας (#3α) ────────────────────────────
+    self.aiReportBusy = ko.observable(false);
+    self.aiReportText = ko.observable("");
+    self.aiCopyLabel = ko.observable("Αντιγραφή");
+
+    self.generateAiReport = function () {
+        if (self.aiReportBusy()) return;
+        self.aiReportBusy(true);
+        $.ajax({
+            type: "POST", url: "/api/AiApi/DraftReport", contentType: "application/json",
+            data: JSON.stringify({ certificateID: self.certificateID() }), dataType: "json",
+            success: function (r) {
+                self.aiReportBusy(false);
+                if (r && r.success) {
+                    self.aiReportText(r.text);
+                    self.aiCopyLabel("Αντιγραφή");
+                    $("#ai-report-modal").modal("show");
+                } else {
+                    self.errorMessage((r && r.message) || "Σφάλμα σύνταξης έκθεσης.");
+                    self.error(true);
+                }
+            },
+            error: function () {
+                self.aiReportBusy(false);
+                self.errorMessage("Σφάλμα επικοινωνίας.");
+                self.error(true);
+            }
+        });
+    };
+
+    self.copyAiReport = function () {
+        try {
+            navigator.clipboard.writeText(self.aiReportText()).then(function () {
+                self.aiCopyLabel("Αντιγράφηκε ✓");
+                setTimeout(function () { self.aiCopyLabel("Αντιγραφή"); }, 2000);
+            });
+        } catch (e) {
+            // Fallback για παλαιότερους browsers
+            var ta = document.createElement("textarea");
+            ta.value = self.aiReportText();
+            document.body.appendChild(ta); ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            self.aiCopyLabel("Αντιγράφηκε ✓");
+            setTimeout(function () { self.aiCopyLabel("Αντιγραφή"); }, 2000);
+        }
+    };
+
     self.fetchData = function () {
 
         //setTimeout(function () { self.showLoader(); }, 10);

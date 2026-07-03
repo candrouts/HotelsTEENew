@@ -345,6 +345,7 @@ namespace HotelsTEE.Controllers
                     return Ok(result);
 
                 result.success = true;
+                result.aiEnabled = Utils.AiService.IsEnabled();
 
                 // Υπάρχει ενεργός κύκλος;
                 result.hasActiveCycle = unitOfWork.HotelCriteriaRepository

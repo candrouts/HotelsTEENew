@@ -185,6 +185,28 @@
         <div id="admin-medal-cards" class="row" style="display:none;"></div>
     }
 
+    <!-- ════ Modal: Πράσινο Προφίλ (AI) ════ -->
+    <div id="green-profile-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h5 class="modal-title"><i class="mdi mdi-leaf me-1 text-success"></i>Πράσινο Προφίλ Καταλύματος (AI)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-1 mb-2" style="font-size:12px;">
+                        <i class="mdi mdi-information-outline me-1"></i>Κείμενο για το site/booking σας, βασισμένο στα πιστοποιημένα επιτεύγματά σας — ελέγξτε και προσαρμόστε ελεύθερα.
+                    </div>
+                    <div id="green-profile-text" style="white-space:pre-wrap; font-size:13px;"></div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Κλείσιμο</button>
+                    <button class="btn btn-sm btn-success" id="green-profile-copy"><i class="mdi mdi-content-copy me-1"></i>Αντιγραφή</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ════ Ιστορικό Βεβαιώσεων (μόνο ξενοδόχος) ════ -->
     <div id="dash-history" class="row" style="display:none;">
         <div class="col-12">

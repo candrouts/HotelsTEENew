@@ -69,6 +69,7 @@ namespace HotelsTEE.ViewModels
     {
         public bool success { get; set; }
         public bool hasActiveCycle { get; set; }     // υπάρχει ενεργή (μη ολοκληρωμένη) διαδικασία
+        public bool aiEnabled { get; set; }          // διαθεσιμότητα AI λειτουργιών (ai branch)
         public List<CertificateHistoryItemViewModel> history { get; set; }
     }
 

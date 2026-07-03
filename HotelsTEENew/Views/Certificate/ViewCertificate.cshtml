@@ -140,6 +140,12 @@
         @if (!_readOnly)
         {
         <div id="guide-actions" class="float-end ">
+            <!-- ko if: aiEnabled() && !readOnly() -->
+            <a class="btn btn-sm btn-soft-info mx-2 mt-1" data-bind="click: generateAiReport, css: { 'disabled': aiReportBusy() }">
+                <!-- ko if: aiReportBusy() --><span class="spinner-border spinner-border-sm me-1"></span>Σύνταξη...<!-- /ko -->
+                <!-- ko ifnot: aiReportBusy() --><i class="mdi mdi-robot-outline me-1"></i>Σχέδιο Έκθεσης (AI)<!-- /ko -->
+            </a>
+            <!-- /ko -->
             <a class="btn btn-sm btn-success mx-2 mt-1" data-bind="click: enableAll() ? saveData : null, css: { 'disabled': !enableAll() }"> <i class="uil uil-message me-1"></i>  Υποβολή</a>
         </div>
         <div class="float-end ">
@@ -680,3 +686,27 @@
         });
     })();
 </script>
+
+<!-- ════ Modal: Σχέδιο Έκθεσης Αυτοψίας (AI) ════ -->
+<div id="ai-report-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title"><i class="mdi mdi-robot-outline me-1 text-info"></i>Σχέδιο Τεχνικής Έκθεσης (AI)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info py-1 mb-2" style="font-size:12px;">
+                    <i class="mdi mdi-information-outline me-1"></i>Σχέδιο με υποβοήθηση AI — ελέγξτε και προσαρμόστε πριν τη χρήση.
+                </div>
+                <div id="ai-report-text" style="white-space:pre-wrap; font-size:13px;" data-bind="text: aiReportText"></div>
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Κλείσιμο</button>
+                <button class="btn btn-sm btn-info" data-bind="click: copyAiReport">
+                    <i class="mdi mdi-content-copy me-1"></i><span data-bind="text: aiCopyLabel"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
