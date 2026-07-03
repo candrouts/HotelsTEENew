@@ -14,7 +14,9 @@ namespace HotelsTEE.Models
 
         public decimal hotelCriteriaFileID { get; set; }
 
-        public string verdict { get; set; }      // ok | warn | fail
+        public string verdict { get; set; }      // ok | warn | fail (καταλληλότητα είδους)
+
+        public string answerVerdict { get; set; }   // supported | unclear | contradicts | na (κάλυψη δηλωθείσας απάντησης)
 
         public string summary { get; set; }
 

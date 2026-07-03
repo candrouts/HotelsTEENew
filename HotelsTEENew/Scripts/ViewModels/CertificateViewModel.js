@@ -613,7 +613,8 @@ function ViewCertificateViewModel() {
     self.aiFileIndex = {};   // fileID -> uploaded file object
 
     self.initAiFile = function (f) {
-        f.aiVerdict = ko.observable(null);    // ok | warn | fail | null
+        f.aiVerdict = ko.observable(null);        // ok | warn | fail | null (είδος τεκμηρίου)
+        f.aiAnswerVerdict = ko.observable(null);  // supported | unclear | contradicts | na (κάλυψη απάντησης)
         f.aiSummary = ko.observable("");
         f.aiChecking = ko.observable(false);
         self.aiFileIndex[f.id()] = f;
@@ -623,7 +624,17 @@ function ViewCertificateViewModel() {
         return v === "ok" ? "badge bg-success" : v === "fail" ? "badge bg-danger" : "badge bg-warning";
     };
     self.aiBadgeLabel = function (v) {
-        return v === "ok" ? "AI: Κατάλληλο" : v === "fail" ? "AI: Ακατάλληλο" : "AI: Με επιφύλαξη";
+        return v === "ok" ? "AI Είδος: Κατάλληλο" : v === "fail" ? "AI Είδος: Ακατάλληλο" : "AI Είδος: Με επιφύλαξη";
+    };
+    self.aiAnswerBadgeClass = function (v) {
+        return v === "supported" ? "badge bg-success"
+             : v === "contradicts" ? "badge bg-danger"
+             : "badge bg-warning";
+    };
+    self.aiAnswerBadgeLabel = function (v) {
+        return v === "supported" ? "AI Απάντηση: Υποστηρίζεται"
+             : v === "contradicts" ? "AI Απάντηση: Αντικρούεται"
+             : "AI Απάντηση: Ασαφές";
     };
 
     self.fetchAiChecks = function () {
@@ -636,7 +647,7 @@ function ViewCertificateViewModel() {
                 self.aiEnabled(r.aiEnabled === true);
                 (r.checks || []).forEach(function (c) {
                     var f = self.aiFileIndex[c.fileID];
-                    if (f) { f.aiVerdict(c.verdict); f.aiSummary(c.summary || ""); }
+                    if (f) { f.aiVerdict(c.verdict); f.aiAnswerVerdict(c.answerVerdict || null); f.aiSummary(c.summary || ""); }
                 });
             }
         });
@@ -650,12 +661,12 @@ function ViewCertificateViewModel() {
             data: JSON.stringify({ fileID: f.id() }), dataType: "json",
             success: function (r) {
                 f.aiChecking(false);
-                if (r && r.success) { f.aiVerdict(r.verdict); f.aiSummary(r.summary || ""); }
-                else { f.aiVerdict("warn"); f.aiSummary((r && r.message) || "Σφάλμα ελέγχου."); }
+                if (r && r.success) { f.aiVerdict(r.verdict); f.aiAnswerVerdict(r.answerVerdict || null); f.aiSummary(r.summary || ""); }
+                else { f.aiVerdict("warn"); f.aiAnswerVerdict(null); f.aiSummary((r && r.message) || "Σφάλμα ελέγχου."); }
             },
             error: function () {
                 f.aiChecking(false);
-                f.aiVerdict("warn"); f.aiSummary("Σφάλμα επικοινωνίας.");
+                f.aiVerdict("warn"); f.aiAnswerVerdict(null); f.aiSummary("Σφάλμα επικοινωνίας.");
             }
         });
     };

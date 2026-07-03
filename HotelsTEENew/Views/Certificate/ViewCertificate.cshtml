@@ -415,6 +415,11 @@
                                                                             <span data-bind="attr: { class: $root.aiBadgeClass(aiVerdict()) }">
                                                                                 <i class="mdi mdi-robot-outline me-1"></i><span data-bind="text: $root.aiBadgeLabel(aiVerdict())"></span>
                                                                             </span>
+                                                                            <!-- ko if: aiAnswerVerdict() && aiAnswerVerdict() !== 'na' -->
+                                                                            <span class="ms-1" data-bind="attr: { class: $root.aiAnswerBadgeClass(aiAnswerVerdict()) + ' ms-1' }">
+                                                                                <i class="mdi mdi-scale-balance me-1"></i><span data-bind="text: $root.aiAnswerBadgeLabel(aiAnswerVerdict())"></span>
+                                                                            </span>
+                                                                            <!-- /ko -->
                                                                             <br /><small class="text-muted" data-bind="text: aiSummary"></small>
                                                                         </div>
                                                                         <!-- /ko -->

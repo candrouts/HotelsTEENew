@@ -107,6 +107,35 @@ namespace HotelsTEE.Controllers
                 Criteria_File cf = unitOfWork.Criteria_FileRepository.GetByID(file.criteriaFileID);
                 Criteria crit = cf != null ? unitOfWork.CriteriaRepository.GetByID(cf.criteriaID) : null;
 
+                // Η απάντηση του ξενοδόχου στο κριτήριο (για την ίδια έκδοση αξιολόγησης)
+                string declaredAnswer = "(δεν έχει απαντηθεί)";
+                if (crit != null)
+                {
+                    decimal critId = crit.id;
+                    HotelCriteria_Criteria ans = unitOfWork.HotelCriteria_CriteriaRepository
+                        .Get(x => x.hotelCriteriaID == file.hotelCriteriaID && x.criteriaID == critId)
+                        .FirstOrDefault();
+                    if (ans != null)
+                    {
+                        if (ans.isApplicable == false)
+                            declaredAnswer = "Δεν ισχύει (μη εφαρμόσιμο)";
+                        else if (crit.criteriaType == 2)
+                            declaredAnswer = string.IsNullOrEmpty(ans.value) ? "(κενή τιμή)" : ans.value;
+                        else
+                            declaredAnswer = ans.isChecked == true ? "ΝΑΙ" : (ans.isNotChecked == true ? "ΟΧΙ" : "(δεν έχει απαντηθεί)");
+                    }
+                }
+
+                // Επιλογές του κριτηρίου (βοηθούν το μοντέλο να ερμηνεύσει την τιμή)
+                string options = "";
+                if (crit != null && !string.IsNullOrEmpty(crit.selectList)) options = crit.selectList;
+                else if (crit != null && !string.IsNullOrEmpty(crit.gradesOptions)) options = crit.gradesOptions;
+                if (options.Length > 800) options = options.Substring(0, 800);
+
+                // Μεθοδολογία του κριτηρίου (περιέχει μονάδες/κανόνες υπολογισμού)
+                string methodology = crit != null ? (crit.description ?? "") : "";
+                if (methodology.Length > 2500) methodology = methodology.Substring(0, 2500);
+
                 string hotelName = "";
                 try
                 {
@@ -143,23 +172,32 @@ namespace HotelsTEE.Controllers
                     return Ok(new { success = false, message = "Δεν ήταν δυνατή η ανάγνωση του εγγράφου (OCR)." });
                 if (text.Length > 12000) text = text.Substring(0, 12000);
 
-                // Κρίση GPT — αυστηρά JSON απάντηση
+                // Κρίση GPT — αυστηρά JSON, διπλή ετυμηγορία (είδος + κάλυψη απάντησης)
                 string system =
                     "Είσαι βοηθός επιθεωρητή στο Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων. " +
-                    "Ελέγχεις αν ένα μεταφορτωμένο έγγραφο αποτελεί κατάλληλο τεκμήριο. " +
-                    "Απαντάς ΑΥΣΤΗΡΑ με JSON της μορφής {\"verdict\":\"ok|warn|fail\",\"summary\":\"...\"} χωρίς άλλο κείμενο. " +
-                    "verdict=ok: το έγγραφο ανταποκρίνεται στο ζητούμενο τεκμήριο. " +
-                    "verdict=warn: σχετικό αλλά με επιφυλάξεις (π.χ. ελλιπές, παλιό, δεν αναφέρει την επιχείρηση). " +
-                    "verdict=fail: άσχετο ή ακατάλληλο. Το summary έως 2 προτάσεις, στα ελληνικά, για τον επιθεωρητή.";
+                    "Ελέγχεις ένα μεταφορτωμένο τεκμήριο σε ΔΥΟ επίπεδα και απαντάς ΑΥΣΤΗΡΑ με JSON " +
+                    "{\"typeVerdict\":\"ok|warn|fail\",\"answerVerdict\":\"supported|unclear|contradicts|na\",\"summary\":\"...\"} χωρίς άλλο κείμενο.\n" +
+                    "1) typeVerdict — καταλληλότητα είδους: ok=ανταποκρίνεται στο ζητούμενο τεκμήριο, warn=σχετικό με επιφυλάξεις (ελλιπές, παλιό, δεν αναφέρει την επιχείρηση), fail=άσχετο/ακατάλληλο.\n" +
+                    "2) answerVerdict — αν το τεκμήριο υποστηρίζει τη ΔΗΛΩΘΕΙΣΑ ΑΠΑΝΤΗΣΗ του ξενοδόχου στο κριτήριο: " +
+                    "supported=τα στοιχεία του εγγράφου επιβεβαιώνουν τη δήλωση, " +
+                    "unclear=δεν επαρκούν τα στοιχεία ή απαιτούνται παραδοχές, " +
+                    "contradicts=τα στοιχεία ΑΝΤΙΚΡΟΥΟΥΝ τη δήλωση με βεβαιότητα, " +
+                    "na=δεν έχει νόημα η σύγκριση (π.χ. δεν υπάρχει απάντηση).\n" +
+                    "ΚΑΝΟΝΕΣ: Αν χρειάζεται μετατροπή μονάδων ή υπολογισμός (π.χ. L/κύκλο ÷ χωρητικότητα kg = L/kg), ΚΑΝΕ τον και δείξε τον ΑΝΑΛΥΤΙΚΑ στο summary (π.χ. «53 L/κύκλο ÷ 6 kg = 8,8 L/kg < 10 ✔»). " +
+                    "Να είσαι συντηρητικός: contradicts ΜΟΝΟ όταν ο υπολογισμός είναι αδιαμφισβήτητος· αν χρειάζονται παραδοχές (πρόγραμμα, φορτίο, πλήθος μηχανημάτων), απάντησε unclear και πες τι λείπει. " +
+                    "Το summary στα ελληνικά, έως 3 προτάσεις, πρώτα ο τυχόν υπολογισμός.";
 
                 string user =
                     "Κατάλυμα: " + hotelName + "\n" +
                     "Κριτήριο: " + (crit != null ? crit.code + " — " + crit.title : "-") + "\n" +
+                    "Μεθοδολογία κριτηρίου: " + methodology + "\n" +
+                    (options.Length > 0 ? "Επιλογές απάντησης κριτηρίου: " + options + "\n" : "") +
+                    "ΔΗΛΩΘΕΙΣΑ ΑΠΑΝΤΗΣΗ ξενοδόχου: " + declaredAnswer + "\n" +
                     "Ζητούμενο τεκμήριο: " + (cf != null ? cf.title : "-") + "\n" +
                     "Περιγραφή ζητούμενου: " + (cf != null ? cf.description : "-") + "\n\n" +
                     "Κείμενο μεταφορτωμένου εγγράφου (" + file.fileName + "):\n" + text;
 
-                string reply = Utils.AiService.Chat(system, user, 0m, 400);
+                string reply = Utils.AiService.Chat(system, user, 0m, 600);
                 if (string.IsNullOrEmpty(reply))
                     return Ok(new { success = false, message = "Το μοντέλο δεν απάντησε — δείτε το TEE_ErrorLog." });
 
@@ -170,13 +208,16 @@ namespace HotelsTEE.Controllers
                     int i1 = clean.IndexOf('{'); int i2 = clean.LastIndexOf('}');
                     if (i1 >= 0 && i2 > i1) clean = clean.Substring(i1, i2 - i1 + 1);
                 }
-                string verdict = "warn", summary = reply;
+                string verdict = "warn", answerVerdict = "unclear", summary = reply;
                 try
                 {
                     JObject o = JObject.Parse(clean);
-                    verdict = ((string)o["verdict"] ?? "warn").ToLower();
+                    verdict = ((string)o["typeVerdict"] ?? (string)o["verdict"] ?? "warn").ToLower();
+                    answerVerdict = ((string)o["answerVerdict"] ?? "unclear").ToLower();
                     summary = (string)o["summary"] ?? "";
                     if (verdict != "ok" && verdict != "warn" && verdict != "fail") verdict = "warn";
+                    if (answerVerdict != "supported" && answerVerdict != "unclear"
+                        && answerVerdict != "contradicts" && answerVerdict != "na") answerVerdict = "unclear";
                 }
                 catch (Exception) { }
                 if (summary != null && summary.Length > 1500) summary = summary.Substring(0, 1500);
@@ -185,6 +226,7 @@ namespace HotelsTEE.Controllers
                 {
                     hotelCriteriaFileID = file.id,
                     verdict = verdict,
+                    answerVerdict = answerVerdict,
                     summary = summary,
                     model = System.Configuration.ConfigurationManager.AppSettings["ai.openai.deployment"],
                     checkedBy = User.Identity.Name,
@@ -193,7 +235,7 @@ namespace HotelsTEE.Controllers
                 unitOfWork.AiDocumentCheckRepository.Insert(check);
                 unitOfWork.Save();
 
-                return Ok(new { success = true, fileID = file.id, verdict = verdict, summary = summary });
+                return Ok(new { success = true, fileID = file.id, verdict = verdict, answerVerdict = answerVerdict, summary = summary });
             }
             catch (Exception ex)
             {
@@ -220,7 +262,7 @@ namespace HotelsTEE.Controllers
                     .Get(x => fileIds.Contains(x.hotelCriteriaFileID))
                     .GroupBy(x => x.hotelCriteriaFileID)
                     .Select(g => g.OrderByDescending(x => x.checkedDateTime).First())
-                    .Select(x => new { fileID = x.hotelCriteriaFileID, verdict = x.verdict, summary = x.summary })
+                    .Select(x => new { fileID = x.hotelCriteriaFileID, verdict = x.verdict, answerVerdict = x.answerVerdict, summary = x.summary })
                     .ToList();
 
                 return Ok(new { success = true, checks = checks, aiEnabled = Utils.AiService.IsEnabled() });

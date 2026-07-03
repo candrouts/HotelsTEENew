@@ -19,3 +19,8 @@ BEGIN
     CREATE INDEX IX_TEE_AI_DocumentCheck_file ON dbo.TEE_AI_DocumentCheck (hotelCriteriaFileID, checkedDateTime DESC);
 END
 GO
+
+-- Φάση 1 βαθύτερου ελέγχου: κρίση αν το τεκμήριο υποστηρίζει τη δηλωθείσα απάντηση
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.TEE_AI_DocumentCheck') AND name = 'answerVerdict')
+    ALTER TABLE dbo.TEE_AI_DocumentCheck ADD answerVerdict NVARCHAR(15) NULL;   -- supported | unclear | contradicts | na
+GO
