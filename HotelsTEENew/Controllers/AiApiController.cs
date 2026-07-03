@@ -136,6 +136,16 @@ namespace HotelsTEE.Controllers
                 string methodology = crit != null ? (crit.description ?? "") : "";
                 if (methodology.Length > 2500) methodology = methodology.Substring(0, 2500);
 
+                // Ειδικές οδηγίες AI ελέγχου του κριτηρίου (Φάση 2 — ορίζονται από τον admin)
+                string aiInstructions = "";
+                if (crit != null)
+                {
+                    decimal cid = crit.id;
+                    AiCriteriaInstruction instr = unitOfWork.AiCriteriaInstructionRepository
+                        .Get(x => x.criteriaID == cid).FirstOrDefault();
+                    if (instr != null) aiInstructions = instr.instructions ?? "";
+                }
+
                 string hotelName = "";
                 try
                 {
@@ -193,6 +203,9 @@ namespace HotelsTEE.Controllers
                     "Μεθοδολογία κριτηρίου: " + methodology + "\n" +
                     (options.Length > 0 ? "Επιλογές απάντησης κριτηρίου: " + options + "\n" : "") +
                     "ΔΗΛΩΘΕΙΣΑ ΑΠΑΝΤΗΣΗ ξενοδόχου: " + declaredAnswer + "\n" +
+                    (aiInstructions.Length > 0
+                        ? "ΕΙΔΙΚΕΣ ΟΔΗΓΙΕΣ ΕΛΕΓΧΟΥ για αυτό το κριτήριο (ΥΠΕΡΙΣΧΥΟΥΝ κάθε γενικού κανόνα): " + aiInstructions + "\n"
+                        : "") +
                     "Ζητούμενο τεκμήριο: " + (cf != null ? cf.title : "-") + "\n" +
                     "Περιγραφή ζητούμενου: " + (cf != null ? cf.description : "-") + "\n\n" +
                     "Κείμενο μεταφορτωμένου εγγράφου (" + file.fileName + "):\n" + text;

@@ -27,6 +27,7 @@ namespace HotelsTEE.ViewModels
         public bool isActiveNow { get; set; }   // dateFrom <= σήμερα <= dateTo
         public bool inUse { get; set; }         // υπάρχει σε αξιολογήσεις (HotelCriteria_Criteria)
         public int filesCount { get; set; }     // πλήθος απαιτούμενων τεκμηρίων
+        public string aiInstructions { get; set; }   // οδηγίες AI ελέγχου (TEE_AI_CriteriaInstructions)
     }
 
     // ── Τεκμήρια κριτηρίου (TEE_Criteria_Files) ─────────────────────
@@ -126,6 +127,7 @@ namespace HotelsTEE.ViewModels
         public string dateFrom { get; set; }
         public string dateTo { get; set; }
         public bool active { get; set; }   // για SetCriterionActive
+        public string aiInstructions { get; set; }
     }
 
     public class AdminCriteriaResult

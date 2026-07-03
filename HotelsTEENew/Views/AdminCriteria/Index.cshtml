@@ -173,6 +173,16 @@
 
                     <div class="col-md-3"><label class="form-label mb-0">Ισχύς από</label><input type="date" class="form-control form-control-sm" data-bind="value: crDateFrom" /></div>
                     <div class="col-md-3"><label class="form-label mb-0">Ισχύς έως</label><input type="date" class="form-control form-control-sm" data-bind="value: crDateTo" /></div>
+
+                    <div class="col-12">
+                        <label class="form-label mb-0">
+                            <i class="mdi mdi-robot-outline me-1 text-info"></i>Οδηγίες AI ελέγχου τεκμηρίων
+                            <small class="text-muted">— «εκπαιδεύουν» τον AI προ-έλεγχο για το κριτήριο (π.χ. ποιο πρόγραμμα/μονάδες μέτρησης να χρησιμοποιεί)</small>
+                        </label>
+                        <textarea class="form-control form-control-sm" rows="3" maxlength="2000"
+                                  placeholder="π.χ. Για τη σύγκριση χρησιμοποίησε το πρόγραμμα ECO 40-60 σε 100% ονομαστικό φορτίο. Αγνόησε βοηθητικά προγράμματα (Quick, 20°C)."
+                                  data-bind="value: crAiInstructions"></textarea>
+                    </div>
                 </div>
                 <div class="text-danger mt-2" data-bind="text: crError, visible: crError().length > 0"></div>
             </div>

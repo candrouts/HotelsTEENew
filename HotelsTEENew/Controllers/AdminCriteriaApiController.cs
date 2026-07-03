@@ -47,6 +47,11 @@ namespace HotelsTEE.Controllers
                     .GroupBy(f => f.criteriaID)
                     .ToDictionary(g => g.Key, g => g.Count());
 
+                // Οδηγίες AI ελέγχου ανά κριτήριο
+                Dictionary<decimal, string> aiInstrByCrit = unitOfWork.AiCriteriaInstructionRepository.Get()
+                    .GroupBy(x => x.criteriaID)
+                    .ToDictionary(g => g.Key, g => g.First().instructions);
+
                 DateTime today = DateTime.Today;
 
                 Func<Criteria, AdminCriterionVM> mapCrit = c => new AdminCriterionVM
@@ -72,7 +77,8 @@ namespace HotelsTEE.Controllers
                     dateTo = D(c.dateTo),
                     isActiveNow = c.dateFrom.Date <= today && c.dateTo.Date >= today,
                     inUse = usedIds.Contains(c.id),
-                    filesCount = filesByCrit.ContainsKey(c.id) ? filesByCrit[c.id] : 0
+                    filesCount = filesByCrit.ContainsKey(c.id) ? filesByCrit[c.id] : 0,
+                    aiInstructions = aiInstrByCrit.ContainsKey(c.id) ? aiInstrByCrit[c.id] : ""
                 };
 
                 var pillars = cats.Where(x => !x.parentID.HasValue)
@@ -251,6 +257,37 @@ namespace HotelsTEE.Controllers
                 c.dateTo = dTo;
 
                 unitOfWork.Save();
+
+                // Οδηγίες AI ελέγχου (upsert στον ξεχωριστό πίνακα — κενό = διαγραφή)
+                decimal critId = c.id;
+                AiCriteriaInstruction instr = unitOfWork.AiCriteriaInstructionRepository
+                    .Get(x => x.criteriaID == critId).FirstOrDefault();
+                string newInstr = (req.aiInstructions ?? "").Trim();
+                if (newInstr.Length > 2000) newInstr = newInstr.Substring(0, 2000);
+
+                if (newInstr.Length == 0)
+                {
+                    if (instr != null) unitOfWork.AiCriteriaInstructionRepository.Delete(instr);
+                }
+                else if (instr == null)
+                {
+                    unitOfWork.AiCriteriaInstructionRepository.Insert(new AiCriteriaInstruction
+                    {
+                        criteriaID = critId,
+                        instructions = newInstr,
+                        updatedBy = User.Identity.Name,
+                        updatedDateTime = DateTime.Now
+                    });
+                }
+                else if (instr.instructions != newInstr)
+                {
+                    instr.instructions = newInstr;
+                    instr.updatedBy = User.Identity.Name;
+                    instr.updatedDateTime = DateTime.Now;
+                    unitOfWork.AiCriteriaInstructionRepository.Update(instr);
+                }
+                unitOfWork.Save();
+
                 res.success = true; res.id = c.id;
                 return Ok(res);
             }

@@ -58,6 +58,8 @@ namespace HotelsTEE.DAL
 
         public DbSet<AiDocumentCheck> AiDocumentChecks { get; set; }
 
+        public DbSet<AiCriteriaInstruction> AiCriteriaInstructions { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 

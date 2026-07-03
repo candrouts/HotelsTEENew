@@ -121,6 +121,7 @@ function AdminCriteriaViewModel() {
     self.crIsRequired = ko.observable(false);
     self.crDateFrom = ko.observable("");
     self.crDateTo = ko.observable("");
+    self.crAiInstructions = ko.observable("");
     self.crError = ko.observable("");
 
     function todayStr() { var d = new Date(); function p(n) { return (n < 10 ? "0" : "") + n; } return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
@@ -133,6 +134,7 @@ function AdminCriteriaViewModel() {
         self.crNotes1(""); self.crNotes2("");
         self.crNeedsFiles(false); self.crNotApplicable(false); self.crIsRequired(false);
         self.crDateFrom(todayStr()); self.crDateTo("2099-12-31");
+        self.crAiInstructions("");
         $("#crit-modal").modal("show");
     };
 
@@ -145,6 +147,7 @@ function AdminCriteriaViewModel() {
         self.crNotes1(c.notes1 || ""); self.crNotes2(c.notes2 || "");
         self.crNeedsFiles(!!c.needsFiles); self.crNotApplicable(!!c.notApplicable); self.crIsRequired(!!c.isRequired);
         self.crDateFrom(c.dateFrom || todayStr()); self.crDateTo(c.dateTo || "2099-12-31");
+        self.crAiInstructions(c.aiInstructions || "");
         $("#crit-modal").modal("show");
     };
 
@@ -158,7 +161,8 @@ function AdminCriteriaViewModel() {
             gradesList: self.crGradesList(), gradesOptions: self.crGradesOptions(), selectList: self.crSelectList(),
             notes1: self.crNotes1(), notes2: self.crNotes2(),
             needsFiles: self.crNeedsFiles(), notApplicable: self.crNotApplicable(), isRequired: self.crIsRequired(),
-            dateFrom: self.crDateFrom(), dateTo: self.crDateTo()
+            dateFrom: self.crDateFrom(), dateTo: self.crDateTo(),
+            aiInstructions: self.crAiInstructions()
         };
         $.ajax({
             type: "POST", url: "/api/AdminCriteriaApi/SaveCriterion", contentType: "application/json",
