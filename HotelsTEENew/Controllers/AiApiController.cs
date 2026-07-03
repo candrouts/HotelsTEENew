@@ -347,6 +347,36 @@ namespace HotelsTEE.Controllers
                 List<Medal> medals = unitOfWork.MedalRepository.Get().OrderBy(m => m.min).ToList();
                 string medalsInfo = string.Join(" | ", medals.Select(m => m.title + ": " + m.min + "-" + m.max));
 
+                // Ενεργοί επιθεωρητές (μόνο όνομα + περιοχές ευθύνης — ΚΑΝΕΝΑ στοιχείο
+                // σύγκρισης) σε ΤΥΧΑΙΑ σειρά ανά κλήση, ώστε καμία θέση στη λίστα να μη
+                // δίνει συστηματικό πλεονέκτημα (αμεροληψία by design).
+                string inspectorsInfo = "";
+                try
+                {
+                    string sqlIns = @"
+                        SELECT i.id, i.firstName, i.lastName, i.email, i.phone,
+                            STUFF((
+                                SELECT ', ' + ea2.title
+                                FROM TEE_Inspector_Areas ia2
+                                INNER JOIN ELSTATAreas ea2 ON ea2.kalID = ia2.kalID
+                                WHERE ia2.inspectorID = i.id
+                                ORDER BY ea2.levelID, ea2.title
+                                FOR XML PATH(''), TYPE
+                            ).value('.','NVARCHAR(MAX)'), 1, 2, '') AS areas
+                        FROM TEE_Inspectors i
+                        WHERE i.isActive = 1";
+                    var inspectors = unitOfWork.context.Database
+                        .SqlQuery<InspectorSearchViewModel>(sqlIns).ToList();
+
+                    var rnd = new Random();
+                    var shuffled = inspectors.OrderBy(x => rnd.Next()).ToList();
+
+                    inspectorsInfo = "ΕΝΕΡΓΟΙ ΕΠΙΘΕΩΡΗΤΕΣ ΜΗΤΡΩΟΥ (σύνολο: " + shuffled.Count + ") — όνομα → περιοχές ευθύνης:\n" +
+                        string.Join("\n", shuffled.Select(i =>
+                            "- " + i.firstName + " " + i.lastName + " → " + (string.IsNullOrEmpty(i.areas) ? "(χωρίς δηλωμένες περιοχές)" : i.areas)));
+                }
+                catch (Exception exIns) { HotelsTEE.Utils.ErrorLogger.Log(exIns, "AiApiController.Advise.Inspectors"); }
+
                 // Γραμμές κριτηρίων (συμπυκνωμένες): code|τίτλος|πυλώνας|max μονάδες|απάντηση
                 var lines = new List<string>();
                 foreach (var c in crits.OrderBy(c => c.categoryID).ThenBy(c => c.order))
@@ -377,10 +407,15 @@ namespace HotelsTEE.Controllers
                     "- Βασίζεσαι ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην επινοείς κριτήρια ή βαθμούς.\n" +
                     "- Όταν προτείνεις βελτιώσεις, ξεκίνα από αναπάντητα/αρνητικά κριτήρια με τους περισσότερους βαθμούς και ανάφερε τους κωδικούς τους.\n" +
                     "- Οι βαθμοί κριτηρίων είναι αρχικοί (raw)· η συνολική βαθμολογία 0-95 προκύπτει με αναγωγή ανά πυλώνα — μίλα ενδεικτικά, μην υπόσχεσαι ακριβή τελικά νούμερα.\n" +
+                    "ΚΑΝΟΝΕΣ ΓΙΑ ΕΠΙΘΕΩΡΗΤΕΣ (ΑΥΣΤΗΡΗ ΟΥΔΕΤΕΡΟΤΗΤΑ):\n" +
+                    "- Όταν ρωτηθείς για επιθεωρητές μιας περιοχής, ανάφερε ΟΛΟΥΣ όσους την καλύπτουν (και το πλήθος τους), χωρίς καμία σύσταση, σύγκριση, αξιολόγηση ή σειρά προτίμησης.\n" +
+                    "- Αν ρωτηθείς «ποιον να διαλέξω» ή «ποιος είναι καλύτερος/γρηγορότερος», απάντησε ότι όλοι οι πιστοποιημένοι επιθεωρητές του μητρώου είναι ισότιμοι και η επιλογή είναι αποκλειστικά δική του — δεν διαθέτεις και δεν παρέχεις συγκριτικά στοιχεία.\n" +
+                    "- Μην δίνεις στοιχεία επικοινωνίας — για στοιχεία, αναζήτηση και υποβολή αίτησης παραπέμπεις πάντα στη σελίδα «Υποβολή Αίτησης».\n" +
                     "- Απαντάς στα ελληνικά, φιλικά και συνοπτικά (έως ~150 λέξεις), με λίστες όπου βοηθά.\n\n" +
                     "ΣΤΟΙΧΕΙΑ ΚΑΤΑΛΥΜΑΤΟΣ: " + hotel.hotelTitle + ", κατηγορία " + hotel.category +
                     ", " + hotel.totalRooms + " δωμάτια / " + hotel.totalBeds + " κλίνες.\n" +
                     scoreInfo + "\nΚλίμακα μεταλλίων (συνολική 0-95): " + medalsInfo + "\n\n" +
+                    (inspectorsInfo.Length > 0 ? inspectorsInfo + "\n\n" : "") +
                     "ΚΡΙΤΗΡΙΑ (κωδικός|τίτλος|πυλώνας|μέγιστοι βαθμοί|απάντηση):\n" + string.Join("\n", lines);
 
                 // Ιστορικό: τα τελευταία 12 μηνύματα, με όρια μήκους
