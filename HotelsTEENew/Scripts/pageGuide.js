@@ -30,6 +30,16 @@
 
     var state = { steps: [], idx: 0, active: false };
 
+    // Πρώτο ΟΡΑΤΟ στοιχείο που ταιριάζει στον selector (τα class selectors
+    // μπορεί να ταιριάζουν και σε κρυφά tab-panes άλλων πυλώνων).
+    function visibleTarget(sel) {
+        var els = document.querySelectorAll(sel);
+        for (var i = 0; i < els.length; i++) {
+            if (els[i].offsetWidth > 0 || els[i].offsetHeight > 0) return els[i];
+        }
+        return null;
+    }
+
     function el(id, tag) {
         var e = document.getElementById(id);
         if (!e) { e = document.createElement(tag || "div"); e.id = id; document.body.appendChild(e); }
@@ -38,7 +48,7 @@
 
     function position() {
         var step = state.steps[state.idx];
-        var target = document.querySelector(step.sel);
+        var target = visibleTarget(step.sel);
         if (!target) { next(); return; }
 
         var r = target.getBoundingClientRect();
@@ -84,7 +94,7 @@
         document.getElementById("pg-next").onclick = next;
         if (!isFirst) document.getElementById("pg-prev").onclick = prev;
 
-        var target = document.querySelector(step.sel);
+        var target = visibleTarget(step.sel);
         if (target) target.scrollIntoView({ block: "center", behavior: "smooth" });
         setTimeout(position, 320);
     }
@@ -106,7 +116,7 @@
 
     function start(steps) {
         injectCss();
-        var avail = (steps || []).filter(function (s) { return document.querySelector(s.sel); });
+        var avail = (steps || []).filter(function (s) { return visibleTarget(s.sel); });
         if (!avail.length) return;
         state.steps = avail; state.idx = 0; state.active = true;
 
