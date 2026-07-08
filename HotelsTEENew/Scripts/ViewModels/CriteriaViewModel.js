@@ -199,6 +199,9 @@
     // Μετάβαση σε κριτήριο: πυλώνας (tab) → υποπυλώνας (pill) → scroll + highlight.
     // Χρήση πραγματικών click() ώστε να ενεργοποιηθούν αξιόπιστα τα data-bs-toggle handlers.
     self.gotoCriterion = function (r) {
+        // Κλείσιμο του dropdown αποτελεσμάτων (κρατάμε το query για επανάληψη)
+        self.aiSearchResults([]);
+        self.aiSearchNoResults(false);
         if (r.pillarID) {
             var pillarLink = document.querySelector('a[href="#tab-' + r.pillarID + '"]');
             if (pillarLink && !pillarLink.classList.contains("active")) pillarLink.click();

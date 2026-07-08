@@ -74,10 +74,42 @@
     <div class="col-12">
         <div class="page-title-box">
             <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="javascript: void(0);">Αρχική</a></li>
-                    <li class="breadcrumb-item active">Αυτοαξιολόγηση</li>
-                </ol>
+                <!-- ko if: aiEnabled -->
+                <!-- Έξυπνη (σημασιολογική) αναζήτηση κριτηρίων — dropdown αποτελέσματα -->
+                <div style="position:relative; width:360px; max-width:60vw;">
+                    <div class="d-flex gap-1 align-items-center">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text py-0"><i class="mdi mdi-robot-outline text-info"></i></span>
+                            <input type="text" class="form-control form-control-sm"
+                                   placeholder="Έξυπνη αναζήτηση κριτηρίων..."
+                                   data-bind="value: aiSearchQuery, valueUpdate: 'input', event: { keypress: onAiSearchEnter }, enable: !aiSearchBusy()" />
+                            <button class="btn btn-sm btn-info py-0" data-bind="click: runAiSearch, enable: !aiSearchBusy()">
+                                <!-- ko if: aiSearchBusy() --><span class="spinner-border spinner-border-sm"></span><!-- /ko -->
+                                <!-- ko ifnot: aiSearchBusy() --><i class="uil uil-search"></i><!-- /ko -->
+                            </button>
+                        </div>
+                    </div>
+                    <!-- ko if: aiSearchResults().length > 0 || aiSearchNoResults() -->
+                    <div style="position:absolute; top:100%; right:0; width:430px; max-width:90vw; z-index:1600; background:#fff; border:1px solid #e3e6ea; border-radius:8px; box-shadow:0 6px 24px rgba(0,0,0,0.18); padding:6px 10px; margin-top:4px; text-align:left;">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-1 mb-1">
+                            <small class="text-muted">Σχετικά κριτήρια</small>
+                            <a href="javascript:void(0)" class="text-muted" data-bind="click: clearAiSearch"><i class="uil uil-times"></i></a>
+                        </div>
+                        <!-- ko foreach: aiSearchResults -->
+                        <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-1 border-bottom text-body" style="text-decoration:none; font-size:13px;"
+                           data-bind="click: $root.gotoCriterion">
+                            <span class="badge badge-info-lighten" data-bind="text: code"></span>
+                            <span class="flex-grow-1" data-bind="text: title"></span>
+                            <span class="badge bg-light text-dark" data-bind="text: score + '%'"></span>
+                        </a>
+                        <!-- /ko -->
+                        <!-- ko if: aiSearchNoResults -->
+                        <p class="text-muted mb-0 py-1"><small>Δεν βρέθηκαν σχετικά κριτήρια.</small></p>
+                        <!-- /ko -->
+                    </div>
+                    <!-- /ko -->
+                </div>
+                <!-- /ko -->
             </div>
             <h4 class="page-title">Αυτοαξιολόγηση</h4>
         </div>
@@ -139,6 +171,30 @@
     <!-- ko if: hasFeatures -->
     <div class="col-12">
         <div id="guide-features" class="border card border-info mb-2" style="background-color:#eef6fc;">
+
+            <!-- Συμπτυγμένο: ΟΛΑ σε μία λεπτή γραμμή -->
+            <!-- ko if: featuresCollapsed() -->
+            <div class="d-flex align-items-center flex-wrap gap-1 px-2 py-1">
+                <i class="uil uil-building text-info me-1"></i>
+                <strong class="me-1" style="font-size:13px;">Παροχές:</strong>
+                <!-- ko foreach: features -->
+                <span class="badge"
+                      data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
+                                 css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
+                <!-- /ko -->
+                <!-- ko if: disabledByFeaturesCount() > 0 -->
+                <span class="text-muted ms-1" style="font-size:12px;" data-bind="text: '· ' + disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
+                <!-- /ko -->
+                <!-- ko ifnot: allFeaturesAnswered -->
+                <span class="badge bg-warning ms-1">Συμπληρώστε</span>
+                <!-- /ko -->
+                <a href="javascript:void(0)" class="text-muted ms-auto" style="font-size:12px;"
+                   data-bind="click: function(){ featuresCollapsed(false); }">Επεξεργασία ▾</a>
+            </div>
+            <!-- /ko -->
+
+            <!-- Ανοιχτό: πλήρης επεξεργασία -->
+            <!-- ko ifnot: featuresCollapsed() -->
             <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
                 <h5 class="card-title mb-0">
                     <i class="uil uil-building me-1 text-info"></i> Χαρακτηριστικά &amp; Παροχές Καταλύματος
@@ -149,11 +205,9 @@
                     <span class="badge bg-secondary ms-1" data-bind="text: disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
                     <!-- /ko -->
                 </h5>
-                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(!featuresCollapsed()); }">
-                    <span data-bind="text: featuresCollapsed() ? 'Επεξεργασία ▾' : 'Σύμπτυξη ▴'"></span>
-                </a>
+                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(true); }">Σύμπτυξη ▴</a>
             </div>
-            <div class="card-body py-2" data-bind="visible: !featuresCollapsed()">
+            <div class="card-body py-2">
                 <p class="text-muted mb-2" style="font-size:13px;">
                     Δηλώστε τις βασικές παροχές. Όσα κριτήρια δεν αφορούν το κατάλυμά σας απενεργοποιούνται αυτόματα.
                 </p>
@@ -181,52 +235,7 @@
                     </div>
                 </div>
             </div>
-            <!-- ko if: featuresCollapsed() -->
-            <div class="card-body py-2">
-                <div data-bind="foreach: features" style="display:inline;">
-                    <span class="badge me-1 mb-1"
-                          data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
-                                     css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
-                </div>
-            </div>
             <!-- /ko -->
-        </div>
-    </div>
-    <!-- /ko -->
-
-    <!-- ════ Έξυπνη (σημασιολογική) αναζήτηση κριτηρίων ════ -->
-    <!-- ko if: aiEnabled -->
-    <div class="col-12 mb-2">
-        <div class="border card mb-0">
-            <div class="card-body py-2">
-                <div class="d-flex gap-2 align-items-center">
-                    <i class="mdi mdi-robot-outline text-info" style="font-size:20px;"></i>
-                    <input type="text" class="form-control form-control-sm" style="max-width:420px;"
-                           placeholder="Έξυπνη αναζήτηση κριτηρίων — π.χ. «ηλιακά πάνελ», «κομποστοποίηση»..."
-                           data-bind="value: aiSearchQuery, valueUpdate: 'input', event: { keypress: onAiSearchEnter }, enable: !aiSearchBusy()" />
-                    <button class="btn btn-sm btn-info" data-bind="click: runAiSearch, enable: !aiSearchBusy()">
-                        <!-- ko if: aiSearchBusy() --><span class="spinner-border spinner-border-sm"></span><!-- /ko -->
-                        <!-- ko ifnot: aiSearchBusy() --><i class="uil uil-search"></i><!-- /ko -->
-                    </button>
-                    <!-- ko if: aiSearchResults().length > 0 -->
-                    <a href="javascript:void(0)" class="text-muted" data-bind="click: clearAiSearch"><small><i class="uil uil-times"></i> Καθαρισμός</small></a>
-                    <!-- /ko -->
-                </div>
-                <!-- ko if: aiSearchResults().length > 0 -->
-                <div class="mt-2" data-bind="foreach: aiSearchResults">
-                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-1 border-bottom text-body" style="text-decoration:none;"
-                       data-bind="click: $root.gotoCriterion">
-                        <span class="badge badge-info-lighten" data-bind="text: code"></span>
-                        <span class="flex-grow-1" data-bind="text: title"></span>
-                        <small class="text-muted" data-bind="text: pillar"></small>
-                        <span class="badge bg-light text-dark" data-bind="text: score + '%'"></span>
-                    </a>
-                </div>
-                <!-- /ko -->
-                <!-- ko if: aiSearchNoResults -->
-                <p class="text-muted mb-0 mt-2"><small>Δεν βρέθηκαν σχετικά κριτήρια.</small></p>
-                <!-- /ko -->
-            </div>
         </div>
     </div>
     <!-- /ko -->
@@ -286,7 +295,7 @@
     <div class="col-12 mb-2">
         <a class="text-muted" data-bs-toggle="collapse" href="#page-legend" role="button" style="font-size:12px;">
             <i class="mdi mdi-help-circle text-info me-1" style="font-size:15px;vertical-align:-2px;"></i> Επεξήγηση σελίδας
-        </a>
+        </a><span id="page-guide-slot"></span>
         <div class="collapse" id="page-legend">
             <div class="card mb-0 mt-1"><div class="card-body py-2" style="font-size:12px;">
                 <div class="row">

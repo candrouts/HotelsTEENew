@@ -118,12 +118,27 @@
         render();
     }
 
-    // Δημόσιο API: κουμπί «?» + αυτόματη εκκίνηση 1η φορά
+    // Δημόσιο API: trigger ξενάγησης + αυτόματη εκκίνηση 1η φορά.
+    // Αν η σελίδα έχει #page-guide-slot, μπαίνει διακριτικό inline link εκεί·
+    // αλλιώς (fallback) το κλασικό floating κουμπί «?».
     function register(key, waitSelector, buildSteps) {
         injectCss();
-        var btn = el("page-guide-btn", "button");
-        btn.textContent = "?";
-        btn.title = "Οδηγός σελίδας";
+        var btn;
+        var slot = document.getElementById("page-guide-slot");
+        if (slot) {
+            btn = document.createElement("a");
+            btn.href = "javascript:void(0)";
+            btn.className = "text-muted";
+            btn.style.fontSize = "12px";
+            btn.style.marginLeft = "14px";
+            btn.innerHTML = "<i class='mdi mdi-compass-outline text-info' style='font-size:15px;vertical-align:-2px;'></i> Ξενάγηση σελίδας";
+            btn.title = "Οδηγός σελίδας βήμα-βήμα";
+            slot.appendChild(btn);
+        } else {
+            btn = el("page-guide-btn", "button");
+            btn.textContent = "?";
+            btn.title = "Οδηγός σελίδας";
+        }
         btn.onclick = function () { start(buildSteps()); };
 
         if (key && !localStorage.getItem(key)) {
