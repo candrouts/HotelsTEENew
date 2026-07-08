@@ -194,6 +194,43 @@
     </div>
     <!-- /ko -->
 
+    <!-- ════ Έξυπνη (σημασιολογική) αναζήτηση κριτηρίων ════ -->
+    <!-- ko if: aiEnabled -->
+    <div class="col-12 mb-2">
+        <div class="border card mb-0">
+            <div class="card-body py-2">
+                <div class="d-flex gap-2 align-items-center">
+                    <i class="mdi mdi-robot-outline text-info" style="font-size:20px;"></i>
+                    <input type="text" class="form-control form-control-sm" style="max-width:420px;"
+                           placeholder="Έξυπνη αναζήτηση κριτηρίων — π.χ. «ηλιακά πάνελ», «κομποστοποίηση»..."
+                           data-bind="value: aiSearchQuery, valueUpdate: 'input', event: { keypress: onAiSearchEnter }, enable: !aiSearchBusy()" />
+                    <button class="btn btn-sm btn-info" data-bind="click: runAiSearch, enable: !aiSearchBusy()">
+                        <!-- ko if: aiSearchBusy() --><span class="spinner-border spinner-border-sm"></span><!-- /ko -->
+                        <!-- ko ifnot: aiSearchBusy() --><i class="uil uil-search"></i><!-- /ko -->
+                    </button>
+                    <!-- ko if: aiSearchResults().length > 0 -->
+                    <a href="javascript:void(0)" class="text-muted" data-bind="click: clearAiSearch"><small><i class="uil uil-times"></i> Καθαρισμός</small></a>
+                    <!-- /ko -->
+                </div>
+                <!-- ko if: aiSearchResults().length > 0 -->
+                <div class="mt-2" data-bind="foreach: aiSearchResults">
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 py-1 border-bottom text-body" style="text-decoration:none;"
+                       data-bind="click: $root.gotoCriterion">
+                        <span class="badge badge-info-lighten" data-bind="text: code"></span>
+                        <span class="flex-grow-1" data-bind="text: title"></span>
+                        <small class="text-muted" data-bind="text: pillar"></small>
+                        <span class="badge bg-light text-dark" data-bind="text: score + '%'"></span>
+                    </a>
+                </div>
+                <!-- /ko -->
+                <!-- ko if: aiSearchNoResults -->
+                <p class="text-muted mb-0 mt-2"><small>Δεν βρέθηκαν σχετικά κριτήρια.</small></p>
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+    <!-- /ko -->
+
     <div id="guide-bar" class="sticky-wrap tier-wrap col-xl-12">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <div>
@@ -351,7 +388,7 @@
 
                                 <!-- ko foreach : criteria  -->
                                 <div class="col-xs-12">
-                                    <div class="card " data-bind="@*visible:  expandPEA ,*@ css: { 'criteria-disabled': isDisabled() }" role="group" data-bind-aria-disabled="isDisabled() ? 'true' : 'false'">
+                                    <div class="card " data-bind="@*visible:  expandPEA ,*@ css: { 'criteria-disabled': isDisabled() }, attr: { id: 'crit-card-' + id() }" role="group" data-bind-aria-disabled="isDisabled() ? 'true' : 'false'">
                                         <div class="card-body" data-bind="css: {'required': isRequired()}">
                                             <!-- ko if : canShowNotApplicableSwitch() === true && !featureMapped() -->
                                             <div class="float-end form-check form-switch">

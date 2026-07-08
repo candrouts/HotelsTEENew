@@ -294,6 +294,17 @@ namespace HotelsTEE.DAL
             }
         }
 
+        private GenericRepository<AiCriteriaEmbedding> aiCriteriaEmbeddingRepository;
+        public GenericRepository<AiCriteriaEmbedding> AiCriteriaEmbeddingRepository
+        {
+            get
+            {
+                if (this.aiCriteriaEmbeddingRepository == null)
+                    this.aiCriteriaEmbeddingRepository = new GenericRepository<AiCriteriaEmbedding>(context);
+                return aiCriteriaEmbeddingRepository;
+            }
+        }
+
         public void Save()
         {
             context.SaveChanges();

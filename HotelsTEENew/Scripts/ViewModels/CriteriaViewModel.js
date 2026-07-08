@@ -156,6 +156,64 @@
         return true;
     };
 
+    // ── Σημασιολογική αναζήτηση κριτηρίων (#6) ───────────────────────
+    self.aiSearchQuery = ko.observable("");
+    self.aiSearchBusy = ko.observable(false);
+    self.aiSearchResults = ko.observableArray([]);
+    self.aiSearchNoResults = ko.observable(false);
+
+    self.runAiSearch = function () {
+        var q = (self.aiSearchQuery() || "").trim();
+        if (!q || self.aiSearchBusy()) return;
+        self.aiSearchBusy(true);
+        self.aiSearchNoResults(false);
+
+        $.ajax({
+            type: "POST", url: "/api/AiApi/SearchCriteria", contentType: "application/json",
+            data: JSON.stringify({ query: q }), dataType: "json",
+            success: function (r) {
+                self.aiSearchBusy(false);
+                if (r && r.success) {
+                    self.aiSearchResults(r.results || []);
+                    self.aiSearchNoResults((r.results || []).length === 0);
+                } else {
+                    self.aiSearchResults([]);
+                    self.aiSearchNoResults(true);
+                }
+            },
+            error: function () { self.aiSearchBusy(false); self.aiSearchNoResults(true); }
+        });
+    };
+
+    self.clearAiSearch = function () {
+        self.aiSearchQuery("");
+        self.aiSearchResults([]);
+        self.aiSearchNoResults(false);
+    };
+
+    self.onAiSearchEnter = function (d, e) {
+        if (e.keyCode === 13) { self.runAiSearch(); return false; }
+        return true;
+    };
+
+    // Μετάβαση σε κριτήριο: ενεργοποίηση tab πυλώνα + scroll + στιγμιαίο highlight
+    self.gotoCriterion = function (r) {
+        if (r.pillarID) {
+            var tabLink = document.querySelector('a[href="#tab-' + r.pillarID + '"]');
+            if (tabLink && window.bootstrap) new bootstrap.Tab(tabLink).show();
+            else if (tabLink) $(tabLink).tab("show");
+        }
+        setTimeout(function () {
+            var card = document.getElementById("crit-card-" + r.id);
+            if (card) {
+                card.scrollIntoView({ behavior: "smooth", block: "center" });
+                card.style.transition = "box-shadow 0.4s";
+                card.style.boxShadow = "0 0 0 3px #39afd1";
+                setTimeout(function () { card.style.boxShadow = ""; }, 2200);
+            }
+        }, 350);
+    };
+
     self.startAssessment = function () {
         self.needsNewAssessment(false);
         self.fetchData(true);   // δημιουργία μετά από ρητή επιβεβαίωση (panel)

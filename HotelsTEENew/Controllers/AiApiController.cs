@@ -33,6 +33,11 @@ namespace HotelsTEE.Controllers
         public decimal certificateID { get; set; }
     }
 
+    public class AiSearchRequest
+    {
+        public string query { get; set; }
+    }
+
     // AI endpoints (ai branch / greencertai) — όλα πίσω από ai.enabled.
     [Authorize]
     public class AiApiController : ApiController
@@ -653,6 +658,120 @@ namespace HotelsTEE.Controllers
             {
                 Utils.ErrorLogger.Log(ex, "AiApiController.GreenProfile");
                 return Ok(new { success = false, message = "Σφάλμα — δοκιμάστε ξανά." });
+            }
+        }
+
+        // ── #6: Σημασιολογική αναζήτηση κριτηρίων ───────────────────────
+        // Embedding του query → cosine similarity με τα cached embeddings των
+        // ενεργών κριτηρίων (lazy build/refresh με content hash) → top 6.
+        [Route("api/AiApi/SearchCriteria")]
+        [HttpPost]
+        public IHttpActionResult SearchCriteria([FromBody] AiSearchRequest req)
+        {
+            try
+            {
+                if (!Utils.AiService.IsEnabled())
+                    return Ok(new { success = false, message = "Το AI είναι απενεργοποιημένο." });
+                if (req == null || string.IsNullOrWhiteSpace(req.query))
+                    return Ok(new { success = false, message = "Κενή αναζήτηση." });
+
+                string query = req.query.Trim();
+                if (query.Length > 300) query = query.Substring(0, 300);
+
+                // Ενεργά κριτήρια + δομή για τίτλους πυλώνων
+                List<Criteria> crits = unitOfWork.CriteriaRepository
+                    .Get(c => c.dateFrom <= DateTime.Now && c.dateTo >= DateTime.Now).ToList();
+                List<CategoryViewModel> cats = unitOfWork.context.Database
+                    .SqlQuery<CategoryViewModel>("Select * from V_TEE_Categories where isActive=1").ToList();
+                Dictionary<decimal, CategoryViewModel> catById = cats.GroupBy(c => c.id).ToDictionary(g => g.Key, g => g.First());
+
+                // Cache embeddings + εντοπισμός ελλειπόντων/stale (MD5 τίτλου+περιγραφής)
+                var cache = unitOfWork.AiCriteriaEmbeddingRepository.Get().ToList()
+                    .GroupBy(x => x.criteriaID).ToDictionary(g => g.Key, g => g.First());
+
+                Func<Criteria, string> contentOf = c =>
+                    (c.code ?? "") + " " + (c.title ?? "") + "\n" + (c.description ?? "");
+
+                var stale = new List<Criteria>();
+                foreach (var c in crits)
+                {
+                    string hash = Utils.Encryptor.MD5Hash(contentOf(c));
+                    AiCriteriaEmbedding e;
+                    if (!cache.TryGetValue(c.id, out e) || e.contentHash != hash)
+                        stale.Add(c);
+                }
+
+                // Batch υπολογισμός για όσα λείπουν (μία κλήση για όλα)
+                if (stale.Count > 0)
+                {
+                    var vectors = Utils.AiService.EmbedBatch(stale.Select(contentOf).ToList());
+                    if (vectors == null || vectors.Count != stale.Count)
+                        return Ok(new { success = false, message = "Σφάλμα υπολογισμού embeddings — δείτε το TEE_ErrorLog." });
+
+                    for (int i = 0; i < stale.Count; i++)
+                    {
+                        string hash = Utils.Encryptor.MD5Hash(contentOf(stale[i]));
+                        string json = Newtonsoft.Json.JsonConvert.SerializeObject(vectors[i]);
+                        AiCriteriaEmbedding e;
+                        if (cache.TryGetValue(stale[i].id, out e))
+                        {
+                            e.contentHash = hash; e.embedding = json; e.updatedDateTime = DateTime.Now;
+                            unitOfWork.AiCriteriaEmbeddingRepository.Update(e);
+                        }
+                        else
+                        {
+                            e = new AiCriteriaEmbedding
+                            {
+                                criteriaID = stale[i].id, contentHash = hash,
+                                embedding = json, updatedDateTime = DateTime.Now
+                            };
+                            unitOfWork.AiCriteriaEmbeddingRepository.Insert(e);
+                            cache[stale[i].id] = e;
+                        }
+                    }
+                    unitOfWork.Save();
+                }
+
+                // Embedding του query
+                var qVecs = Utils.AiService.EmbedBatch(new List<string> { query });
+                if (qVecs == null || qVecs.Count == 0)
+                    return Ok(new { success = false, message = "Σφάλμα αναζήτησης — δοκιμάστε ξανά." });
+                float[] qv = qVecs[0];
+
+                // Cosine ranking
+                var scored = new List<Tuple<Criteria, double>>();
+                foreach (var c in crits)
+                {
+                    AiCriteriaEmbedding e;
+                    if (!cache.TryGetValue(c.id, out e)) continue;
+                    float[] v = Newtonsoft.Json.JsonConvert.DeserializeObject<float[]>(e.embedding);
+                    scored.Add(Tuple.Create(c, Utils.AiService.Cosine(qv, v)));
+                }
+
+                var top = scored.OrderByDescending(x => x.Item2).Take(6)
+                    .Where(x => x.Item2 > 0.15)   // κόφτης εντελώς άσχετων
+                    .Select(x =>
+                    {
+                        CategoryViewModel sub; catById.TryGetValue(x.Item1.categoryID, out sub);
+                        CategoryViewModel pillar = null;
+                        if (sub != null && sub.parentID.HasValue) catById.TryGetValue(sub.parentID.Value, out pillar);
+                        return new
+                        {
+                            id = x.Item1.id,
+                            code = x.Item1.code,
+                            title = x.Item1.title,
+                            pillar = pillar != null ? pillar.title : "",
+                            pillarID = pillar != null ? (decimal?)pillar.id : null,
+                            score = Math.Round(x.Item2 * 100)
+                        };
+                    }).ToList();
+
+                return Ok(new { success = true, results = top });
+            }
+            catch (Exception ex)
+            {
+                Utils.ErrorLogger.Log(ex, "AiApiController.SearchCriteria");
+                return Ok(new { success = false, message = "Σφάλμα αναζήτησης." });
             }
         }
 

@@ -220,6 +220,7 @@
     <Compile Include="Models\AiDocumentCheck.cs" />
     <Compile Include="Models\AiCriteriaInstruction.cs" />
     <Compile Include="Models\AiChatLog.cs" />
+    <Compile Include="Models\AiCriteriaEmbedding.cs" />
     <Compile Include="Utils\DiaugeiaService.cs" />
     <Compile Include="Models\CertificateFile.cs" />
     <Compile Include="Models\CertificateTemplate.cs" />

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -88,6 +89,55 @@ namespace HotelsTEE.Utils
                 ErrorLogger.Log(ex, "AiService.Chat");
                 return null;
             }
+        }
+
+        // ── Azure OpenAI: embeddings (batch) ─────────────────────────────
+        // Επιστρέφει ένα διάνυσμα ανά κείμενο εισόδου, ή null σε σφάλμα.
+        // Deployment: ai.openai.embeddings (default: text-embedding-3-large),
+        // με μειωμένες διαστάσεις (1024) για οικονομία χώρου/χρόνου.
+        public static List<float[]> EmbedBatch(List<string> texts)
+        {
+            if (!IsEnabled() || texts == null || texts.Count == 0) return null;
+
+            try
+            {
+                string endpoint = Cfg("ai.openai.endpoint").TrimEnd('/');
+                string deployment = Cfg("ai.openai.embeddings");
+                if (string.IsNullOrEmpty(deployment)) deployment = "text-embedding-3-large";
+                string url = endpoint + "/openai/deployments/" + deployment +
+                             "/embeddings?api-version=2024-06-01";
+
+                var payload = new { input = texts, dimensions = 1024 };
+                string responseJson = PostJson(url, JsonConvert.SerializeObject(payload),
+                    "api-key", Cfg("ai.openai.key"));
+                if (responseJson == null) return null;
+
+                JObject o = JObject.Parse(responseJson);
+                var result = new List<float[]>();
+                foreach (var item in (JArray)o["data"])
+                    result.Add(((JArray)item["embedding"]).Select(x => (float)x).ToArray());
+                return result;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.Log(ex, "AiService.EmbedBatch");
+                return null;
+            }
+        }
+
+        // Cosine similarity δύο διανυσμάτων
+        public static double Cosine(float[] a, float[] b)
+        {
+            if (a == null || b == null || a.Length != b.Length) return 0;
+            double dot = 0, na = 0, nb = 0;
+            for (int i = 0; i < a.Length; i++)
+            {
+                dot += (double)a[i] * b[i];
+                na += (double)a[i] * a[i];
+                nb += (double)b[i] * b[i];
+            }
+            if (na == 0 || nb == 0) return 0;
+            return dot / (Math.Sqrt(na) * Math.Sqrt(nb));
         }
 
         // ── Azure AI Document Intelligence: εξαγωγή κειμένου (prebuilt-read)
