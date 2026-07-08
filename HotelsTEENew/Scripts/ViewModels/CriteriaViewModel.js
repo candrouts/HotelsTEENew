@@ -88,73 +88,8 @@
     // Δεν υπάρχει ενεργή αυτοαξιολόγηση — εμφανίζουμε επιβεβαίωση πριν δημιουργήσουμε νέα
     self.needsNewAssessment = ko.observable(false);
 
-    // ── AI Σύμβουλος Βιωσιμότητας (chat) ─────────────────────────────
+    // ── AI: διαθεσιμότητα λειτουργιών στη σελίδα (το chat είναι πλέον global widget: aiChat.js)
     self.aiEnabled = ko.observable(false);
-    self.aiChatOpen = ko.observable(false);
-    self.aiChatMessages = ko.observableArray([]);   // { role: 'user'|'assistant', content }
-    self.aiChatInput = ko.observable("");
-    self.aiChatBusy = ko.observable(false);
-    self.aiSuggestions = ko.observableArray([
-        "Τι μου λείπει για το επόμενο μετάλλιο;",
-        "Ποια εύκολα κριτήρια δεν έχω απαντήσει;",
-        "Τι τεκμήρια χρειάζονται τα υποχρεωτικά κριτήρια;"
-    ]);
-
-    self.toggleAiChat = function () {
-        self.aiChatOpen(!self.aiChatOpen());
-        if (self.aiChatOpen() && self.aiChatMessages().length === 0) {
-            self.aiChatMessages.push({
-                role: "assistant",
-                content: "Γεια σας! Είμαι ο AI Σύμβουλος Βιωσιμότητας. Γνωρίζω τα κριτήρια και την τρέχουσα αξιολόγησή σας — ρωτήστε με ό,τι θέλετε!"
-            });
-        }
-        if (self.aiChatOpen()) setTimeout(function () { $("#ai-chat-input").focus(); }, 200);
-    };
-
-    self.aiScrollDown = function () {
-        setTimeout(function () {
-            var el = document.getElementById("ai-chat-body");
-            if (el) el.scrollTop = el.scrollHeight;
-        }, 50);
-    };
-
-    self.sendAiSuggestion = function (s) { self.aiChatInput(s); self.sendAiMessage(); };
-
-    self.sendAiMessage = function () {
-        var text = (self.aiChatInput() || "").trim();
-        if (!text || self.aiChatBusy()) return;
-
-        self.aiChatMessages.push({ role: "user", content: text });
-        self.aiChatInput("");
-        self.aiChatBusy(true);
-        self.aiScrollDown();
-
-        // Στέλνουμε το ιστορικό ΧΩΡΙΣ το εναρκτήριο χαιρετιστήριο μήνυμα
-        var payload = self.aiChatMessages().slice(1).map(function (m) {
-            return { role: m.role, content: m.content };
-        });
-
-        $.ajax({
-            type: "POST", url: "/api/AiApi/Advise", contentType: "application/json",
-            data: JSON.stringify({ messages: payload }), dataType: "json",
-            success: function (r) {
-                self.aiChatBusy(false);
-                if (r && r.success) self.aiChatMessages.push({ role: "assistant", content: r.reply });
-                else self.aiChatMessages.push({ role: "assistant", content: (r && r.message) || "Κάτι πήγε στραβά — δοκιμάστε ξανά." });
-                self.aiScrollDown();
-            },
-            error: function () {
-                self.aiChatBusy(false);
-                self.aiChatMessages.push({ role: "assistant", content: "Πρόβλημα επικοινωνίας — δοκιμάστε ξανά." });
-                self.aiScrollDown();
-            }
-        });
-    };
-
-    self.onAiChatEnter = function (d, e) {
-        if (e.keyCode === 13 && !e.shiftKey) { self.sendAiMessage(); return false; }
-        return true;
-    };
 
     // ── Σημασιολογική αναζήτηση κριτηρίων (#6) ───────────────────────
     self.aiSearchQuery = ko.observable("");

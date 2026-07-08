@@ -284,6 +284,24 @@ namespace HotelsTEE.Controllers
             }
         }
 
+        // Διαθεσιμότητα του AI Συμβούλου για τον τρέχοντα χρήστη (global widget).
+        [Route("api/AiApi/ChatAvailable")]
+        [HttpPost]
+        public IHttpActionResult ChatAvailable()
+        {
+            try
+            {
+                if (!Utils.AiService.IsEnabled()) return Ok(new { enabled = false });
+                UserViewModel user = CurrentUser();
+                return Ok(new { enabled = user != null && user.role == 1 });
+            }
+            catch (Exception ex)
+            {
+                Utils.ErrorLogger.Log(ex, "AiApiController.ChatAvailable");
+                return Ok(new { enabled = false });
+            }
+        }
+
         // ── AI Σύμβουλος Βιωσιμότητας (ξενοδόχος) ───────────────────────
         // Multi-turn chat με πλήρες context: κριτήρια, απαντήσεις, βαθμολογία,
         // μετάλλια/βάσεις πυλώνων. Ημερήσιο όριο μηνυμάτων ανά χρήστη.

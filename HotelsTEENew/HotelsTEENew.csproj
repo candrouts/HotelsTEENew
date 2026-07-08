@@ -876,6 +876,7 @@
     <Content Include="Scripts\ViewModels\Calendar.js" />
     <Content Include="Scripts\ViewModels\AdminFeaturesViewModel.js" />
     <Content Include="Scripts\ViewModels\AdminCriteriaViewModel.js" />
+    <Content Include="Scripts\aiChat.js" />
     <Content Include="Scripts\ViewModels\PendingActionsViewModel.js" />
     <Content Include="Scripts\ViewModels\InspectorProfileViewModel.js" />
     <Content Include="Scripts\ViewModels\InspectorSelectionViewModel.js" />
