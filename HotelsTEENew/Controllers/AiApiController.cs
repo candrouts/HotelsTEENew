@@ -762,6 +762,7 @@ namespace HotelsTEE.Controllers
                             title = x.Item1.title,
                             pillar = pillar != null ? pillar.title : "",
                             pillarID = pillar != null ? (decimal?)pillar.id : null,
+                            subID = x.Item1.categoryID,
                             score = Math.Round(x.Item2 * 100)
                         };
                     }).ToList();

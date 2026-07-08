@@ -196,22 +196,28 @@
         return true;
     };
 
-    // Μετάβαση σε κριτήριο: ενεργοποίηση tab πυλώνα + scroll + στιγμιαίο highlight
+    // Μετάβαση σε κριτήριο: πυλώνας (tab) → υποπυλώνας (pill) → scroll + highlight.
+    // Χρήση πραγματικών click() ώστε να ενεργοποιηθούν αξιόπιστα τα data-bs-toggle handlers.
     self.gotoCriterion = function (r) {
         if (r.pillarID) {
-            var tabLink = document.querySelector('a[href="#tab-' + r.pillarID + '"]');
-            if (tabLink && window.bootstrap) new bootstrap.Tab(tabLink).show();
-            else if (tabLink) $(tabLink).tab("show");
+            var pillarLink = document.querySelector('a[href="#tab-' + r.pillarID + '"]');
+            if (pillarLink && !pillarLink.classList.contains("active")) pillarLink.click();
         }
         setTimeout(function () {
-            var card = document.getElementById("crit-card-" + r.id);
-            if (card) {
-                card.scrollIntoView({ behavior: "smooth", block: "center" });
-                card.style.transition = "box-shadow 0.4s";
-                card.style.boxShadow = "0 0 0 3px #39afd1";
-                setTimeout(function () { card.style.boxShadow = ""; }, 2200);
+            if (r.subID) {
+                var subLink = document.querySelector('a[href="#subTabPane-' + r.subID + '"]');
+                if (subLink && !subLink.classList.contains("active")) subLink.click();
             }
-        }, 350);
+            setTimeout(function () {
+                var card = document.getElementById("crit-card-" + r.id);
+                if (card) {
+                    card.scrollIntoView({ behavior: "smooth", block: "center" });
+                    card.style.transition = "box-shadow 0.4s";
+                    card.style.boxShadow = "0 0 0 3px #39afd1";
+                    setTimeout(function () { card.style.boxShadow = ""; }, 2200);
+                }
+            }, 300);
+        }, 250);
     };
 
     self.startAssessment = function () {
