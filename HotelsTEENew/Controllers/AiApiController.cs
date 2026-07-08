@@ -370,6 +370,55 @@ namespace HotelsTEE.Controllers
                 List<Medal> medals = unitOfWork.MedalRepository.Get().OrderBy(m => m.min).ToList();
                 string medalsInfo = string.Join(" | ", medals.Select(m => m.title + ": " + m.min + "-" + m.max));
 
+                // ── Κατάσταση τρέχουσας αίτησης (στάδιο ροής) ────────────
+                string appStatus;
+                if (v1 == null)
+                    appStatus = "Δεν υπάρχει ενεργή διαδικασία αξιολόγησης.";
+                else if (v1.status == 1)
+                    appStatus = "Η αυτοαξιολόγηση είναι ΣΕ ΕΞΕΛΙΞΗ — δεν έχει υποβληθεί οριστικά ακόμη.";
+                else if (!v1.certificateID.HasValue)
+                    appStatus = "Η αυτοαξιολόγηση έχει υποβληθεί. ΕΚΚΡΕΜΕΙ η υποβολή αίτησης και η επιλογή επιθεωρητή (σελίδα «Υποβολή Αίτησης»).";
+                else
+                {
+                    HotelierCertificate cert = unitOfWork.HotelierCertificateRepository.GetByID(v1.certificateID.Value);
+                    decimal certID = v1.certificateID.Value;
+                    HotelCriteria v2s = unitOfWork.HotelCriteriaRepository
+                        .Get(x => x.certificateID == certID && x.version == 2).FirstOrDefault();
+                    HotelCriteria v3s = unitOfWork.HotelCriteriaRepository
+                        .Get(x => x.certificateID == certID && x.version == 3).FirstOrDefault();
+
+                    string inspName = "-";
+                    if (cert != null && cert.tee_inspectorID.HasValue)
+                    {
+                        Inspector insp = unitOfWork.InspectorRepository.GetByID(cert.tee_inspectorID.Value);
+                        if (insp != null) inspName = insp.firstName + " " + insp.lastName;
+                    }
+                    string autopsyInfo = cert != null && cert.autopsyDateTime.HasValue
+                        ? cert.autopsyDateTime.Value.ToString("dd/MM/yyyy") +
+                          (cert.autopsyDateStatus == 1 ? " (προτεινόμενη — εκκρεμεί επιβεβαίωση από τον επιθεωρητή)" : " (οριστική)")
+                        : "δεν έχει οριστεί";
+
+                    if (cert == null)
+                        appStatus = "Η αίτηση δεν βρέθηκε.";
+                    else if (cert.certificateStatusID == 2)
+                        appStatus = "Η αξιολόγηση ΟΛΟΚΛΗΡΩΘΗΚΕ και η βεβαίωση έχει εκδοθεί" +
+                            (cert.issueDateTime.HasValue ? " στις " + cert.issueDateTime.Value.ToString("dd/MM/yyyy") : "") +
+                            (cert.validityStopDateTime.HasValue ? " με ισχύ έως " + cert.validityStopDateTime.Value.ToString("dd/MM/yyyy") : "") +
+                            ". Είναι διαθέσιμη στην Αρχική Σελίδα («Οι Βεβαιώσεις μου»).";
+                    else if (cert.certificateStatusID == 24)
+                        appStatus = "Ο επιθεωρητής ΑΠΕΡΡΙΨΕ την ανάθεση — απαιτείται επιλογή νέου επιθεωρητή από τη σελίδα «Υποβολή Αίτησης».";
+                    else if (v3s != null && v3s.status == 2)
+                        appStatus = "Ο επιθεωρητής (" + inspName + ") ολοκλήρωσε την ΤΕΛΙΚΗ ΚΑΤΑΤΑΞΗ. ΕΚΚΡΕΜΕΙ Η ΔΙΚΗ ΣΑΣ ΑΠΟΔΟΧΗ στη σελίδα «Υποβολή Αίτησης» — με την αποδοχή σας η βεβαίωση εκδίδεται ΑΜΕΣΑ και αυτόματα.";
+                    else if (v3s != null && v3s.status == 1)
+                        appStatus = "Η αυτοψία ολοκληρώθηκε και ο επιθεωρητής (" + inspName + ") συντάσσει την τελική κατάταξη.";
+                    else if (v2s != null && v2s.status == 2)
+                        appStatus = "Η αυτοψία ολοκληρώθηκε — αναμένεται η τελική κατάταξη από τον επιθεωρητή (" + inspName + ").";
+                    else if (v2s != null)
+                        appStatus = "Η ΑΥΤΟΨΙΑ είναι σε εξέλιξη από τον επιθεωρητή " + inspName + ". Ημερομηνία αυτοψίας: " + autopsyInfo + ".";
+                    else
+                        appStatus = "Η αίτηση ανατέθηκε στον επιθεωρητή " + inspName + ". Ημερομηνία αυτοψίας: " + autopsyInfo + ".";
+                }
+
                 // Ενεργοί επιθεωρητές (μόνο όνομα + περιοχές ευθύνης — ΚΑΝΕΝΑ στοιχείο
                 // σύγκρισης) σε ΤΥΧΑΙΑ σειρά ανά κλήση, ώστε καμία θέση στη λίστα να μη
                 // δίνει συστηματικό πλεονέκτημα (αμεροληψία by design).
@@ -441,7 +490,13 @@ namespace HotelsTEE.Controllers
                     "Περιοχή καταλύματος: " + (hotel.periphereiaTitle ?? "-") +
                     ", Π.Ε. " + (hotel.peripheryTitle ?? "-") +
                     ", Δήμος " + (hotel.municipalityTitle ?? "-") + ".\n" +
-                    scoreInfo + "\nΚλίμακα μεταλλίων (συνολική 0-95): " + medalsInfo + "\n\n" +
+                    scoreInfo + "\nΚλίμακα μεταλλίων (συνολική 0-95): " + medalsInfo + "\n" +
+                    "ΚΑΤΑΣΤΑΣΗ ΤΡΕΧΟΥΣΑΣ ΑΙΤΗΣΗΣ: " + appStatus + "\n" +
+                    "ΡΟΗ ΔΙΑΔΙΚΑΣΙΑΣ (για ερωτήσεις «σε ποια φάση είμαι / πότε παίρνω βεβαίωση»): " +
+                    "1) Αυτοαξιολόγηση → 2) Υποβολή αίτησης & επιλογή επιθεωρητή → 3) Αυτοψία από επιθεωρητή → " +
+                    "4) Τελική κατάταξη από επιθεωρητή → 5) Αποδοχή τελικής κατάταξης από τον ξενοδόχο → " +
+                    "6) ΑΥΤΟΜΑΤΗ έκδοση βεβαίωσης με την αποδοχή (ισχύς 3 έτη). " +
+                    "Δεν υπάρχουν εγγυημένα χρονοδιαγράμματα για τα βήματα του επιθεωρητή — μην υπόσχεσαι ημερομηνίες που δεν δίνονται.\n\n" +
                     (inspectorsInfo.Length > 0 ? inspectorsInfo + "\n\n" : "") +
                     "ΚΡΙΤΗΡΙΑ (κωδικός|τίτλος|πυλώνας|μέγιστοι βαθμοί|απάντηση):\n" + string.Join("\n", lines);
 
