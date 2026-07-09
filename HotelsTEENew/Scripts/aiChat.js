@@ -44,7 +44,8 @@
             "<div id='ai-chat-suggestions' style='padding:6px 10px;background:#f5f7fa;'></div>" +
             "<div style='padding:10px;border-top:1px solid #e3e6ea;display:flex;gap:6px;'>" +
             "<input type='text' id='ai-chat-input' class='form-control form-control-sm' placeholder='Ρωτήστε τον Σύμβουλο...' />" +
-            "<button class='btn btn-sm btn-info' id='ai-chat-send'><i class='mdi mdi-send'></i></button></div>";
+            "<button class='btn btn-sm btn-info' id='ai-chat-send'><i class='mdi mdi-send'></i></button></div>" +
+            "<div style='padding:3px 10px 6px;background:#fff;font-size:10px;color:#98a6ad;text-align:center;'>Οι συνομιλίες καταγράφονται για τη βελτίωση της υπηρεσίας.</div>";
         document.body.appendChild(panel);
 
         fab.onclick = toggle;

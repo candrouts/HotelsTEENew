@@ -64,6 +64,8 @@ namespace HotelsTEE.DAL
 
         public DbSet<AiCriteriaEmbedding> AiCriteriaEmbeddings { get; set; }
 
+        public DbSet<AiInsightsReport> AiInsightsReports { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 

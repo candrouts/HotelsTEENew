@@ -443,6 +443,12 @@
                             <span> Πυλώνες &amp; Κριτήρια </span>
                         </a>
                     </li>
+                    <li class="side-nav-item">
+                        <a href=@Url.Action("Index", "AdminAiInsights") class="side-nav-link">
+                            <i class="uil-chart-line"></i>
+                            <span> AI Insights </span>
+                        </a>
+                    </li>
                     <!-- /ko -->
                 </ul>
                 <!--- End Sidemenu -->
@@ -574,7 +580,7 @@
 
     <script src="~/Scripts/Handlers.js"></script>
     <script src="~/Scripts/pageGuide.js?v=1.1"></script>
-    <script src="~/Scripts/aiChat.js?v=1.0"></script>
+    <script src="~/Scripts/aiChat.js?v=1.1"></script>
 
 
 
@@ -596,6 +602,7 @@
     <script src="~/Scripts/ViewModels/AdminCertTemplateViewModel.js"></script>
     <script src="~/Scripts/ViewModels/AdminFeaturesViewModel.js"></script>
     <script src="~/Scripts/ViewModels/AdminCriteriaViewModel.js"></script>
+    <script src="~/Scripts/ViewModels/AdminAiInsightsViewModel.js?v=1.0"></script>
     <script src="~/Scripts/ViewModels/PendingActionsViewModel.js"></script>
 
 
@@ -671,6 +678,9 @@
         }
         else if (documentView == "AdminCriteria/Index") {
             ko.applyBindings(new AdminCriteriaViewModel(), document.getElementById("container"));
+        }
+        else if (documentView == "AdminAiInsights/Index") {
+            ko.applyBindings(new AdminAiInsightsViewModel(), document.getElementById("container"));
         }
 
 

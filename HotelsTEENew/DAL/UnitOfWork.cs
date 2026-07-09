@@ -305,6 +305,17 @@ namespace HotelsTEE.DAL
             }
         }
 
+        private GenericRepository<AiInsightsReport> aiInsightsReportRepository;
+        public GenericRepository<AiInsightsReport> AiInsightsReportRepository
+        {
+            get
+            {
+                if (this.aiInsightsReportRepository == null)
+                    this.aiInsightsReportRepository = new GenericRepository<AiInsightsReport>(context);
+                return aiInsightsReportRepository;
+            }
+        }
+
         public void Save()
         {
             context.SaveChanges();

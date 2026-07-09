@@ -221,6 +221,10 @@
     <Compile Include="Models\AiCriteriaInstruction.cs" />
     <Compile Include="Models\AiChatLog.cs" />
     <Compile Include="Models\AiCriteriaEmbedding.cs" />
+    <Compile Include="Models\AiInsightsReport.cs" />
+    <Compile Include="Utils\AiDocumentChecker.cs" />
+    <Compile Include="Controllers\AdminAiInsightsApiController.cs" />
+    <Compile Include="Controllers\AdminAiInsightsController.cs" />
     <Compile Include="Utils\DiaugeiaService.cs" />
     <Compile Include="Models\CertificateFile.cs" />
     <Compile Include="Models\CertificateTemplate.cs" />
@@ -877,6 +881,7 @@
     <Content Include="Scripts\ViewModels\AdminFeaturesViewModel.js" />
     <Content Include="Scripts\ViewModels\AdminCriteriaViewModel.js" />
     <Content Include="Scripts\aiChat.js" />
+    <Content Include="Scripts\ViewModels\AdminAiInsightsViewModel.js" />
     <Content Include="Scripts\ViewModels\PendingActionsViewModel.js" />
     <Content Include="Scripts\ViewModels\InspectorProfileViewModel.js" />
     <Content Include="Scripts\ViewModels\InspectorSelectionViewModel.js" />
@@ -908,6 +913,7 @@
     <Content Include="Views\AdminCertTemplate\Index.cshtml" />
     <Content Include="Views\Calendar\Index.cshtml" />
     <Content Include="Views\AdminFeatures\Index.cshtml" />
+    <Content Include="Views\AdminAiInsights\Index.cshtml" />
     <Content Include="Views\AdminCriteria\Index.cshtml" />
     <Content Include="Views\InspectorProfile\Index.cshtml" />
   </ItemGroup>

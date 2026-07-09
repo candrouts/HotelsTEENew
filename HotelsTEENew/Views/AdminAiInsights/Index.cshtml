@@ -1,0 +1,212 @@
+@{
+    ViewBag.Title = "AI Insights";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <div class="page-title-right">
+                <div class="btn-group btn-group-sm">
+                    <button class="btn" data-bind="click: function(){ setDays(7); }, css: days() === 7 ? 'btn-primary' : 'btn-outline-primary'">7 ημέρες</button>
+                    <button class="btn" data-bind="click: function(){ setDays(30); }, css: days() === 30 ? 'btn-primary' : 'btn-outline-primary'">30 ημέρες</button>
+                    <button class="btn" data-bind="click: function(){ setDays(90); }, css: days() === 90 ? 'btn-primary' : 'btn-outline-primary'">90 ημέρες</button>
+                </div>
+            </div>
+            <h4 class="page-title"><i class="mdi mdi-robot-outline me-1 text-info"></i>AI Insights</h4>
+        </div>
+    </div>
+</div>
+
+<!-- ko if: error --><div class="alert alert-danger" data-bind="text: error"></div><!-- /ko -->
+
+<!-- ════ 1. Στατιστικά χρήσης ════ -->
+<div class="row">
+    <!-- ko if: chatStats -->
+    <div class="col-md-2 col-6"><div class="border card"><div class="card-body py-2 text-center">
+        <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Ερωτήσεις Chat</h6>
+        <h3 class="my-1" data-bind="text: chatStats().totalQuestions"></h3>
+    </div></div></div>
+    <div class="col-md-2 col-6"><div class="border card"><div class="card-body py-2 text-center">
+        <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Χρήστες Chat</h6>
+        <h3 class="my-1" data-bind="text: chatStats().distinctUsers"></h3>
+    </div></div></div>
+    <!-- /ko -->
+    <!-- ko if: docStats -->
+    <div class="col-md-2 col-6"><div class="border card"><div class="card-body py-2 text-center">
+        <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Τεκμήρια Ελεγμένα</h6>
+        <h3 class="my-1" data-bind="text: docStats().totalChecked"></h3>
+    </div></div></div>
+    <div class="col-md-2 col-6"><div class="border card"><div class="card-body py-2 text-center">
+        <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Ακατάλληλα</h6>
+        <h3 class="my-1 text-danger" data-bind="text: docStats().fail"></h3>
+    </div></div></div>
+    <div class="col-md-2 col-6"><div class="border card"><div class="card-body py-2 text-center">
+        <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Αντικρούουν Δήλωση</h6>
+        <h3 class="my-1 text-danger" data-bind="text: docStats().contradicts"></h3>
+    </div></div></div>
+    <div class="col-md-2 col-6"><div class="border card"><div class="card-body py-2 text-center">
+        <h6 class="text-muted text-uppercase mt-0 mb-1" style="font-size:11px;">Εκκρεμούν Ελέγχου</h6>
+        <h3 class="my-1 text-warning" data-bind="text: docStats().pendingBatch"></h3>
+    </div></div></div>
+    <!-- /ko -->
+</div>
+
+<div class="row">
+    <!-- ════ 3. Scorecard Επιθεωρητών ════ -->
+    <div class="col-xl-7">
+        <div class="border card">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="uil uil-users-alt me-1"></i>Αξιολόγηση Τεκμηρίωσης ανά Επιθεωρητή</h5>
+                <div>
+                    <!-- ko ifnot: batchRunning -->
+                    <button class="btn btn-sm btn-info" data-bind="click: startBatch, enable: batchRemaining() > 0">
+                        <i class="mdi mdi-robot-outline me-1"></i>Batch έλεγχος (<span data-bind="text: batchRemaining"></span> εκκρεμή)
+                    </button>
+                    <!-- /ko -->
+                    <!-- ko if: batchRunning -->
+                    <button class="btn btn-sm btn-outline-danger" data-bind="click: stopBatch">
+                        <span class="spinner-border spinner-border-sm me-1"></span>Διακοπή (<span data-bind="text: batchProcessed"></span> ✓ / <span data-bind="text: batchRemaining"></span> εκκρεμή)
+                    </button>
+                    <!-- /ko -->
+                </div>
+            </div>
+            <div class="card-body py-2">
+                <div class="alert alert-warning py-1 mb-2" style="font-size:12px;">
+                    <i class="mdi mdi-alert-outline me-1"></i>Υποστηρικτική ένδειξη AI βάσει τεκμηρίων τελικών κατατάξεων (v3) — απαιτείται ανθρώπινη αξιολόγηση πριν από οποιαδήποτε ενέργεια.
+                </div>
+                <table class="table table-sm table-centered mb-0">
+                    <thead class="table-light">
+                        <tr><th>Επιθεωρητής</th><th>Αιτήσεις</th><th>Τεκμήρια</th><th>✔/⚠/✘</th><th>Αντικρούουν</th><th>Ένδειξη</th><th></th></tr>
+                    </thead>
+                    <tbody data-bind="foreach: scorecard">
+                        <tr>
+                            <td><strong data-bind="text: inspectorName"></strong></td>
+                            <td data-bind="text: applications"></td>
+                            <td><span data-bind="text: checkedFiles"></span><small class="text-muted" data-bind="visible: uncheckedFiles > 0, text: ' (+' + uncheckedFiles + ' ανέλεγκτα)'"></small></td>
+                            <td>
+                                <span class="text-success" data-bind="text: ok"></span> /
+                                <span class="text-warning" data-bind="text: warn"></span> /
+                                <span class="text-danger" data-bind="text: fail"></span>
+                            </td>
+                            <td><span data-bind="text: contradicts, css: contradicts > 0 ? 'text-danger fw-bold' : 'text-muted'"></span></td>
+                            <td><span data-bind="text: $root.ratingLabel(rating), attr: { class: $root.ratingBadge(rating) }"></span></td>
+                            <td><button class="btn btn-sm btn-light py-0" data-bind="click: $root.showFindings" title="Ευρήματα"><i class="uil uil-search-plus"></i></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- ko if: scorecard().length === 0 -->
+                <p class="text-muted mb-0"><small>Δεν υπάρχουν υποβεβλημένες τελικές κατατάξεις (v3) με τεκμήρια.</small></p>
+                <!-- /ko -->
+
+                <!-- ko if: batchLog().length > 0 -->
+                <hr class="my-2" />
+                <h6 class="text-muted text-uppercase" style="font-size:11px;">Πρόσφατοι batch έλεγχοι</h6>
+                <div style="max-height:160px; overflow-y:auto;" data-bind="foreach: batchLog">
+                    <div class="d-flex gap-2 py-1 border-bottom" style="font-size:12px;">
+                        <span class="flex-grow-1" data-bind="text: fileName"></span>
+                        <span data-bind="text: verdict, attr: { class: $root.verdictBadge(verdict) }"></span>
+                        <small class="text-muted" data-bind="text: answerVerdict"></small>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
+
+        <!-- ════ Ποιότητα τεκμηρίωσης ανά κριτήριο ════ -->
+        <div class="border card">
+            <div class="card-header py-2"><h5 class="card-title mb-0"><i class="uil uil-file-question-alt me-1"></i>Κριτήρια με προβληματική τεκμηρίωση</h5></div>
+            <div class="card-body py-2">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light"><tr><th>Κριτήριο</th><th>Έλεγχοι</th><th>Ευρήματα</th><th>%</th></tr></thead>
+                    <tbody data-bind="foreach: criteriaQuality">
+                        <tr>
+                            <td><code data-bind="text: code"></code> <small data-bind="text: title"></small></td>
+                            <td data-bind="text: total"></td>
+                            <td class="text-danger" data-bind="text: issues"></td>
+                            <td><span class="badge badge-danger-lighten" data-bind="text: issueRate + '%'"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- ko if: criteriaQuality().length === 0 -->
+                <p class="text-muted mb-0"><small>Κανένα εύρημα — ή δεν έχουν γίνει έλεγχοι ακόμη.</small></p>
+                <!-- /ko -->
+                <p class="text-muted mb-0 mt-1"><small><i class="mdi mdi-lightbulb-outline"></i> Υψηλά ποσοστά = υποψήφια για καλύτερη περιγραφή ζητούμενου ή «Οδηγίες AI ελέγχου» (Πυλώνες &amp; Κριτήρια).</small></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ 2. AI Ανάλυση θεμάτων + 4. Πρόσφατες συνομιλίες ════ -->
+    <div class="col-xl-5">
+        <div class="border card">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="mdi mdi-chart-timeline-variant me-1"></i>AI Ανάλυση Θεμάτων Chat</h5>
+                <button class="btn btn-sm btn-info" data-bind="click: analyze, enable: !analyzing()">
+                    <!-- ko if: analyzing --><span class="spinner-border spinner-border-sm me-1"></span>Ανάλυση...<!-- /ko -->
+                    <!-- ko ifnot: analyzing --><i class="mdi mdi-robot-outline me-1"></i>Ανάλυση περιόδου<!-- /ko -->
+                </button>
+            </div>
+            <div class="card-body py-2">
+                <!-- ko if: aiReport -->
+                <small class="text-muted" data-bind="visible: aiReportDate, text: 'Τελευταία ανάλυση: ' + aiReportDate()"></small>
+                <div style="white-space:pre-wrap; font-size:13px;" class="mt-1" data-bind="text: aiReport"></div>
+                <!-- /ko -->
+                <!-- ko ifnot: aiReport -->
+                <p class="text-muted mb-0"><small>Δεν υπάρχει ανάλυση για την περίοδο — πατήστε «Ανάλυση περιόδου».</small></p>
+                <!-- /ko -->
+            </div>
+        </div>
+
+        <div class="border card">
+            <div class="card-header py-2"><h5 class="card-title mb-0"><i class="uil uil-comments me-1"></i>Πρόσφατες Συνομιλίες</h5></div>
+            <div class="card-body py-2" style="max-height:420px; overflow-y:auto;">
+                <div data-bind="foreach: recentChats">
+                    <div class="border-bottom py-1" style="font-size:12px;">
+                        <div class="d-flex justify-content-between">
+                            <strong data-bind="text: user"></strong>
+                            <small class="text-muted" data-bind="text: date"></small>
+                        </div>
+                        <div><span class="text-primary">Ε:</span> <span data-bind="text: question"></span></div>
+                        <div class="text-muted"><span>Α:</span> <span data-bind="text: answer"></span></div>
+                    </div>
+                </div>
+                <!-- ko if: recentChats().length === 0 -->
+                <p class="text-muted mb-0"><small>Καμία συνομιλία ακόμη.</small></p>
+                <!-- /ko -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════ Modal: Ευρήματα επιθεωρητή ════ -->
+<div id="findings-modal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h5 class="modal-title"><i class="uil uil-search-plus me-1"></i>Ευρήματα — <span data-bind="text: findingsInspector"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- ko if: findingsLoading --><div class="text-center py-3"><span class="spinner-border text-info"></span></div><!-- /ko -->
+                <table class="table table-sm" data-bind="visible: findings().length > 0">
+                    <thead class="table-light"><tr><th>Αίτηση</th><th>Κριτήριο</th><th>Τεκμήριο</th><th>Είδος</th><th>Απάντηση</th><th>Αιτιολόγηση AI</th></tr></thead>
+                    <tbody data-bind="foreach: findings">
+                        <tr>
+                            <td><a target="_blank" data-bind="attr: { href: '/Certificate/ViewCertificate/' + certificateID + '?mode=3' }, text: '#' + certificateID"></a></td>
+                            <td><code data-bind="text: criterion"></code></td>
+                            <td style="max-width:180px;"><small data-bind="text: docTitle"></small></td>
+                            <td><span data-bind="text: verdict, attr: { class: $root.verdictBadge(verdict) }"></span></td>
+                            <td><span class="badge" data-bind="text: answerVerdict, css: answerVerdict === 'contradicts' ? 'bg-danger' : 'bg-light text-dark'"></span></td>
+                            <td style="font-size:12px;" data-bind="text: summary"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <!-- ko if: !findingsLoading() && findings().length === 0 -->
+                <p class="text-muted mb-0">Κανένα εύρημα για αυτόν τον επιθεωρητή. 👏</p>
+                <!-- /ko -->
+            </div>
+            <div class="modal-footer py-2">
+                <button class="btn btn-sm btn-light" data-bs-dismiss="modal">Κλείσιμο</button>
+            </div>
+        </div>
+    </div>
+</div>
