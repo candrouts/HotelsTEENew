@@ -6,14 +6,12 @@
 
 
 <div class="login-bg account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 position-relative">
-    <div class="container" id="container">
-        <div class="row justify-content-center">
-            <div class="col-xxl-8 col-lg-10">
-                <div class="card overflow-hidden">
-                    <div class="row g-0">
+    <div id="container" class="login-shell">
+        <div class="card overflow-hidden mb-0">
+            <div class="login-split">
 
-                        <!-- ═══ Αριστερό πάνελ: branding ═══ -->
-                        <div class="col-md-6 login-info-panel d-flex">
+                <!-- ═══ Αριστερό πάνελ: branding ═══ -->
+                <div class="login-split-left login-info-panel">
                             <div class="p-4 p-lg-5 w-100 d-flex flex-column justify-content-between">
                                 <div>
                                     <h3>Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων</h3>
@@ -41,9 +39,9 @@
                             </div>
                         </div>
 
-                        <!-- ═══ Δεξί πάνελ: φόρμα εισόδου ═══ -->
-                        <div class="col-md-6">
-                            <div class="card-body p-4 p-lg-5">
+                <!-- ═══ Δεξί πάνελ: φόρμα εισόδου ═══ -->
+                <div class="login-split-right">
+                    <div class="card-body p-4 p-lg-5">
 
                                 <div class="text-center">
                                     <img src="~/Content/xee_logo_smaller.png" alt="ΞΕΕ" style="height:52px;" class="mb-2" />
@@ -100,15 +98,12 @@
                                     </p>
                                 </div>
 
-                            </div>
-                        </div>
+                    </div>
+                </div>
 
-                    </div> <!-- end row g-0 -->
-                </div> <!-- end card -->
-
-            </div> <!-- end col -->
-        </div><!-- end row -->
-    </div><!-- end container -->
+            </div> <!-- end login-split -->
+        </div> <!-- end card -->
+    </div><!-- end login-shell -->
 </div><!-- end page -->
 
 <footer class="footer footer-alt" style="color:white">
