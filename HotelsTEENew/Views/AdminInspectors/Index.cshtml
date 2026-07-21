@@ -35,6 +35,10 @@
                         <button class="btn btn-sm btn-light" data-bind="click: clearFilter">
                             <i class="uil uil-times me-1"></i>Καθαρισμός
                         </button>
+                        <button class="btn btn-sm btn-info ms-1" data-bind="click: inviteAll, disable: inviteBusy"
+                                title="Αποστολή πρόσκλησης ενεργοποίησης σε όλους τους επιθεωρητές χωρίς λογαριασμό">
+                            <i class="uil-envelope-send me-1"></i>Πρόσκληση σε όλους χωρίς λογαριασμό
+                        </button>
                         <span class="text-muted ms-2">
                             <span data-bind="text: filteredInspectors().length"></span> / <span data-bind="text: inspectors().length"></span>
                         </span>
@@ -57,7 +61,8 @@
                                 <th>Επιθεωρητής</th>
                                 <th>Επικοινωνία</th>
                                 <th>Περιοχές δραστηριότητας</th>
-                                <th style="width:140px;">Ενέργειες</th>
+                                <th style="width:110px;">Λογαριασμός</th>
+                                <th style="width:230px;">Ενέργειες</th>
                             </tr>
                         </thead>
                         <tbody data-bind="foreach: filteredInspectors">
@@ -74,10 +79,25 @@
                                 </td>
                                 <td><small class="text-muted" data-bind="text: areas || '— Δεν έχουν οριστεί —'"></small></td>
                                 <td>
+                                    <!-- ko if: hasAccount -->
+                                    <span class="badge bg-success-subtle text-success"><i class="mdi mdi-check"></i> Ενεργός</span>
+                                    <!-- /ko -->
+                                    <!-- ko ifnot: hasAccount -->
+                                    <span class="badge bg-secondary-subtle text-secondary">Χωρίς</span>
+                                    <!-- /ko -->
+                                </td>
+                                <td>
                                     <button class="btn btn-sm btn-outline-primary"
                                             data-bind="click: $root.openAreas">
                                         <i class="uil-map-marker me-1"></i>Περιοχές
                                     </button>
+                                    <!-- ko ifnot: hasAccount -->
+                                    <button class="btn btn-sm btn-outline-info"
+                                            data-bind="click: $root.sendInvitation, disable: $root.inviteBusy"
+                                            title="Αποστολή email με σύνδεσμο ενεργοποίησης λογαριασμού">
+                                        <i class="uil-envelope-send me-1"></i>Πρόσκληση
+                                    </button>
+                                    <!-- /ko -->
                                 </td>
                             </tr>
                         </tbody>

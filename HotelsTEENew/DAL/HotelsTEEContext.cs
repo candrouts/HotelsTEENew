@@ -66,6 +66,8 @@ namespace HotelsTEE.DAL
 
         public DbSet<AiInsightsReport> AiInsightsReports { get; set; }
 
+        public DbSet<AccountToken> AccountTokens { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
 

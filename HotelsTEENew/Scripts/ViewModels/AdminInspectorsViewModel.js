@@ -30,6 +30,45 @@ function AdminInspectorsViewModel() {
         });
     });
 
+    // ── Προσκλήσεις ενεργοποίησης λογαριασμού ──────────────────────
+    self.inviteBusy = ko.observable(false);
+
+    self.sendInvitation = function (row) {
+        if (!confirm("Αποστολή email πρόσκλησης ενεργοποίησης λογαριασμού στον/στην " + row.lastName + " " + row.firstName + " (" + row.email + ");")) return;
+        self.inviteBusy(true);
+        $.ajax({
+            type: "POST", dataType: "json", contentType: "application/json",
+            url: "/api/AdminInspectorsApi/SendInvitation",
+            data: JSON.stringify({ inspectorID: row.id }),
+            success: function (r) {
+                self.inviteBusy(false);
+                if (r && r.success && r.sent > 0) alert("Η πρόσκληση εστάλη στο " + row.email + ".");
+                else if (r && r.success && r.skipped > 0) alert("Ο επιθεωρητής έχει ήδη λογαριασμό ή δεν έχει έγκυρο email.");
+                else alert("Η αποστολή απέτυχε. Ελέγξτε το αρχείο σφαλμάτων.");
+            },
+            error: function () { self.inviteBusy(false); alert("Σφάλμα επικοινωνίας."); }
+        });
+    };
+
+    self.inviteAll = function () {
+        var pending = self.inspectors().filter(function (i) { return !i.hasAccount; }).length;
+        if (pending === 0) { alert("Όλοι οι επιθεωρητές έχουν ήδη λογαριασμό."); return; }
+        if (!confirm("Αποστολή πρόσκλησης ενεργοποίησης σε " + pending + " επιθεωρητές χωρίς λογαριασμό;")) return;
+        self.inviteBusy(true);
+        self.showLoader();
+        $.ajax({
+            type: "POST", dataType: "json", contentType: "application/json",
+            url: "/api/AdminInspectorsApi/SendInvitation",
+            data: JSON.stringify({ inspectorID: 0 }),
+            success: function (r) {
+                self.inviteBusy(false); self.hideLoader();
+                if (r && r.success) alert("Εστάλησαν " + r.sent + " προσκλήσεις (" + r.skipped + " παραλείφθηκαν" + (r.failed ? ", " + r.failed + " απέτυχαν" : "") + ").");
+                else alert("Η αποστολή απέτυχε.");
+            },
+            error: function () { self.inviteBusy(false); self.hideLoader(); alert("Σφάλμα επικοινωνίας."); }
+        });
+    };
+
     // ── Modal περιοχών ─────────────────────────────────────────────
     self.areasInspectorID = ko.observable(null);
     self.areasInspectorName = ko.observable("");

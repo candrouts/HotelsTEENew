@@ -1,0 +1,75 @@
+@{
+    ViewBag.Title = "Εγγραφή Επιθεωρητή";
+    Layout = "~/Views/Shared/_AnonymousLayout.cshtml";
+}
+
+<div class="login-bg account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 position-relative">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xxl-4 col-lg-5">
+                <div class="card">
+                    <div class="py-4 text-center login-info-panel">
+                        <div>
+                            <h3>Ενεργοποίηση Λογαριασμού Επιθεωρητή</h3>
+                            <small>Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων</small>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div id="step-form">
+                            <p class="text-muted">
+                                Εισάγετε το email με το οποίο είστε καταχωρημένος/η στο μητρώο επιθεωρητών.
+                                Θα σας αποσταλεί σύνδεσμος ενεργοποίησης.
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input class="form-control" type="email" id="email" placeholder="π.χ. inspector@example.gr" autofocus />
+                            </div>
+                            <div id="msg" class="alert alert-danger d-none py-2"></div>
+                            <div class="text-center">
+                                <button class="btn login-info-panel" id="btn-submit">Αποστολή συνδέσμου</button>
+                            </div>
+                        </div>
+
+                        <div id="step-done" class="text-center" style="display:none;">
+                            <i class="mdi mdi-email-check-outline text-success" style="font-size:48px;"></i>
+                            <p class="mt-2">
+                                Αν το email αντιστοιχεί σε εγγεγραμμένο επιθεωρητή χωρίς λογαριασμό,
+                                θα λάβετε σύντομα μήνυμα με τον σύνδεσμο ενεργοποίησης.
+                                Ελέγξτε και τον φάκελο ανεπιθύμητης αλληλογραφίας.
+                            </p>
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <a href=@Url.Action("Login", "Account") class="text-muted"><small><i class="mdi mdi-arrow-left"></i> Επιστροφή στη σύνδεση</small></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer footer-alt" style="color:white">
+    <script>document.write(new Date().getFullYear())</script> © ΞΕΝΟΔΟΧΕΙΑΚΟ ΕΠΙΜΕΛΗΤΗΡΙΟ ΕΛΛΑΔΟΣ
+</footer>
+
+<script>
+    $(function () {
+        function submit() {
+            var email = $("#email").val().trim();
+            $("#msg").addClass("d-none");
+            $("#btn-submit").prop("disabled", true).text("Αποστολή...");
+            $.post('@Url.Action("RegisterRequest", "Auth")', { email: email }, function (r) {
+                $("#btn-submit").prop("disabled", false).text("Αποστολή συνδέσμου");
+                if (r && r.success) { $("#step-form").hide(); $("#step-done").show(); }
+                else $("#msg").removeClass("d-none").text((r && r.message) || "Παρουσιάστηκε σφάλμα.");
+            }).fail(function () {
+                $("#btn-submit").prop("disabled", false).text("Αποστολή συνδέσμου");
+                $("#msg").removeClass("d-none").text("Σφάλμα επικοινωνίας.");
+            });
+        }
+        $("#btn-submit").on("click", submit);
+        $("#email").on("keypress", function (e) { if (e.which === 13) submit(); });
+    });
+</script>

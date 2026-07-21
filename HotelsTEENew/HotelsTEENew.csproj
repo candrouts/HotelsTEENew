@@ -245,6 +245,8 @@
     <Compile Include="Controllers\AdminCriteriaApiController.cs" />
     <Compile Include="ViewModels\AdminCriteriaViewModels.cs" />
     <Compile Include="Models\PropertyFeature.cs" />
+    <Compile Include="Models\AccountToken.cs" />
+    <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Models\FeatureCriteriaMap.cs" />
     <Compile Include="Models\HotelCriteriaFeature.cs" />
     <Compile Include="ViewModels\PropertyFeatureViewModels.cs" />
@@ -908,6 +910,11 @@
     <Content Include="Views\Certificate\ViewCertificate.cshtml" />
     <Content Include="Views\InspectorSelection\Index.cshtml" />
     <Content Include="Views\AdminInspectors\Index.cshtml" />
+    <Content Include="Views\Auth\Register.cshtml" />
+    <Content Include="Views\Auth\Activate.cshtml" />
+    <Content Include="Views\Auth\RecoverPassword.cshtml" />
+    <Content Include="Views\Auth\ResetPassword.cshtml" />
+    <Content Include="Views\Auth\TokenInvalid.cshtml" />
     <Content Include="Views\AdminNotifications\Index.cshtml" />
     <Content Include="Views\AdminMedals\Index.cshtml" />
     <Content Include="Views\AdminCertTemplate\Index.cshtml" />

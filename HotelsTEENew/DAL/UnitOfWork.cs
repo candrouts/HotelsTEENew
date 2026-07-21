@@ -316,6 +316,17 @@ namespace HotelsTEE.DAL
             }
         }
 
+        private GenericRepository<AccountToken> accountTokenRepository;
+        public GenericRepository<AccountToken> AccountTokenRepository
+        {
+            get
+            {
+                if (this.accountTokenRepository == null)
+                    this.accountTokenRepository = new GenericRepository<AccountToken>(context);
+                return accountTokenRepository;
+            }
+        }
+
         public void Save()
         {
             context.SaveChanges();

@@ -1,0 +1,32 @@
+@{
+    ViewBag.Title = "Μη έγκυρος σύνδεσμος";
+    Layout = "~/Views/Shared/_AnonymousLayout.cshtml";
+}
+
+<div class="login-bg account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 position-relative">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xxl-4 col-lg-5">
+                <div class="card">
+                    <div class="card-body p-4 text-center">
+                        <i class="mdi mdi-link-off text-danger" style="font-size:48px;"></i>
+                        <h4 class="mt-2">Ο σύνδεσμος δεν είναι έγκυρος</h4>
+                        <p class="text-muted">
+                            Ο σύνδεσμος έχει λήξει ή έχει ήδη χρησιμοποιηθεί.
+                            Μπορείτε να ζητήσετε νέο από τις παρακάτω επιλογές.
+                        </p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href=@Url.Action("Register", "Auth") class="btn btn-outline-primary btn-sm">Ενεργοποίηση λογαριασμού</a>
+                            <a href=@Url.Action("RecoverPassword", "Auth") class="btn btn-outline-primary btn-sm">Επαναφορά κωδικού</a>
+                            <a href=@Url.Action("Login", "Account") class="btn login-info-panel btn-sm">Σύνδεση</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer footer-alt" style="color:white">
+    <script>document.write(new Date().getFullYear())</script> © ΞΕΝΟΔΟΧΕΙΑΚΟ ΕΠΙΜΕΛΗΤΗΡΙΟ ΕΛΛΑΔΟΣ
+</footer>
