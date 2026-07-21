@@ -50,6 +50,31 @@ textarea {
     text-align: center;
 }
 
+/* ── Login: split κάρτα δύο στηλών ── */
+.login-shell {
+    width: min(940px, 94vw);
+    margin: 0 auto;
+}
+
+.login-split {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.login-split-left {
+    flex: 1 1 300px;
+}
+
+.login-split-right {
+    flex: 1 1 340px;
+    display: flex;
+    align-items: center;
+}
+
+    .login-split-right .card-body {
+        width: 100%;
+    }
+
 /* ── Login: λίστα χαρακτηριστικών στο αριστερό πάνελ ── */
 .login-features {
     max-width: 340px;
