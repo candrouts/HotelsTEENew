@@ -265,7 +265,7 @@ namespace HotelsTEE.Controllers
             mail.To.Add(email);
             mail.Subject = subject;
             mail.Body = body;
-            return HotelsTEE.Utils.Mailer.SendEmail(mail);
+            return HotelsTEE.Utils.Mailer.SendEmailDirect(mail);
         }
 
         private void SendTokenEmail(string email, decimal? inspectorID, string purpose)
