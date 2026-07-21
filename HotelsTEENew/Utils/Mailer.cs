@@ -11,7 +11,20 @@ namespace HotelsTEE.Utils
     public class Mailer
     {
 
+        // Απευθείας αποστολή στον πραγματικό παραλήπτη, χωρίς test-mode εκτροπή
+        // (sendEmailClearTrueRecipient) και χωρίς BCC — για emails λογαριασμών
+        // (ενεργοποίηση, επαναφορά κωδικού) που πρέπει να φτάσουν ΜΟΝΟ στον χρήστη.
+        public static bool SendEmailDirect(MailMessage mail)
+        {
+            return SendEmail(mail, true);
+        }
+
         public static bool SendEmail(MailMessage mail)
+        {
+            return SendEmail(mail, false);
+        }
+
+        private static bool SendEmail(MailMessage mail, bool direct)
         {
             try
             {
@@ -50,13 +63,13 @@ namespace HotelsTEE.Utils
                 mail.IsBodyHtml = true;
 
                 string sendEmailClearTrueRecipient = WebConfigurationManager.AppSettings["sendEmailClearTrueRecipient"].ToString();
-                if (sendEmailClearTrueRecipient == "1")
+                if (!direct && sendEmailClearTrueRecipient == "1")
                 {
                     mail.To.Clear();
                 }
 
                 string sendEmailBCC = WebConfigurationManager.AppSettings["sendEmailBCC"].ToString();
-                if (sendEmailBCC == "1")
+                if (!direct && sendEmailBCC == "1")
                 {
                     string bccEmail1 = WebConfigurationManager.AppSettings["bccEmail1"].ToString();
                     if (bccEmail1.Length > 0) mail.Bcc.Add(bccEmail1);
