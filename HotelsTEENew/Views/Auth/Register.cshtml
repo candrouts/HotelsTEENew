@@ -55,21 +55,28 @@
 </footer>
 
 <script>
-    $(function () {
+    (function () {
+        var btn = document.getElementById("btn-submit"), msg = document.getElementById("msg");
         function submit() {
-            var email = $("#email").val().trim();
-            $("#msg").addClass("d-none");
-            $("#btn-submit").prop("disabled", true).text("Αποστολή...");
-            $.post('@Url.Action("RegisterRequest", "Auth")', { email: email }, function (r) {
-                $("#btn-submit").prop("disabled", false).text("Αποστολή συνδέσμου");
-                if (r && r.success) { $("#step-form").hide(); $("#step-done").show(); }
-                else $("#msg").removeClass("d-none").text((r && r.message) || "Παρουσιάστηκε σφάλμα.");
-            }).fail(function () {
-                $("#btn-submit").prop("disabled", false).text("Αποστολή συνδέσμου");
-                $("#msg").removeClass("d-none").text("Σφάλμα επικοινωνίας.");
+            var email = document.getElementById("email").value.trim();
+            msg.classList.add("d-none");
+            btn.disabled = true; btn.textContent = "Αποστολή...";
+            fetch('@Url.Action("RegisterRequest", "Auth")', {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "email=" + encodeURIComponent(email)
+            }).then(function (res) { return res.json(); }).then(function (r) {
+                btn.disabled = false; btn.textContent = "Αποστολή συνδέσμου";
+                if (r && r.success) {
+                    document.getElementById("step-form").style.display = "none";
+                    document.getElementById("step-done").style.display = "block";
+                } else { msg.classList.remove("d-none"); msg.textContent = (r && r.message) || "Παρουσιάστηκε σφάλμα."; }
+            }).catch(function () {
+                btn.disabled = false; btn.textContent = "Αποστολή συνδέσμου";
+                msg.classList.remove("d-none"); msg.textContent = "Σφάλμα επικοινωνίας.";
             });
         }
-        $("#btn-submit").on("click", submit);
-        $("#email").on("keypress", function (e) { if (e.which === 13) submit(); });
-    });
+        btn.addEventListener("click", submit);
+        document.getElementById("email").addEventListener("keypress", function (e) { if (e.key === "Enter") submit(); });
+    })();
 </script>

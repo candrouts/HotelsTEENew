@@ -64,24 +64,31 @@
 </footer>
 
 <script>
-    $(function () {
-        $("#btn-submit").on("click", function () {
-            var p1 = $("#password").val(), p2 = $("#password2").val();
-            $("#msg").addClass("d-none");
-            if (p1 !== p2) { $("#msg").removeClass("d-none").text("Οι κωδικοί δεν ταιριάζουν."); return; }
-            $("#btn-submit").prop("disabled", true).text("Δημιουργία...");
-            $.post('@Url.Action("ActivateSubmit", "Auth")', {
-                token: '@ViewBag.Token',
-                phoneDigits: $("#phoneDigits").val() || "",
-                password: p1
-            }, function (r) {
-                $("#btn-submit").prop("disabled", false).text("Δημιουργία λογαριασμού");
-                if (r && r.success) { $("#step-form").hide(); $("#step-done").show(); }
-                else $("#msg").removeClass("d-none").text((r && r.message) || "Παρουσιάστηκε σφάλμα.");
-            }).fail(function () {
-                $("#btn-submit").prop("disabled", false).text("Δημιουργία λογαριασμού");
-                $("#msg").removeClass("d-none").text("Σφάλμα επικοινωνίας.");
+    (function () {
+        var btn = document.getElementById("btn-submit"), msg = document.getElementById("msg");
+        btn.addEventListener("click", function () {
+            var p1 = document.getElementById("password").value;
+            var p2 = document.getElementById("password2").value;
+            var pd = document.getElementById("phoneDigits");
+            msg.classList.add("d-none");
+            if (p1 !== p2) { msg.classList.remove("d-none"); msg.textContent = "Οι κωδικοί δεν ταιριάζουν."; return; }
+            btn.disabled = true; btn.textContent = "Δημιουργία...";
+            fetch('@Url.Action("ActivateSubmit", "Auth")', {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "token=" + encodeURIComponent('@ViewBag.Token') +
+                      "&phoneDigits=" + encodeURIComponent(pd ? pd.value : "") +
+                      "&password=" + encodeURIComponent(p1)
+            }).then(function (res) { return res.json(); }).then(function (r) {
+                btn.disabled = false; btn.textContent = "Δημιουργία λογαριασμού";
+                if (r && r.success) {
+                    document.getElementById("step-form").style.display = "none";
+                    document.getElementById("step-done").style.display = "block";
+                } else { msg.classList.remove("d-none"); msg.textContent = (r && r.message) || "Παρουσιάστηκε σφάλμα."; }
+            }).catch(function () {
+                btn.disabled = false; btn.textContent = "Δημιουργία λογαριασμού";
+                msg.classList.remove("d-none"); msg.textContent = "Σφάλμα επικοινωνίας.";
             });
         });
-    });
+    })();
 </script>
