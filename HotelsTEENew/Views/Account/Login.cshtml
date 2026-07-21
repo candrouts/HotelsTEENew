@@ -1,4 +1,4 @@
-﻿
+
 @{
     ViewBag.Title = "Login";
     Layout = "~/Views/Shared/_AnonymousLayout.cshtml";
@@ -8,81 +8,102 @@
 <div class="login-bg account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 position-relative">
     <div class="container" id="container">
         <div class="row justify-content-center">
-            <div class="col-xxl-4 col-lg-5">
-                <div class="card">
-                    <!-- Logo -->
-                    <div class=" py-4 text-center login-info-panel">
-                        <div>
-                            @*<img src="~/Content/xee_logo_smaller.png" alt="logo">*@
-                            <h3>
-                                Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων
-                            </h3>                           
-                            <small>
-                                Με τη συνεργασία ΞΕΕ – ΤΕΕ<br>
-                                και την εποπτεία του Υπουργείου Τουρισμού
-                            </small>
-                        </div>
-                    </div>
+            <div class="col-xxl-8 col-lg-10">
+                <div class="card overflow-hidden">
+                    <div class="row g-0">
 
-                    <div class="card-body p-4">
+                        <!-- ═══ Αριστερό πάνελ: branding ═══ -->
+                        <div class="col-md-6 login-info-panel d-flex">
+                            <div class="p-4 p-lg-5 w-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h3>Σύστημα Περιβαλλοντικής Κατάταξης Τουριστικών Καταλυμάτων</h3>
+                                    <small>
+                                        Με τη συνεργασία ΞΕΕ – ΤΕΕ<br>
+                                        και την εποπτεία του Υπουργείου Τουρισμού
+                                    </small>
+                                </div>
 
-                        <div class="text-center w-75 m-auto">
-                            <h4 class="text-dark-50 text-center pb-4 fw-bold">Είσοδος στο σύστημα</h4>
-                            @*<p class="text-muted mb-4">Παρακαλούμε εισάγετε τα στοχιεία σύνδεσής σας.</p>*@
-                        </div>
+                                <div class="login-features text-start mx-auto mt-4">
+                                    <div><i class="mdi mdi-leaf-circle-outline"></i> Αυτοαξιολόγηση σε κριτήρια βιωσιμότητας</div>
+                                    <div><i class="mdi mdi-clipboard-check-outline"></i> Επιθεώρηση από πιστοποιημένους επιθεωρητές</div>
+                                    <div><i class="mdi mdi-certificate-outline"></i> Βεβαίωση τριετούς ισχύος με ανάρτηση στη Διαύγεια</div>
+                                </div>
 
-                        <!-- Μήνυμα σφάλματος -->
-                        <!-- ko if: error -->
-                        <div class="alert alert-danger d-flex align-items-center py-2">
-                            <i class="mdi mdi-alert-circle-outline me-1"></i>
-                            <span data-bind="text: errorMessage"></span>
-                        </div>
-                        <!-- /ko -->
-
-
-
-                        <div class="mb-3">
-                            <label for="emailaddress" class="form-label">Όνομα Χρήστη</label>
-                            <input class="form-control" type="text" id="userName" required="" placeholder="Εισάγετε το όνομα χρήστη σας" data-bind="value:UserName,hasfocus: true, event: { 'keypress': onEnter }">
-                        </div>
-
-                        <div class="mb-3">
-                            <a href=@Url.Action("RecoverPassword", "Auth") class="text-muted float-end"><small>Ξεχάσατε τον κωδικό σας;</small></a>
-                            <label for="password" class="form-label">Κωδικός</label>
-                            <div class="input-group input-group-merge">
-                                <input type="password" id="password" class="form-control" placeholder="Εισάγετε τον κωδικό σας" data-bind="value: Password, event: { 'keypress': onEnter }">
-                                <div class="input-group-text" data-password="false">
-                                    <span class="password-eye"></span>
+                                <div class="mt-4">
+                                    <div class="login-medals">
+                                        <span class="login-medal medal-bronze" title="Χάλκινο"></span>
+                                        <span class="login-medal medal-silver" title="Ασημένιο"></span>
+                                        <span class="login-medal medal-gold" title="Χρυσό"></span>
+                                        <span class="login-medal medal-platinum" title="Πλατινένιο"></span>
+                                    </div>
+                                    <small class="d-block mt-1" style="opacity:.75;">Τέσσερις βαθμίδες περιβαλλοντικής κατάταξης</small>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3 mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="checkbox-signin" data-bind="checked : rememberme">
-                                <label class="form-check-label" for="checkbox-signin">Να με θυμάσαι</label>
+                        <!-- ═══ Δεξί πάνελ: φόρμα εισόδου ═══ -->
+                        <div class="col-md-6">
+                            <div class="card-body p-4 p-lg-5">
+
+                                <div class="text-center">
+                                    <img src="~/Content/xee_logo_smaller.png" alt="ΞΕΕ" style="height:52px;" class="mb-2" />
+                                    <h4 class="text-dark-50 pb-3 fw-bold">Είσοδος στο σύστημα</h4>
+                                </div>
+
+                                <!-- Μήνυμα σφάλματος -->
+                                <!-- ko if: error -->
+                                <div class="alert alert-danger d-flex align-items-center py-2">
+                                    <i class="mdi mdi-alert-circle-outline me-1"></i>
+                                    <span data-bind="text: errorMessage"></span>
+                                </div>
+                                <!-- /ko -->
+
+                                <div class="mb-3">
+                                    <label for="emailaddress" class="form-label">Όνομα Χρήστη</label>
+                                    <input class="form-control" type="text" id="userName" required="" placeholder="Εισάγετε το όνομα χρήστη σας" data-bind="value:UserName,hasfocus: true, event: { 'keypress': onEnter }">
+                                </div>
+
+                                <div class="mb-3">
+                                    <a href=@Url.Action("RecoverPassword", "Auth") class="text-muted float-end"><small>Ξεχάσατε τον κωδικό σας;</small></a>
+                                    <label for="password" class="form-label">Κωδικός</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="password" id="password" class="form-control" placeholder="Εισάγετε τον κωδικό σας" data-bind="value: Password, event: { 'keypress': onEnter }">
+                                        <div class="input-group-text" data-password="false">
+                                            <span class="password-eye"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="checkbox-signin" data-bind="checked : rememberme">
+                                        <label class="form-check-label" for="checkbox-signin">Να με θυμάσαι</label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3 mb-0 text-center d-grid">
+                                    <button class="btn login-info-panel" data-bind="click: submitLogin, disable: isLoading">
+                                        <!-- ko if: isLoading -->
+                                        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Σύνδεση...
+                                        <!-- /ko -->
+                                        <!-- ko ifnot: isLoading -->
+                                        Είσοδος
+                                        <!-- /ko -->
+                                    </button>
+                                </div>
+
+                                <hr class="my-3" />
+                                <div class="text-center">
+                                    <p class="text-muted mb-0">
+                                        Είστε πιστοποιημένος επιθεωρητής χωρίς λογαριασμό;<br />
+                                        <a href=@Url.Action("Register", "Auth") class="text-muted"><b>Ενεργοποιήστε τον λογαριασμό σας</b></a>
+                                    </p>
+                                </div>
+
                             </div>
                         </div>
 
-                        <div class="mb-3 mb-0 text-center">
-                            <button class="btn login-info-panel" data-bind="click: submitLogin, disable: isLoading">
-                                <!-- ko if: isLoading -->
-                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Σύνδεση...
-                                <!-- /ko -->
-                                <!-- ko ifnot: isLoading -->
-                                Είσοδος
-                                <!-- /ko -->
-                            </button>
-                        </div>
-
-                        <div class="row mt-3">
-                            <div class="col-12 text-center">
-                                <p class="text-muted">Είστε πιστοποιημένος επιθεωρητής χωρίς λογαριασμό;<br /><a href=@Url.Action("Register", "Auth") class="text-muted"><b>Ενεργοποιήστε τον λογαριασμό σας</b></a></p>
-                            </div>
-                            <!-- end col -->
-                        </div><!-- end row -->
-
-                    </div> <!-- end card-body -->
+                    </div> <!-- end row g-0 -->
                 </div> <!-- end card -->
 
             </div> <!-- end col -->
