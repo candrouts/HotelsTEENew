@@ -1,0 +1,87 @@
+@{
+    ViewBag.Title = "Ενεργοποίηση Λογαριασμού";
+    Layout = "~/Views/Shared/_AnonymousLayout.cshtml";
+}
+
+<div class="login-bg account-pages pt-2 pt-sm-5 pb-4 pb-sm-5 position-relative">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xxl-4 col-lg-5">
+                <div class="card">
+                    <div class="py-4 text-center login-info-panel">
+                        <div>
+                            <h3>Ενεργοποίηση Λογαριασμού</h3>
+                            <small>@ViewBag.FullName</small>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div id="step-form">
+                            <p class="text-muted">
+                                Ο λογαριασμός θα δημιουργηθεί με όνομα χρήστη το email <b>@ViewBag.Email</b>.
+                            </p>
+
+                            @if ((bool)ViewBag.AskPhoneDigits)
+                            {
+                                <div class="mb-3">
+                                    <label class="form-label">Τα 4 τελευταία ψηφία του δηλωμένου τηλεφώνου σας</label>
+                                    <input class="form-control" type="text" id="phoneDigits" maxlength="4" placeholder="____" autocomplete="off" />
+                                </div>
+                            }
+
+                            <div class="mb-3">
+                                <label class="form-label">Κωδικός</label>
+                                <div class="input-group input-group-merge">
+                                    <input type="password" id="password" class="form-control" placeholder="Τουλάχιστον 7 χαρακτήρες, 1 ειδικός (π.χ. ! @@ #)" />
+                                    <div class="input-group-text" data-password="false"><span class="password-eye"></span></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Επιβεβαίωση κωδικού</label>
+                                <input type="password" id="password2" class="form-control" />
+                            </div>
+
+                            <div id="msg" class="alert alert-danger d-none py-2"></div>
+                            <div class="text-center">
+                                <button class="btn login-info-panel" id="btn-submit">Δημιουργία λογαριασμού</button>
+                            </div>
+                        </div>
+
+                        <div id="step-done" class="text-center" style="display:none;">
+                            <i class="mdi mdi-check-circle-outline text-success" style="font-size:48px;"></i>
+                            <p class="mt-2">Ο λογαριασμός σας δημιουργήθηκε! Μπορείτε τώρα να συνδεθείτε.</p>
+                            <a href=@Url.Action("Login", "Account") class="btn login-info-panel">Σύνδεση</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer footer-alt" style="color:white">
+    <script>document.write(new Date().getFullYear())</script> © ΞΕΝΟΔΟΧΕΙΑΚΟ ΕΠΙΜΕΛΗΤΗΡΙΟ ΕΛΛΑΔΟΣ
+</footer>
+
+<script>
+    $(function () {
+        $("#btn-submit").on("click", function () {
+            var p1 = $("#password").val(), p2 = $("#password2").val();
+            $("#msg").addClass("d-none");
+            if (p1 !== p2) { $("#msg").removeClass("d-none").text("Οι κωδικοί δεν ταιριάζουν."); return; }
+            $("#btn-submit").prop("disabled", true).text("Δημιουργία...");
+            $.post('@Url.Action("ActivateSubmit", "Auth")', {
+                token: '@ViewBag.Token',
+                phoneDigits: $("#phoneDigits").val() || "",
+                password: p1
+            }, function (r) {
+                $("#btn-submit").prop("disabled", false).text("Δημιουργία λογαριασμού");
+                if (r && r.success) { $("#step-form").hide(); $("#step-done").show(); }
+                else $("#msg").removeClass("d-none").text((r && r.message) || "Παρουσιάστηκε σφάλμα.");
+            }).fail(function () {
+                $("#btn-submit").prop("disabled", false).text("Δημιουργία λογαριασμού");
+                $("#msg").removeClass("d-none").text("Σφάλμα επικοινωνίας.");
+            });
+        });
+    });
+</script>

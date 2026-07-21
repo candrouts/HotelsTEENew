@@ -11,6 +11,7 @@ namespace HotelsTEE.ViewModels
         public string phone { get; set; }
         public string taxNumber { get; set; }
         public string areas { get; set; }
+        public bool hasAccount { get; set; }
     }
 
     public class ELSTATAreaViewModel

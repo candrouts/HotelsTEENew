@@ -35,6 +35,10 @@ namespace HotelsTEE.Controllers
 
                 string sql = @"
                     SELECT i.id, i.firstName, i.lastName, i.email, i.phone, i.taxNumber,
+                        CAST(CASE WHEN EXISTS (
+                            SELECT 1 FROM aspnet_Users u
+                            WHERE u.LoweredUserName = LOWER(i.email) AND u.role = 10
+                        ) THEN 1 ELSE 0 END AS BIT) AS hasAccount,
                         STUFF((
                             SELECT ', ' + ea2.title
                             FROM TEE_Inspector_Areas ia2
@@ -52,6 +56,53 @@ namespace HotelsTEE.Controllers
                     .ToList();
 
                 return Ok(new { success = true, inspectors = inspectors });
+            }
+            catch (Exception exLog)
+            { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminInspectorsApiController.cs");
+                return Ok(new { success = false });
+            }
+        }
+
+        // Αποστολή πρόσκλησης ενεργοποίησης λογαριασμού σε επιθεωρητή (ή σε όλους χωρίς λογαριασμό)
+        [Route("api/AdminInspectorsApi/SendInvitation")]
+        [HttpPost]
+        public IHttpActionResult SendInvitation([FromBody] InspectorSubmitViewModel model)
+        {
+            try
+            {
+                if (!IsAdmin())
+                    return Ok(new { success = false });
+
+                string baseUrl = Request.RequestUri.Scheme + "://" + Request.RequestUri.Authority;
+                string ip = System.Web.HttpContext.Current != null ? System.Web.HttpContext.Current.Request.UserHostAddress : null;
+
+                List<Inspector> targets;
+                if (model != null && model.inspectorID != 0)
+                {
+                    decimal id = model.inspectorID;
+                    targets = unitOfWork.InspectorRepository.Get(x => x.id == id && x.isActive).ToList();
+                }
+                else
+                {
+                    targets = unitOfWork.InspectorRepository.Get(x => x.isActive).ToList();
+                }
+
+                int sent = 0, skipped = 0, failed = 0;
+                foreach (Inspector inspector in targets)
+                {
+                    string email = (inspector.email ?? "").Trim();
+                    if (email.Length < 5 || !email.Contains("@")) { skipped++; continue; }
+
+                    // Παράλειψη όσων έχουν ήδη λογαριασμό
+                    if (System.Web.Security.Membership.GetUser(email) != null) { skipped++; continue; }
+
+                    if (AuthController.SendTokenEmailFor(unitOfWork, email, inspector.id, "register", baseUrl, ip))
+                        sent++;
+                    else
+                        failed++;
+                }
+
+                return Ok(new { success = true, sent = sent, skipped = skipped, failed = failed });
             }
             catch (Exception exLog)
             { HotelsTEE.Utils.ErrorLogger.Log(exLog, "AdminInspectorsApiController.cs");
