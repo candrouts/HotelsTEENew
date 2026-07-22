@@ -10,6 +10,47 @@ namespace HotelsTEE.Utils
 {
     public class Mailer
     {
+        // Χτίζει τον SmtpClient από τα App Settings (smtp.*) — έτσι τα credentials
+        // ζουν στα Azure App Settings του κάθε Web App, όχι στο Web.config (git).
+        // Αν το smtp.host είναι κενό, γυρνά default client που διαβάζει το
+        // <system.net><mailSettings> (fallback για local dev).
+        private static SmtpClient BuildSmtpClient()
+        {
+            string host = WebConfigurationManager.AppSettings["smtp.host"];
+            if (string.IsNullOrWhiteSpace(host))
+                return new SmtpClient();
+
+            SmtpClient sc = new SmtpClient(host);
+
+            string port = WebConfigurationManager.AppSettings["smtp.port"];
+            int portNum;
+            if (!string.IsNullOrWhiteSpace(port) && int.TryParse(port, out portNum))
+                sc.Port = portNum;
+
+            string ssl = WebConfigurationManager.AppSettings["smtp.enableSsl"];
+            sc.EnableSsl = ssl == "1" || string.Equals(ssl, "true", StringComparison.OrdinalIgnoreCase);
+
+            string user = WebConfigurationManager.AppSettings["smtp.user"];
+            string pass = WebConfigurationManager.AppSettings["smtp.password"];
+            if (!string.IsNullOrWhiteSpace(user))
+            {
+                sc.UseDefaultCredentials = false;
+                sc.Credentials = new NetworkCredential(user, pass);
+            }
+
+            return sc;
+        }
+
+        // Θέτει τον αποστολέα από το smtp.from (App Settings) αν δεν έχει οριστεί.
+        private static void EnsureFrom(MailMessage mail)
+        {
+            if (mail.From == null)
+            {
+                string from = WebConfigurationManager.AppSettings["smtp.from"];
+                if (!string.IsNullOrWhiteSpace(from))
+                    mail.From = new MailAddress(from);
+            }
+        }
 
         // Απευθείας αποστολή στον πραγματικό παραλήπτη, χωρίς test-mode εκτροπή
         // (sendEmailClearTrueRecipient) και χωρίς BCC — για emails λογαριασμών
@@ -80,7 +121,8 @@ namespace HotelsTEE.Utils
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
 
 
-                SmtpClient sc = new SmtpClient();
+                EnsureFrom(mail);
+                SmtpClient sc = BuildSmtpClient();
                 sc.Send(mail);
                 return true;
             }
@@ -143,7 +185,8 @@ namespace HotelsTEE.Utils
 
 
             mail.To.Add("tolisgrigorakis@gmail.com");
-            SmtpClient sc = new SmtpClient();
+            EnsureFrom(mail);
+            SmtpClient sc = BuildSmtpClient();
             try
             {
                 sc.Send(mail);
