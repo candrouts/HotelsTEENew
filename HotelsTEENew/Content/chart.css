@@ -55,13 +55,13 @@
 
 .nav.nav-pills.bg-nav-pills {
     position: sticky;
-    top: 209px;
+    top: 145px;
     z-index: 100;
 }
 
 #v-pills-tab {
     position: sticky;
-    top: 315px;
+    top: 218px;
     max-height: calc(100vh - 375px);
     overflow: auto;
     z-index: 100;
@@ -91,16 +91,17 @@
 }
 
 .tier-wrap {
-    padding: 12px;
+    padding: 0px;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
 }
 
 .tier-bar {
     position: relative;
-    height: 28px;
+    height: 15px;
     border-radius: 10px;
-    overflow: hidden
+    overflow: hidden;
+    margin: 5px;
 }
 
 .tier-bands {
@@ -120,8 +121,8 @@
     inset: 0 auto 0 0;
     background: red;
     opacity: .85;
-    top: 8px;
-    bottom: 8px;
+    top: 4px;
+    bottom: 4px
 }
 
 
@@ -135,9 +136,10 @@
 
 .tier-scale {
     position: relative;
-    height: 18px;
+    height: 15px;
     font-size: 12px;
-    color: #6b7280
+    color: #6b7280;
+    margin: 5px 20px 5px 10px
 }
 
     .tier-scale span {
