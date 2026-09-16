@@ -82,7 +82,7 @@
 
             <!-- Ανοιχτό: πλήρης επεξεργασία/προβολή -->
             <!-- ko ifnot: featuresCollapsed() -->
-            <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
+            <div class="card-header py-1 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
                 <h5 class="card-title mb-0">
                     <i class="uil uil-building me-1 text-info"></i> Χαρακτηριστικά &amp; Παροχές Καταλύματος
                     <!-- ko if: disabledByFeaturesCount() > 0 -->
@@ -91,7 +91,7 @@
                 </h5>
                 <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(true); }">Σύμπτυξη ▴</a>
             </div>
-            <div class="card-body py-2">
+            <div class="card-body py-1">
                 <p class="text-muted mb-2" style="font-size:13px;">
                     Οι παροχές όπως δηλώθηκαν από τον ξενοδόχο. <!-- ko if: enableAll -->Επιβεβαιώστε ή διορθώστε τις κατά την αυτοψία — τα σχετικά κριτήρια απενεργοποιούνται αυτόματα.<!-- /ko -->
                 </p>
@@ -125,7 +125,7 @@
     <!-- /ko -->
 
     <div id="guide-bar" class="sticky-wrap tier-wrap col-xl-12">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px">
             <div>
                 <strong data-bind="text: tierLabel"></strong>
                 <span class="text-muted">(<span data-bind="text: totalScore"></span>/95)</span>
@@ -144,10 +144,10 @@
 
         <div class="tier-scale">
             <span style="left:0%">0</span>
-            <span style="left:17.79%">15</span>
-            <span style="left:36.84%">35</span>
-            <span style="left:57.89%">55</span>
-            <span style="left:78.94%">75</span>
+            <span style="left:16.79%">15</span>
+            <span style="left:37.55%">35</span>
+            <span style="left:58.89%">55</span>
+            <span style="left:79.94%">75</span>
             <span style="left:100%">95</span>
         </div>
         <hr style="margin:0!important" />
@@ -193,13 +193,13 @@
 
     <div class="col-sm-12">
 
-        <ul id="guide-pillars" class="nav nav-pills bg-nav-pills nav-justified mb-3 tier-wrap">
+        <ul id="guide-pillars" class="nav nav-pills bg-nav-pills nav-justified mb-1 tier-wrap">
             <!-- ko foreach: {data: categories, as: 'category'}  -->
             <li class="nav-item">
                 <a data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0" data-bind="attr: { 'href': '#tab-'+category.id() },css:{ 'active': $index() == 0 }">
                     <i class="mdi mdi-home-variant d-md-none d-block"></i>
                     <span class="d-none d-md-block" data-bind="html:category.title"></span>
-                    <p class="inbox-item-date">
+                    <p class="inbox-item-date" style="margin-bottom: .25rem;">
                         <button type="button" class="btn btn-sm cr-btn-outline-primary px-1 py-0" data-bs-toggle="tooltip"
                                 data-bind="attr: { title: 'Βαθμολογία ' + category.rawPoints() + ' από ' + category.maxGrade() + ' → αναγωγή στις ' + totalUnits() + ' μονάδες του πυλώνα' }">
                             <span data-bind="html: category.rawPoints()"></span>
@@ -253,7 +253,7 @@
 
                                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                                 <span class="d-none d-md-block" data-bind="html:title"></span>
-                                <p class="inbox-item-date">
+                                <p class="inbox-item-date" >
                                     <button type="button" class="btn btn-sm cr-btn-outline-primary px-1 py-0" data-bs-toggle="tooltip" title="Η βαθμολογία σου / Μέγιστη Βαθμολογία"> <span data-bind="html:subCategory.totalPoints() + ' / ' + subCategory.maxGrade()"></span> </button>
                                 </p>
                                 @*<span class="badge badge-success-lighten" data-bind="html:subCategory.totalPoints"></span>*@
