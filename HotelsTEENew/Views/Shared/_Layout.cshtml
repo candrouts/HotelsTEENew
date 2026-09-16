@@ -18,6 +18,24 @@
     <!-- App favicon -->
     <link rel="shortcut icon" href="~/assets/images/favicon.ico">
 
+    <!-- Sidebar default = condensed: εναρμόνιση του αποθηκευμένου Hyper config
+         (το sessionStorage υπερισχύει του data-sidenav-size, οπότε μετατρέπουμε
+         τυχόν "default" σε "condensed" ώστε το μενού να ξεκινά κλειστό). -->
+    <script>
+        (function () {
+            try {
+                var k = "__HYPER_CONFIG__", raw = sessionStorage.getItem(k);
+                if (raw) {
+                    var c = JSON.parse(raw);
+                    if (c && c.sidenav && (!c.sidenav.size || c.sidenav.size === "default")) {
+                        c.sidenav.size = "condensed";
+                        sessionStorage.setItem(k, JSON.stringify(c));
+                    }
+                }
+            } catch (e) { }
+        })();
+    </script>
+
     <!-- Theme Config Js -->
     <script src="~/assets/js/hyper-config.js"></script>
 
