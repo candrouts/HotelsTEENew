@@ -268,7 +268,7 @@
                                 <div class="col-xs-12">
                                     <div class="card " data-bind="@*visible:  expandPEA ,*@ css: { 'criteria-disabled': isDisabled() }" role="group" data-bind-aria-disabled="isDisabled() ? 'true' : 'false'">
                                         <div class="card-body" data-bind="css: {'required': isRequired()}">
-                                            <!-- ko if : canShowNotApplicableSwitch() === true && !featureMapped() -->
+                                            <!-- ko if : canShowNotApplicableSwitch() === true -->
                                             <div class="float-end form-check form-switch">
 
                                                 <input type="checkbox" class="form-check-input" id="customSwitch1" data-bind="checked:isApplicable, enable: $root.enableAll()">
