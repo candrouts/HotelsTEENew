@@ -515,6 +515,11 @@ function ViewCertificateViewModel() {
     self.category = ko.observable("");
     self.hotelTitle = ko.observable("");
     self.hotelType = ko.observable("");
+    // Παραδοσιακό κατάλυμα: κάθε είδος που ξεκινά από «ΠΑΡΑΔΟΣΙΑΚΟ»
+    // (π.χ. «ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ», «ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ ΕΠΙΠΛ.ΔΙΑΜΕΡΙΣΜΑΤΩΝ»)
+    self.isTraditional = function () {
+        return (self.hotelType() || "").trim().toUpperCase().indexOf("ΠΑΡΑΔΟΣΙΑΚΟ") === 0;
+    };
     self.totalRooms = ko.observable(0);
     self.totalBeds = ko.observable(0);
 
@@ -1117,7 +1122,7 @@ function ViewCertificateViewModel() {
                                     // Αρχιτεκτονική κληρονομιά: μη παραδοσιακό => «Δεν εφαρμόζεται»· παραδοσιακό =>
                                     // στεγάζεται εξ ορισμού σε χαρακτηρισμένο κτίριο, άρα αυτόματα «Ναι» (κλειδωμένο)
                                     if (newCriteria.code() == 'ΑΔ_ΠΔ_4') {
-                                        if (self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
+                                        if (!self.isTraditional()) {
                                             newCriteria.isApplicable(false);
                                         } else {
                                             newCriteria.isApplicable(true);
