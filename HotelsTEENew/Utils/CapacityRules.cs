@@ -7,20 +7,37 @@ using System.Linq;
 
 namespace HotelsTEE.Utils
 {
-    // Server-side υποχρεωτικότητα κριτηρίων βάσει δυναμικότητας καταλύματος (κλίνες).
-    // Ίδιος κανόνας με τον client (CriteriaViewModel / CertificateViewModel), ώστε
-    // η υποχρεωτικότητα να μην εξαρτάται από το τι στέλνει ο browser.
+    // Server-side κανόνες κριτηρίων βάσει δυναμικότητας καταλύματος (κλίνες).
+    // Ίδιοι κανόνες με τον client (CriteriaViewModel / CertificateViewModel), ώστε
+    // βαθμολογία και υποχρεωτικότητα να μην εξαρτώνται από το τι στέλνει ο browser.
     public static class CapacityRules
     {
-        // Υποχρεωτικό για μονάδες ΑΝΩ των 100 κλινών (αυστηρά > 100)
-        public const int BedsThreshold = 100;
+        private class Rule
+        {
+            public string Code;
+            public Func<int, bool> When;
+            public Rule(string code, Func<int, bool> when) { Code = code; When = when; }
+        }
 
-        // Κριτήρια που γίνονται υποχρεωτικά πάνω από το όριο κλινών
-        private static readonly string[] Codes = { "ΔΑ_ΣΑ_2" };
+        // Υποχρεωτικά (πρέπει να καλύπτονται) όταν ισχύει η συνθήκη κλινών
+        private static readonly Rule[] RequiredRules =
+        {
+            new Rule("ΔΑ_ΣΑ_2", beds => beds > 100),   // χωριστή συλλογή βιοαποβλήτων
+            new Rule("ΑΔ_ΠΔ_1", beds => beds >= 51),   // πιστοποιητικό πυρασφάλειας (νομική υποχρέωση)
+        };
 
-        // Κριτήρια που ΔΕΝ εφαρμόζονται πάνω από το όριο κλινών (π.χ. η διαλογή
-        // 4 ρευμάτων είναι νομική υποχρέωση για μονάδες > 100 κλινών)
-        private static readonly string[] NotApplicableCodes = { "ΔΑ_ΣΑ_1" };
+        // «Δεν εφαρμόζεται» όταν ισχύει η συνθήκη κλινών
+        private static readonly Rule[] NotApplicableRules =
+        {
+            new Rule("ΔΑ_ΣΑ_1", beds => beds > 100),   // διαλογή 4 ρευμάτων: νομική υποχρέωση > 100
+        };
+
+        // Προαιρετικά με Δ/Α: «Ναι» βαθμολογείται, «Όχι» => Δ/Α χωρίς ποινή
+        // (αντιμετωπίζονται ως criteriaType 3 στη βαθμολόγηση)
+        private static readonly Rule[] OptionalRules =
+        {
+            new Rule("ΑΔ_ΠΔ_1", beds => beds < 51),    // πυρασφάλεια: προαιρετικό < 51 κλινών
+        };
 
         public static int GetTotalBeds(UnitOfWork uow, object hotelID, object companyID)
         {
@@ -31,28 +48,40 @@ namespace HotelsTEE.Utils
             return beds ?? 0;
         }
 
-        // criteriaID που είναι υποχρεωτικά για το συγκεκριμένο κατάλυμα λόγω δυναμικότητας
-        public static HashSet<decimal> GetCapacityRequiredCriteria(UnitOfWork uow, object hotelID, object companyID)
+        private static HashSet<decimal> Resolve(UnitOfWork uow, Rule[] rules, int beds)
         {
             var result = new HashSet<decimal>();
-            if (GetTotalBeds(uow, hotelID, companyID) <= BedsThreshold)
-                return result;
+            List<string> codes = rules.Where(r => r.When(beds)).Select(r => r.Code).ToList();
+            if (codes.Count == 0) return result;
 
-            foreach (decimal id in uow.CriteriaRepository.Get(x => Codes.Contains(x.code)).Select(c => c.id))
+            foreach (decimal id in uow.CriteriaRepository.Get(x => codes.Contains(x.code)).Select(c => c.id))
                 result.Add(id);
             return result;
         }
 
-        // criteriaID που είναι «δεν εφαρμόζεται» για το κατάλυμα λόγω δυναμικότητας
+        public static HashSet<decimal> GetCapacityRequiredCriteria(UnitOfWork uow, object hotelID, object companyID)
+        {
+            return Resolve(uow, RequiredRules, GetTotalBeds(uow, hotelID, companyID));
+        }
+
         public static HashSet<decimal> GetCapacityNotApplicableCriteria(UnitOfWork uow, object hotelID, object companyID)
         {
-            var result = new HashSet<decimal>();
-            if (GetTotalBeds(uow, hotelID, companyID) <= BedsThreshold)
-                return result;
+            return Resolve(uow, NotApplicableRules, GetTotalBeds(uow, hotelID, companyID));
+        }
 
-            foreach (decimal id in uow.CriteriaRepository.Get(x => NotApplicableCodes.Contains(x.code)).Select(c => c.id))
-                result.Add(id);
-            return result;
+        public static HashSet<decimal> GetCapacityOptionalCriteria(UnitOfWork uow, object hotelID, object companyID)
+        {
+            return Resolve(uow, OptionalRules, GetTotalBeds(uow, hotelID, companyID));
+        }
+
+        // Αποτελεσματικός τύπος για τη βαθμολόγηση: τα «προαιρετικά με Δ/Α»
+        // Ναι/Όχι κριτήρια βαθμολογούνται ως τύπος 3 (το «Όχι» δεν μετρά στο μέγιστο).
+        // ΔΕΝ αλλάζει το entity (tracked από το EF) — μόνο υπολογισμός.
+        public static int EffectiveType(Criteria crit, HashSet<decimal> optional)
+        {
+            if (optional != null && crit.criteriaType == 1 && optional.Contains(crit.id))
+                return 3;
+            return crit.criteriaType;
         }
 
         // Ίδια σημασιολογία με το isValidRequired του client:
