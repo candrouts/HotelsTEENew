@@ -310,12 +310,12 @@
                                                 <span class="badge badge-warning-lighten me-1" style="font-size:11px;" data-bind="text: 'Υποχρεωτικό λόγω δυναμικότητας (' + $root.totalBeds() + ' κλίνες)'"></span>
                                                 <!-- /ko -->
                                                 <!-- ko if: capacityOptional() -->
-                                                <span class="badge badge-info-lighten me-1" style="font-size:11px;" data-bind="text: 'Προαιρετικό για μονάδες κάτω των 51 κλινών (' + $root.totalBeds() + ') — αν δεν υπάρχει: Δ/Α'"></span>
+                                                <span class="badge badge-info-lighten me-1" style="font-size:11px;" data-bind="text: 'Προαιρετικό για μονάδες κάτω των 51 κλινών (' + $root.totalBeds() + ') — μπορεί να σημειωθεί «Δεν εφαρμόζεται»'"></span>
                                                 <!-- /ko -->
                                                 <!-- /ko  -->
                                                 <span data-bind="html:title"></span>
                                                 <span class="badge bg-danger ms-2" data-bind="visible: isDisabled">Μη εφαρμόσιμο</span>
-                                                <span class="badge bg-danger ms-2" data-bind="visible: isHeritage, text: capacityOptional() ? 'Δεν απαιτείται (Δ/Α)' : 'Δεν Αφορά (Δ/Α)'">Δεν Αφορά (Δ/Α)</span>
+                                                <span class="badge bg-danger ms-2" data-bind="visible: isHeritage">Δεν Αφορά (Δ/Α)</span>
                                             </h4>
 
                                             @*<p data-bind="html: description"></p>*@

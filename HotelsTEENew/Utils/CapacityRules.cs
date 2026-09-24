@@ -32,12 +32,11 @@ namespace HotelsTEE.Utils
             new Rule("ΔΑ_ΣΑ_1", beds => beds > 100),   // διαλογή 4 ρευμάτων: νομική υποχρέωση > 100
         };
 
-        // Προαιρετικά με Δ/Α: «Ναι» βαθμολογείται, «Όχι» => Δ/Α χωρίς ποινή
-        // (αντιμετωπίζονται ως criteriaType 3 στη βαθμολόγηση)
-        private static readonly Rule[] OptionalRules =
-        {
-            new Rule("ΑΔ_ΠΔ_1", beds => beds < 51),    // πυρασφάλεια: προαιρετικό < 51 κλινών
-        };
+        // Κριτήρια που βαθμολογούνται ΠΑΝΤΑ ως Ναι/Όχι (τύπος 1: μετρούν στο μέγιστο
+        // όταν εφαρμόζονται), ανεξάρτητα από τον τύπο στη βάση. Για < 51 κλίνες το
+        // ΑΔ_ΠΔ_1 είναι προαιρετικό: ο χρήστης το σημειώνει «Δεν εφαρμόζεται» (Δ/Α)
+        // με τον διακόπτη — η επιλογή του σεβαστή και στον server.
+        private static readonly string[] YesNoCodes = { "ΑΔ_ΠΔ_1" };
 
         public static int GetTotalBeds(UnitOfWork uow, object hotelID, object companyID)
         {
@@ -69,18 +68,12 @@ namespace HotelsTEE.Utils
             return Resolve(uow, NotApplicableRules, GetTotalBeds(uow, hotelID, companyID));
         }
 
-        public static HashSet<decimal> GetCapacityOptionalCriteria(UnitOfWork uow, object hotelID, object companyID)
-        {
-            return Resolve(uow, OptionalRules, GetTotalBeds(uow, hotelID, companyID));
-        }
-
-        // Αποτελεσματικός τύπος για τη βαθμολόγηση: τα «προαιρετικά με Δ/Α»
-        // Ναι/Όχι κριτήρια βαθμολογούνται ως τύπος 3 (το «Όχι» δεν μετρά στο μέγιστο).
+        // Αποτελεσματικός τύπος για τη βαθμολόγηση (ίδιος με τον client).
         // ΔΕΝ αλλάζει το entity (tracked από το EF) — μόνο υπολογισμός.
-        public static int EffectiveType(Criteria crit, HashSet<decimal> optional)
+        public static int EffectiveType(Criteria crit)
         {
-            if (optional != null && crit.criteriaType == 1 && optional.Contains(crit.id))
-                return 3;
+            if (crit.criteriaType == 3 && YesNoCodes.Contains(crit.code))
+                return 1;
             return crit.criteriaType;
         }
 
