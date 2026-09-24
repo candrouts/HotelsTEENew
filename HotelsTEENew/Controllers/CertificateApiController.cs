@@ -596,6 +596,21 @@ namespace HotelsTEE.Controllers
             // αυτής της έκδοσης — π.χ. όπως τη διόρθωσε ο επιθεωρητής στην αυτοψία).
             HashSet<decimal> featureDisabled = Utils.FeatureRules.GetFeatureDisabledCriteria(unitOfWork, hotelCriteria.id);
 
+            // Server-side υποχρεωτικότητα βάσει δυναμικότητας (κλίνες): δεν επιτρέπεται
+            // «μη εφαρμόσιμο» και, στην οριστική υποβολή, πρέπει να καλύπτεται.
+            HashSet<decimal> capacityRequired = Utils.CapacityRules.GetCapacityRequiredCriteria(unitOfWork, model.hotelID, model.exploitingCompanyID);
+            if (model.status == 2)
+            {
+                foreach (decimal cid in capacityRequired)
+                {
+                    if (featureDisabled.Contains(cid)) continue;
+                    Criteria reqCrit = unitOfWork.CriteriaRepository.GetByID(cid);
+                    var answer = model.criteria == null ? null : model.criteria.FirstOrDefault(c => c.criteriaID == cid);
+                    if (reqCrit != null && (answer == null || !Utils.CapacityRules.IsSatisfied(reqCrit, answer.isChecked, answer.value)))
+                        return Ok(new ApiAnswer() { success = false, responseText = "Το κριτήριο " + reqCrit.code + " είναι υποχρεωτικό για καταλύματα άνω των " + Utils.CapacityRules.BedsThreshold + " κλινών." });
+                }
+            }
+
             if (model.criteria != null && model.criteria.Count > 0)
             {
                 foreach (var z in model.criteria)
@@ -611,7 +626,7 @@ namespace HotelsTEE.Controllers
                     criteria.criteriaID = z.criteriaID;
                     criteria.hotelCriteriaID = hotelCriteria.id > 0 ? hotelCriteria.id : 0;
                     criteria.hotelCriteria = hotelCriteria;
-                    criteria.isApplicable = z.isApplicable && !featureDisabled.Contains(z.criteriaID);
+                    criteria.isApplicable = (z.isApplicable || capacityRequired.Contains(z.criteriaID)) && !featureDisabled.Contains(z.criteriaID);
                     criteria.isChecked = z.isChecked;
                     criteria.isNotChecked = z.isNotChecked;
 

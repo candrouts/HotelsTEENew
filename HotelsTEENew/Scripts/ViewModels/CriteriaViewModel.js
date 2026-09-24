@@ -256,7 +256,8 @@
                 //self.hotelTitle(data.hotelDetails.hotelTitle);
                 //self.hotelType(data.hotelDetails.hotelType);
                 //self.totalRooms(data.hotelDetails.totalRooms);
-                //self.totalBeds(data.hotelDetails.totalBeds);
+                // Κλίνες: χρειάζονται ΠΡΙΝ χτιστούν τα κριτήρια (υποχρεωτικότητα βάσει δυναμικότητας)
+                self.totalBeds(parseInt(data.hotelDetails.totalBeds || 0, 10));
 
                 //// Επιλογή κειμένου Δειγματοληψίας
                 //var beds = parseInt(self.totalBeds() || 0, 10);
@@ -369,6 +370,7 @@
                                     newCriteria.needsFiles = ko.observable(criteria.needsFiles);
                                     newCriteria.notApplication = ko.observable(false);
                                     newCriteria.isRequired = ko.observable(criteria.isRequired);
+                                    newCriteria.capacityRequired = ko.observable(false);
 
                                     newCriteria.options = ko.observableArray([]);
                                     //newCriteria.value = ko.observable();
@@ -426,8 +428,8 @@
                                     newCriteria.canShowNotApplicableSwitch = ko.pureComputed(function () {
                                         var beds = parseInt(self.totalBeds() || 0, 10);
                                         var code = this.code();
-                                        return this.notApplicable() === true;
-                                            /*&& !(beds >= 100 && (code === "ΔΑ_ΣΑ_1" || code === "ΔΑ_ΣΑ_2"));*/
+                                        // Υποχρεωτικό λόγω δυναμικότητας => δεν επιτρέπεται «μη εφαρμόσιμο»
+                                        return this.notApplicable() === true && !this.capacityRequired();
                                     }, newCriteria);
 
                                     //if (newCriteria.code().startsWith('_ΔΕ_') == true) {
@@ -624,8 +626,11 @@
 
                                     newCriteria.isApplicable(criteria.isApplicable);
 
-                                    if (self.totalBeds() >= 100 && (newCriteria.code() === "ΔΑ_ΣΑ_1" || newCriteria.code() === "ΔΑ_ΣΑ_2")) {
+                                    // Υποχρεωτικό βάσει δυναμικότητας (ίδιος κανόνας και στον server: Utils/CapacityRules)
+                                    if (newCriteria.code() === "ΔΑ_ΣΑ_2" && self.totalBeds() > 100) {
                                         newCriteria.isRequired(true);
+                                        newCriteria.capacityRequired(true);
+                                        newCriteria.isApplicable(true);
                                     }
 
                                     if (newCriteria.code() == 'ΑΔ_ΠΔ_5' && self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
