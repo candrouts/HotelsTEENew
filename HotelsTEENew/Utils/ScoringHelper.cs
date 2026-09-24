@@ -54,7 +54,7 @@ namespace HotelsTEE.Utils
                 decimal cmax = 0;
                 if (sc.isApplicable)
                 {
-                    int ctype = CapacityRules.EffectiveType(def);
+                    int ctype = def.criteriaType;
                     if (ctype == 1 || ctype == 2)
                         cmax = def.weight * def.maxGrade;
                     else if (ctype == 3 && sc.isChecked == true)

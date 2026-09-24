@@ -372,7 +372,6 @@
                                     newCriteria.isRequired = ko.observable(criteria.isRequired);
                                     newCriteria.capacityRequired = ko.observable(false);
                                     newCriteria.capacityNotApplicable = ko.observable(false);
-                                    newCriteria.capacityOptional = ko.observable(false);
                                     newCriteria.capacityReason = ko.observable("");
 
                                     newCriteria.options = ko.observableArray([]);
@@ -432,7 +431,7 @@
                                         var beds = parseInt(self.totalBeds() || 0, 10);
                                         var code = this.code();
                                         // Υποχρεωτικό λόγω δυναμικότητας => δεν επιτρέπεται «μη εφαρμόσιμο»
-                                        return (this.notApplicable() === true || this.capacityOptional() === true) && !this.capacityRequired() && !this.capacityNotApplicable();
+                                        return this.notApplicable() === true && !this.capacityRequired() && !this.capacityNotApplicable();
                                     }, newCriteria);
 
                                     //if (newCriteria.code().startsWith('_ΔΕ_') == true) {
@@ -636,19 +635,14 @@
                                         newCriteria.capacityReason('Υποχρεωτικό για μονάδες άνω των 100 κλινών (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
                                         newCriteria.isApplicable(true);
                                     }
-                                    // Πιστοποιητικό πυρασφάλειας: βαθμολογείται ως Ναι/Όχι (μετρά πάντα στο μέγιστο).
-                                    // ≥51 κλίνες: νομικά υποχρεωτικό· <51: προαιρετικό — ο χρήστης μπορεί να το
-                                    // σημειώσει «Δεν εφαρμόζεται» (Δ/Α) με τον διακόπτη, κατά την κρίση του.
+                                    // Πιστοποιητικό πυρασφάλειας (τύπος 3): «Όχι» => Δεν Αφορά (Δ/Α), χωρίς ποινή.
+                                    // Πάντα εφαρμόσιμο (χωρίς διακόπτη)· για ≥51 κλίνες νομικά υποχρεωτικό («Ναι»).
                                     if (newCriteria.code() === "ΑΔ_ΠΔ_1") {
-                                        if (newCriteria.criteriaType() === 3) newCriteria.criteriaType(1);
+                                        newCriteria.isApplicable(true);
                                         if (self.totalBeds() >= 51) {
-                                            newCriteria.isApplicable(true);
                                             newCriteria.isRequired(true);
                                             newCriteria.capacityRequired(true);
                                             newCriteria.capacityReason('Νομικά υποχρεωτικό για μονάδες 51 κλινών και άνω (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
-                                        } else {
-                                            newCriteria.isRequired(false);
-                                            newCriteria.capacityOptional(true);
                                         }
                                     }
                                     // Μη εφαρμόσιμο βάσει δυναμικότητας: για >100 κλίνες η διαλογή είναι νομική υποχρέωση
