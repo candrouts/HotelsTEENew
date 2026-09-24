@@ -595,6 +595,8 @@ namespace HotelsTEE.Controllers
             // Server-side επιβολή κανόνων κεντρικών ρυθμίσεων (βάσει της δήλωσης παροχών
             // αυτής της έκδοσης — π.χ. όπως τη διόρθωσε ο επιθεωρητής στην αυτοψία).
             HashSet<decimal> featureDisabled = Utils.FeatureRules.GetFeatureDisabledCriteria(unitOfWork, hotelCriteria.id);
+            // Μη εφαρμόσιμα λόγω δυναμικότητας (κλίνες): εξαιρούνται όπως τα απενεργοποιημένα από παροχές
+            featureDisabled.UnionWith(Utils.CapacityRules.GetCapacityNotApplicableCriteria(unitOfWork, model.hotelID, model.exploitingCompanyID));
 
             // Server-side υποχρεωτικότητα βάσει δυναμικότητας (κλίνες): δεν επιτρέπεται
             // «μη εφαρμόσιμο» και, στην οριστική υποβολή, πρέπει να καλύπτεται.

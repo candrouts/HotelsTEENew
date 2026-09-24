@@ -298,6 +298,7 @@
                                     newCriteria.notApplication = ko.observable(false);
                                     newCriteria.isRequired = ko.observable(criteria.isRequired);
                                     newCriteria.capacityRequired = ko.observable(false);
+                                    newCriteria.capacityNotApplicable = ko.observable(false);
 
                                     newCriteria.options = ko.observableArray([]);
                                     //newCriteria.value = ko.observable();
@@ -356,7 +357,7 @@
                                         var beds = parseInt(self.totalBeds() || 0, 10);
                                         var code = this.code();
                                         // Υποχρεωτικό λόγω δυναμικότητας => δεν επιτρέπεται «μη εφαρμόσιμο»
-                                        return this.notApplicable() === true && !this.capacityRequired();
+                                        return this.notApplicable() === true && !this.capacityRequired() && !this.capacityNotApplicable();
                                     }, newCriteria);
 
                                     //if (newCriteria.code().startsWith('_ΔΕ_') == true) {
@@ -558,6 +559,11 @@
                                         newCriteria.isRequired(true);
                                         newCriteria.capacityRequired(true);
                                         newCriteria.isApplicable(true);
+                                    }
+                                    // Μη εφαρμόσιμο βάσει δυναμικότητας: για >100 κλίνες η διαλογή είναι νομική υποχρέωση
+                                    if (newCriteria.code() === "ΔΑ_ΣΑ_1" && self.totalBeds() > 100) {
+                                        newCriteria.capacityNotApplicable(true);
+                                        newCriteria.isApplicable(false);
                                     }
 
                                     if (newCriteria.code() == 'ΑΔ_ΠΔ_5' && self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
