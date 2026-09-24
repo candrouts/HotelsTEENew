@@ -293,6 +293,14 @@
                                                 </span>
                                             </div>
                                             <!-- /ko -->
+                                            <!-- ko if: capacityNotApplicable() -->
+                                            <div class="float-end">
+                                                <span class="badge badge-secondary-lighten" data-bs-toggle="tooltip"
+                                                      data-bind="attr: { title: 'Για μονάδες άνω των 100 κλινών η διαλογή είναι νομική υποχρέωση (το κατάλυμα έχει ' + $root.totalBeds() + ' κλίνες)' }">
+                                                    <i class="uil uil-lock-alt me-1"></i><span data-bind="text: 'Δεν εφαρμόζεται — μονάδα άνω των 100 κλινών (' + $root.totalBeds() + ')'"></span>
+                                                </span>
+                                            </div>
+                                            <!-- /ko -->
                                             <h4>
                                                 <span class="badge badge-info-lighten" data-bind="html:code"></span>&nbsp;&nbsp;
                                                 <!-- ko if : isRequired() === true -->

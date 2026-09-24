@@ -18,6 +18,10 @@ namespace HotelsTEE.Utils
         // Κριτήρια που γίνονται υποχρεωτικά πάνω από το όριο κλινών
         private static readonly string[] Codes = { "ΔΑ_ΣΑ_2" };
 
+        // Κριτήρια που ΔΕΝ εφαρμόζονται πάνω από το όριο κλινών (π.χ. η διαλογή
+        // 4 ρευμάτων είναι νομική υποχρέωση για μονάδες > 100 κλινών)
+        private static readonly string[] NotApplicableCodes = { "ΔΑ_ΣΑ_1" };
+
         public static int GetTotalBeds(UnitOfWork uow, object hotelID, object companyID)
         {
             int? beds = uow.context.Database.SqlQuery<int?>(
@@ -35,6 +39,18 @@ namespace HotelsTEE.Utils
                 return result;
 
             foreach (decimal id in uow.CriteriaRepository.Get(x => Codes.Contains(x.code)).Select(c => c.id))
+                result.Add(id);
+            return result;
+        }
+
+        // criteriaID που είναι «δεν εφαρμόζεται» για το κατάλυμα λόγω δυναμικότητας
+        public static HashSet<decimal> GetCapacityNotApplicableCriteria(UnitOfWork uow, object hotelID, object companyID)
+        {
+            var result = new HashSet<decimal>();
+            if (GetTotalBeds(uow, hotelID, companyID) <= BedsThreshold)
+                return result;
+
+            foreach (decimal id in uow.CriteriaRepository.Get(x => NotApplicableCodes.Contains(x.code)).Select(c => c.id))
                 result.Add(id);
             return result;
         }
