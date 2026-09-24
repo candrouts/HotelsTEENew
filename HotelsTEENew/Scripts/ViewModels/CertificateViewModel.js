@@ -739,6 +739,7 @@ function ViewCertificateViewModel() {
                 self.exploitingCompanyID(data.hotelDetails.exploitingCompanyID);
                 // Κλίνες: χρειάζονται ΠΡΙΝ χτιστούν τα κριτήρια (υποχρεωτικότητα βάσει δυναμικότητας)
                 self.totalBeds(parseInt(data.hotelDetails.totalBeds || 0, 10));
+                self.hotelType(data.hotelDetails.hotelType || "");   // χρειάζεται για τον κανόνα ΑΔ_ΠΔ_4 (παραδοσιακό)
 
 
                 // Read-only: mode=1, ξενοδόχος (ro=1),
@@ -1110,7 +1111,7 @@ function ViewCertificateViewModel() {
                                         newCriteria.isApplicable(false);
                                     }
 
-                                    if (newCriteria.code() == 'ΑΔ_ΠΔ_5' && self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
+                                    if (newCriteria.code() == 'ΑΔ_ΠΔ_4' && self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
                                         newCriteria.isApplicable(false);
                                     }
 
