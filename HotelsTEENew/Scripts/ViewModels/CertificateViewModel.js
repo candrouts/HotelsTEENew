@@ -830,6 +830,8 @@ function ViewCertificateViewModel() {
                                     newCriteria.isRequired = ko.observable(criteria.isRequired);
                                     newCriteria.capacityRequired = ko.observable(false);
                                     newCriteria.capacityNotApplicable = ko.observable(false);
+                                    newCriteria.capacityOptional = ko.observable(false);
+                                    newCriteria.capacityReason = ko.observable("");
 
                                     newCriteria.options = ko.observableArray([]);
                                     //newCriteria.value = ko.observable();
@@ -1090,7 +1092,22 @@ function ViewCertificateViewModel() {
                                     if (newCriteria.code() === "ΔΑ_ΣΑ_2" && self.totalBeds() > 100) {
                                         newCriteria.isRequired(true);
                                         newCriteria.capacityRequired(true);
+                                        newCriteria.capacityReason('Υποχρεωτικό για μονάδες άνω των 100 κλινών (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
                                         newCriteria.isApplicable(true);
+                                    }
+                                    // Πιστοποιητικό πυρασφάλειας: νομικά υποχρεωτικό για ≥51 κλίνες·
+                                    // για <51 προαιρετικό — «Ναι» βαθμολογείται, «Όχι» => Δ/Α χωρίς ποινή (τύπος 3)
+                                    if (newCriteria.code() === "ΑΔ_ΠΔ_1") {
+                                        newCriteria.isApplicable(true);
+                                        if (self.totalBeds() >= 51) {
+                                            newCriteria.isRequired(true);
+                                            newCriteria.capacityRequired(true);
+                                            newCriteria.capacityReason('Νομικά υποχρεωτικό για μονάδες 51 κλινών και άνω (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
+                                        } else {
+                                            newCriteria.isRequired(false);
+                                            if (newCriteria.criteriaType() === 1) newCriteria.criteriaType(3);
+                                            newCriteria.capacityOptional(true);
+                                        }
                                     }
                                     // Μη εφαρμόσιμο βάσει δυναμικότητας: για >100 κλίνες η διαλογή είναι νομική υποχρέωση
                                     if (newCriteria.code() === "ΔΑ_ΣΑ_1" && self.totalBeds() > 100) {

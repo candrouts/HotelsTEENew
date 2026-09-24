@@ -378,14 +378,17 @@
                                                 <span class="badge badge-info-lighten" data-bind="html:code"></span>&nbsp;&nbsp;
                                                 <!-- ko if : isRequired() === true -->
                                                 <i class="ri-lock-fill text-danger me-1" data-bs-toggle="tooltip" title="Υποχρεωτικό κριτήριο"
-                                                   data-bind="attr: { title: capacityRequired() ? 'Υποχρεωτικό για μονάδες άνω των 100 κλινών (το κατάλυμα έχει ' + $root.totalBeds() + ' κλίνες)' : 'Υποχρεωτικό κριτήριο' }"></i>&nbsp;&nbsp;
+                                                   data-bind="attr: { title: capacityRequired() ? capacityReason() : 'Υποχρεωτικό κριτήριο' }"></i>&nbsp;&nbsp;
                                                 <!-- ko if: capacityRequired() -->
                                                 <span class="badge badge-warning-lighten me-1" style="font-size:11px;" data-bind="text: 'Υποχρεωτικό λόγω δυναμικότητας (' + $root.totalBeds() + ' κλίνες)'"></span>
+                                                <!-- /ko -->
+                                                <!-- ko if: capacityOptional() -->
+                                                <span class="badge badge-info-lighten me-1" style="font-size:11px;" data-bind="text: 'Προαιρετικό για μονάδες κάτω των 51 κλινών (' + $root.totalBeds() + ') — αν δεν υπάρχει: Δ/Α'"></span>
                                                 <!-- /ko -->
                                                 <!-- /ko  -->
                                                 <span data-bind="html:title"></span>
                                                 <span class="badge bg-danger ms-2" data-bind="visible: isDisabled">Μη εφαρμόσιμο</span>
-                                                <span class="badge bg-danger ms-2" data-bind="visible: isHeritage">Δεν Αφορά (Δ/Α)</span>
+                                                <span class="badge bg-danger ms-2" data-bind="visible: isHeritage, text: capacityOptional() ? 'Δεν απαιτείται (Δ/Α)' : 'Δεν Αφορά (Δ/Α)'">Δεν Αφορά (Δ/Α)</span>
                                             </h4>
 
                                             @*<p data-bind="html: description"></p>*@

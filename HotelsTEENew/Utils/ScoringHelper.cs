@@ -36,6 +36,10 @@ namespace HotelsTEE.Utils
                 .Get(c => critIds.Contains(c.id)).ToList()
                 .GroupBy(c => c.id).ToDictionary(g => g.Key, g => g.First());
 
+            // Κανόνες δυναμικότητας: «προαιρετικά με Δ/Α» βαθμολογούνται ως τύπος 3
+            HashSet<decimal> capacityOptional = CapacityRules.GetCapacityOptionalCriteria(
+                uow, hotelCriteria.hotelID, hotelCriteria.exploitingCompanyID);
+
             var raw = new Dictionary<decimal, decimal>();
             var rawMax = new Dictionary<decimal, decimal>();
 
@@ -54,9 +58,10 @@ namespace HotelsTEE.Utils
                 decimal cmax = 0;
                 if (sc.isApplicable)
                 {
-                    if (def.criteriaType == 1 || def.criteriaType == 2)
+                    int ctype = CapacityRules.EffectiveType(def, capacityOptional);
+                    if (ctype == 1 || ctype == 2)
                         cmax = def.weight * def.maxGrade;
-                    else if (def.criteriaType == 3 && sc.isChecked == true)
+                    else if (ctype == 3 && sc.isChecked == true)
                         cmax = def.weight * def.maxGrade;
                 }
                 rawMax[mp] += cmax;
