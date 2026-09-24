@@ -404,8 +404,6 @@ namespace HotelsTEE.Controllers
             // Server-side υποχρεωτικότητα βάσει δυναμικότητας (κλίνες): δεν επιτρέπεται
             // «μη εφαρμόσιμο» και, στην οριστική υποβολή, πρέπει να καλύπτεται.
             HashSet<decimal> capacityRequired = Utils.CapacityRules.GetCapacityRequiredCriteria(unitOfWork, model.hotelID, model.exploitingCompanyID);
-            // Προαιρετικά με Δ/Α βάσει δυναμικότητας: πάντα εφαρμόσιμα, βαθμολογούνται ως τύπος 3
-            HashSet<decimal> capacityOptional = Utils.CapacityRules.GetCapacityOptionalCriteria(unitOfWork, model.hotelID, model.exploitingCompanyID);
             if (model.status == 2)
             {
                 foreach (decimal cid in capacityRequired)
@@ -433,7 +431,7 @@ namespace HotelsTEE.Controllers
                     criteria.criteriaID = z.criteriaID;
                     criteria.hotelCriteriaID = hotelCriteria.id > 0 ? hotelCriteria.id : 0;
                     criteria.hotelCriteria = hotelCriteria;
-                    criteria.isApplicable = (z.isApplicable || capacityRequired.Contains(z.criteriaID) || capacityOptional.Contains(z.criteriaID)) && !featureDisabled.Contains(z.criteriaID);
+                    criteria.isApplicable = (z.isApplicable || capacityRequired.Contains(z.criteriaID)) && !featureDisabled.Contains(z.criteriaID);
                     criteria.isChecked = z.isChecked;
                     criteria.isNotChecked = z.isNotChecked;
 
@@ -443,7 +441,7 @@ namespace HotelsTEE.Controllers
                     if (criteria.isApplicable == true)
                     {
                         Criteria crit = unitOfWork.CriteriaRepository.GetByID(z.criteriaID);
-                        int ctype = Utils.CapacityRules.EffectiveType(crit, capacityOptional);
+                        int ctype = Utils.CapacityRules.EffectiveType(crit);
                         if (ctype == 1 && criteria.isChecked == true)
                         {
                             criteria.points = crit.maxGrade * crit.weight ;

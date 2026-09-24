@@ -359,7 +359,7 @@
                                         var beds = parseInt(self.totalBeds() || 0, 10);
                                         var code = this.code();
                                         // Υποχρεωτικό λόγω δυναμικότητας => δεν επιτρέπεται «μη εφαρμόσιμο»
-                                        return this.notApplicable() === true && !this.capacityRequired() && !this.capacityNotApplicable();
+                                        return (this.notApplicable() === true || this.capacityOptional() === true) && !this.capacityRequired() && !this.capacityNotApplicable();
                                     }, newCriteria);
 
                                     //if (newCriteria.code().startsWith('_ΔΕ_') == true) {
@@ -563,17 +563,18 @@
                                         newCriteria.capacityReason('Υποχρεωτικό για μονάδες άνω των 100 κλινών (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
                                         newCriteria.isApplicable(true);
                                     }
-                                    // Πιστοποιητικό πυρασφάλειας: νομικά υποχρεωτικό για ≥51 κλίνες·
-                                    // για <51 προαιρετικό — «Ναι» βαθμολογείται, «Όχι» => Δ/Α χωρίς ποινή (τύπος 3)
+                                    // Πιστοποιητικό πυρασφάλειας: βαθμολογείται ως Ναι/Όχι (μετρά πάντα στο μέγιστο).
+                                    // ≥51 κλίνες: νομικά υποχρεωτικό· <51: προαιρετικό — ο χρήστης μπορεί να το
+                                    // σημειώσει «Δεν εφαρμόζεται» (Δ/Α) με τον διακόπτη, κατά την κρίση του.
                                     if (newCriteria.code() === "ΑΔ_ΠΔ_1") {
-                                        newCriteria.isApplicable(true);
+                                        if (newCriteria.criteriaType() === 3) newCriteria.criteriaType(1);
                                         if (self.totalBeds() >= 51) {
+                                            newCriteria.isApplicable(true);
                                             newCriteria.isRequired(true);
                                             newCriteria.capacityRequired(true);
                                             newCriteria.capacityReason('Νομικά υποχρεωτικό για μονάδες 51 κλινών και άνω (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
                                         } else {
                                             newCriteria.isRequired(false);
-                                            if (newCriteria.criteriaType() === 1) newCriteria.criteriaType(3);
                                             newCriteria.capacityOptional(true);
                                         }
                                     }
@@ -768,7 +769,8 @@
                                 var category = this.categories()[i];
                                 points += category.totalPoints();
                             }
-                            points = ((points / this.maxGrade()) * this.totalUnits()).toFixed(2);
+                            // Προστασία από 0/0 (NaN) όταν το μέγιστο του πυλώνα είναι 0
+                            points = (this.maxGrade() > 0 ? (points / this.maxGrade()) * this.totalUnits() : 0).toFixed(2);
                         }
 
                         return points;
