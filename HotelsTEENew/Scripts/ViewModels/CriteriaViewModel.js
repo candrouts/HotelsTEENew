@@ -300,6 +300,7 @@
                                     newCriteria.capacityRequired = ko.observable(false);
                                     newCriteria.capacityNotApplicable = ko.observable(false);
                                     newCriteria.capacityReason = ko.observable("");
+                                    newCriteria.ruleBadge = ko.observable("");
 
                                     newCriteria.options = ko.observableArray([]);
                                     //newCriteria.value = ko.observable();
@@ -560,6 +561,7 @@
                                         newCriteria.isRequired(true);
                                         newCriteria.capacityRequired(true);
                                         newCriteria.capacityReason('Υποχρεωτικό για μονάδες άνω των 100 κλινών (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
+                                        newCriteria.ruleBadge('Υποχρεωτικό λόγω δυναμικότητας (' + self.totalBeds() + ' κλίνες)');
                                         newCriteria.isApplicable(true);
                                     }
                                     // Πιστοποιητικό πυρασφάλειας (τύπος 3): «Όχι» => Δεν Αφορά (Δ/Α), χωρίς ποινή.
@@ -570,6 +572,7 @@
                                             newCriteria.isRequired(true);
                                             newCriteria.capacityRequired(true);
                                             newCriteria.capacityReason('Νομικά υποχρεωτικό για μονάδες 51 κλινών και άνω (το κατάλυμα έχει ' + self.totalBeds() + ' κλίνες)');
+                                            newCriteria.ruleBadge('Υποχρεωτικό λόγω δυναμικότητας (' + self.totalBeds() + ' κλίνες)');
                                         }
                                     }
                                     // Μη εφαρμόσιμο βάσει δυναμικότητας: για >100 κλίνες η διαλογή είναι νομική υποχρέωση
@@ -578,8 +581,21 @@
                                         newCriteria.isApplicable(false);
                                     }
 
-                                    if (newCriteria.code() == 'ΑΔ_ΠΔ_4' && self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
-                                        newCriteria.isApplicable(false);
+                                    // Αρχιτεκτονική κληρονομιά: μη παραδοσιακό => «Δεν εφαρμόζεται»· παραδοσιακό =>
+                                    // στεγάζεται εξ ορισμού σε χαρακτηρισμένο κτίριο, άρα αυτόματα «Ναι» (κλειδωμένο)
+                                    if (newCriteria.code() == 'ΑΔ_ΠΔ_4') {
+                                        if (self.hotelType() != 'ΠΑΡΑΔΟΣΙΑΚΟ ΞΕΝΟΔΟΧΕΙΟ') {
+                                            newCriteria.isApplicable(false);
+                                        } else {
+                                            newCriteria.isApplicable(true);
+                                            newCriteria.isRequired(true);
+                                            newCriteria.isChecked(true);
+                                            newCriteria.isNotChecked(false);
+                                            newCriteria.enabled(false);
+                                            newCriteria.capacityRequired(true);
+                                            newCriteria.capacityReason('Τα παραδοσιακά καταλύματα στεγάζονται εξ ορισμού σε χαρακτηρισμένο κτίριο');
+                                            newCriteria.ruleBadge('Αυτόματα «Ναι» — παραδοσιακό κατάλυμα');
+                                        }
                                     }
 
                                     //if (newCriteria.code() == 'ΑΠ_ΒΣ_1' && newCriteria.isApplicable() == false) {
