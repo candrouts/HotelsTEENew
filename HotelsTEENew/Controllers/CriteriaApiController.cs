@@ -441,7 +441,7 @@ namespace HotelsTEE.Controllers
                     if (criteria.isApplicable == true)
                     {
                         Criteria crit = unitOfWork.CriteriaRepository.GetByID(z.criteriaID);
-                        int ctype = Utils.CapacityRules.EffectiveType(crit);
+                        int ctype = crit.criteriaType;
                         if (ctype == 1 && criteria.isChecked == true)
                         {
                             criteria.points = crit.maxGrade * crit.weight ;
