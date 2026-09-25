@@ -193,7 +193,7 @@
     <!-- /ko -->
 
     <div id="guide-bar" class="sticky-wrap tier-wrap col-xl-12">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
             <div>
                 <strong data-bind="text: tierLabel"></strong>
                 <span class="text-muted">(<span data-bind="text: totalScore"></span>/95)</span>
@@ -204,23 +204,7 @@
                 </span>
                 <!-- /ko -->
             </div>
-            <div class="d-flex align-items-center flex-wrap justify-content-end gap-1">
-                <span id="guide-nexttier" class="badge me-1" data-bind="text: nextTierDeltaText, css: nextTierBadgeClass"></span>
-                <span id="guide-actions" class="d-inline-flex gap-1">
-                    <a class="btn btn-sm btn-primary py-0"
-                       data-bind="click: enableAll() ? saveDataTemp : null,
-                                  css: { 'disabled': !enableAll() },
-                                  attr: { 'aria-disabled': !enableAll() }">
-                        <i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση
-                    </a>
-                    <a class="btn btn-sm btn-success py-0"
-                       data-bind="click: enableAll() ? saveData : null,
-                                  css: { 'disabled': !enableAll() },
-                                  attr: { 'aria-disabled': !enableAll() }">
-                        <i class="uil uil-message me-1"></i> Υποβολή
-                    </a>
-                </span>
-            </div>
+            <span id="guide-nexttier" class="badge" data-bind="text: nextTierDeltaText, css: nextTierBadgeClass"></span>
         </div>
 
         <div class="tier-bar">
@@ -231,12 +215,32 @@
 
         <div class="tier-scale">
             <span style="left:0%">0</span>
-            <span style="left:16.79%">15</span>
-            <span style="left:37.55%">35</span>
-            <span style="left:58.89%">55</span>
-            <span style="left:79.94%">75</span>
+            <span style="left:17.79%">15</span>
+            <span style="left:36.84%">35</span>
+            <span style="left:57.89%">55</span>
+            <span style="left:78.94%">75</span>
             <span style="left:100%">95</span>
         </div>
+        <hr style="margin:0!important" />
+
+
+        <div id="guide-actions" class="float-end ">
+            <a class="btn btn-sm btn-success mx-2 mt-1"
+               data-bind="click: enableAll() ? saveData : null,
+                          css: { 'disabled': !enableAll() },
+                          attr: { 'aria-disabled': !enableAll() }">
+                <i class="uil uil-message me-1"></i> Υποβολή
+            </a>
+        </div>
+        <div class="float-end ">
+            <a class="btn btn-sm btn-primary mx-2 mt-1"
+               data-bind="click: enableAll() ? saveDataTemp : null,
+                          css: { 'disabled': !enableAll() },
+                          attr: { 'aria-disabled': !enableAll() }">
+                <i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση
+            </a>
+        </div>
+
     </div>
 
     <!-- ════ Επεξήγηση σελίδας (legend — το toggle link είναι δίπλα στον τίτλο) ════ -->
@@ -261,7 +265,7 @@
 
     <div class="col-sm-12">
 
-        <ul id="guide-pillars" class="nav nav-pills bg-nav-pills nav-justified mb-1 tier-wrap">
+        <ul id="guide-pillars" class="nav nav-pills bg-nav-pills nav-justified mb-3 tier-wrap">
             <!-- ko foreach: {data: categories, as: 'category'}  -->
             <li class="nav-item">
                 <a data-bs-toggle="tab" aria-expanded="false" class="nav-link rounded-0" data-bind="attr: { 'href': '#tab-'+category.id() },css:{ 'active': $index() == 0 }">
