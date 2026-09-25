@@ -859,6 +859,7 @@
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\Handlers.js" />
     <Content Include="Scripts\pageGuide.js" />
+    <Content Include="Scripts\scoreBar.js" />
     <Content Include="Scripts\icheck.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

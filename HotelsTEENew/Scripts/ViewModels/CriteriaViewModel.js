@@ -1154,6 +1154,9 @@
 
     self.tierLabel = ko.pureComputed(function () { if (self.tier() != null) { return self.tier().title; } else { return null;  } });
 
+    // Νέα συμπαγής μπάρα βαθμολογίας (Scripts/scoreBar.js)
+    if (typeof attachScoreBar === "function") attachScoreBar(self);
+
     // Βασίζεται στο μετάλιο-βάσει-συνόλου (η μπάρα δείχνει τη συνολική βαθμολογία)
     self.nextTierDeltaText = ko.pureComputed(function () {
         const x = parseFloat(self.totalScore()), t = self.byTotalTier();

@@ -1615,6 +1615,9 @@ function ViewCertificateViewModel() {
 
     self.tierLabel = ko.pureComputed(function () { if (self.tier() != null) { return self.tier().title; } else { return null; } });
 
+    // Νέα συμπαγής μπάρα βαθμολογίας (Scripts/scoreBar.js)
+    if (typeof attachScoreBar === "function") attachScoreBar(self);
+
     self.nextTierDeltaText = ko.pureComputed(function () {
         const x = parseFloat(self.totalScore()), t = self.byTotalTier();
         if (t != null) {
