@@ -65,6 +65,7 @@
     max-height: calc(100vh - 248px);
     overflow: auto;
     z-index: 100;
+    align-self: flex-start;
 }
 .cr-btn-outline-primary {
     --ct-btn-color: #727cf5;
