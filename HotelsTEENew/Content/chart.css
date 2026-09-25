@@ -61,7 +61,7 @@
 
 #v-pills-tab {
     position: sticky;
-    top: 206px;
+    top: 200px;
     max-height: calc(100vh - 236px);
     overflow: auto;
     z-index: 100;
