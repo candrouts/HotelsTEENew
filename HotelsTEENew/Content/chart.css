@@ -57,6 +57,7 @@
     position: sticky;
     top: 182px;
     z-index: 100;
+    align-self: flex-start;
 }
 
 #v-pills-tab {
