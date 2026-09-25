@@ -55,7 +55,7 @@
 
 .nav.nav-pills.bg-nav-pills {
     position: sticky;
-    top: 126px;
+    top: 122px;
     z-index: 100;
 }
 
@@ -364,7 +364,8 @@
 .sb-icon-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e5e7eb; background: #fff; display: grid; place-items: center; font-size: 16px; color: #727cf5; }
 .sb-icon-btn:hover { background: #f4f5ff; color: #727cf5; }
 .sb-submit { background: #0acf97; color: #fff; border-radius: 8px; padding: 6px 14px; font-weight: 700; }
-.sb-submit:hover { color: #fff; filter: brightness(.95); }
+.sb-submit, .sb-submit:focus { background: #0acf97 !important; border-color: #0acf97 !important; color: #fff !important; }
+.sb-submit:hover { background: #08b585 !important; border-color: #08b585 !important; color: #fff !important; }
 .sb-icon-btn.disabled, .sb-submit.disabled { opacity: .5; pointer-events: none; }
 
 @media (max-width: 860px) {
