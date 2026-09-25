@@ -378,3 +378,16 @@
 .sb-save-link { font-size: 13px; font-weight: 600; color: #727cf5; text-decoration: none; }
 .sb-save-link:hover { color: #5b64d8; text-decoration: underline; }
 .sb-save-link.disabled { opacity: .5; pointer-events: none; }
+
+/* ── Μπάρα βαθμολογίας στο header κατά το scroll (Scripts/scoreBarHeader.js) ── */
+@media (min-width: 992px) {
+    body.sb-in-header #guide-bar { position: static; z-index: 1010; }   /* flex item με z-index = δικό του stacking context: πρέπει > header (1005) */
+    body.sb-in-header #guide-bar .sb-bar {
+        position: fixed; top: var(--sb-top, 10px); left: var(--sb-left, 160px); right: var(--sb-right, 240px);
+        z-index: 1010; margin: 0; box-shadow: 0 2px 10px rgba(0,0,0,.08);
+    }
+    body.sb-in-header.sb-narrow #guide-bar .sb-zone { display: none; }
+    body.sb-in-header.sb-narrow #guide-bar .sb-track { padding-bottom: 8px; }
+    body.sb-in-header .nav.nav-pills.bg-nav-pills { top: 70px; }
+    body.sb-in-header #v-pills-tab { top: 148px; max-height: calc(100vh - 178px); }
+}
