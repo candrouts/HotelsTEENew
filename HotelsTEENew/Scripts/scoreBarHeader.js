@@ -62,6 +62,39 @@
             if (nav) new ResizeObserver(measure).observe(nav);
         }
 
+        // Αλλαγή πυλώνα/υποπυλώνα: το Bootstrap κρύβει το παλιό pane πριν δείξει το νέο,
+        // η σελίδα «κονταίνει» στιγμιαία και ο browser την ανεβάζει (φαίνονται ξανά οι
+        // παροχές). Κλειδώνουμε το ύψος κατά την εναλλαγή και, αν ο χρήστης είχε σκρολάρει,
+        // τον κρατάμε στην αρχή των κριτηρίων του νέου pane (κάτω από τους πυλώνες).
+        document.addEventListener("show.bs.tab", function (e) {
+            var href = e.target && e.target.getAttribute("href");
+            if (!href || (href.indexOf("#subTabPane-") !== 0 && href.indexOf("#tab-") !== 0)) return;
+            var pane = document.querySelector(href);
+            var box = pane ? pane.parentElement : null;
+            if (!box) return;
+            box.style.minHeight = box.getBoundingClientRect().height + "px";
+            box.dataset.sbKeep = document.body.classList.contains("sb-in-header") ? "1" : "";
+        });
+        document.addEventListener("shown.bs.tab", function (e) {
+            var href = e.target && e.target.getAttribute("href");
+            if (!href || (href.indexOf("#subTabPane-") !== 0 && href.indexOf("#tab-") !== 0)) return;
+            var pane = document.querySelector(href);
+            var box = pane ? pane.parentElement : null;
+            if (!box) return;
+            if (box.dataset.sbKeep === "1") {
+                var nav = document.querySelector(".navbar-custom");
+                var pills = document.getElementById("guide-pillars");
+                var offset = (nav ? nav.getBoundingClientRect().height : 70) + (pills ? pills.getBoundingClientRect().height : 0) + 8;
+                // αρκετό ύψος ώστε η σελίδα να μπορεί να μείνει εκεί ακόμα και με λίγα κριτήρια
+                box.style.minHeight = Math.max(0, window.innerHeight - offset) + "px";
+                var y = window.scrollY + pane.getBoundingClientRect().top - offset;
+                if (y < window.scrollY) window.scrollTo(0, Math.max(0, y));
+            } else {
+                box.style.minHeight = "";
+            }
+            box.dataset.sbKeep = "";
+        });
+
         measure();
         update();
     }
