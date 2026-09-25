@@ -24,7 +24,14 @@
                     <li class="breadcrumb-item active">Αυτοαξιολόγηση</li>
                 </ol>
             </div>
-            <h4 class="page-title">Αυτοαξιολόγηση</h4>
+            <h4 class="page-title">
+                Αυτοαξιολόγηση
+                <span class="ms-3" style="font-weight:normal;" data-bind="visible: !applicationInProgress() && !needsNewAssessment()">
+                    <a class="text-muted" data-bs-toggle="collapse" href="#page-legend" role="button" style="font-size:12px;">
+                        <i class="mdi mdi-help-circle text-info me-1" style="font-size:15px;vertical-align:-2px;"></i>Επεξήγηση σελίδας
+                    </a>
+                </span>
+            </h4>
         </div>
     </div>
 </div>
@@ -84,7 +91,31 @@
     <!-- ko if: hasFeatures -->
     <div class="col-12">
         <div id="guide-features" class="border card border-info mb-2" style="background-color:#eef6fc;">
-            <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
+
+            <!-- Συμπτυγμένο: ΟΛΑ σε μία λεπτή γραμμή -->
+            <!-- ko if: featuresCollapsed() -->
+            <div class="d-flex align-items-center flex-wrap gap-1 px-2 py-1">
+                <i class="uil uil-building text-info me-1"></i>
+                <strong class="me-1" style="font-size:13px;">Παροχές:</strong>
+                <!-- ko foreach: features -->
+                <span class="badge"
+                      data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
+                                 css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
+                <!-- /ko -->
+                <!-- ko ifnot: allFeaturesAnswered -->
+                <span class="badge bg-warning ms-1">Συμπληρώστε</span>
+                <!-- /ko -->
+                <!-- ko if: disabledByFeaturesCount() > 0 -->
+                <span class="text-muted ms-1" style="font-size:12px;" data-bind="text: '· ' + disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
+                <!-- /ko -->
+                <a href="javascript:void(0)" class="text-muted ms-auto" style="font-size:12px;"
+                   data-bind="click: function(){ featuresCollapsed(false); }, text: enableAll() ? 'Επεξεργασία ▾' : 'Προβολή ▾'"></a>
+            </div>
+            <!-- /ko -->
+
+            <!-- Ανοιχτό: πλήρης επεξεργασία/προβολή -->
+            <!-- ko ifnot: featuresCollapsed() -->
+            <div class="card-header py-1 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
                 <h5 class="card-title mb-0">
                     <i class="uil uil-building me-1 text-info"></i> Χαρακτηριστικά &amp; Παροχές Καταλύματος
                     <!-- ko ifnot: allFeaturesAnswered -->
@@ -94,11 +125,9 @@
                     <span class="badge bg-secondary ms-1" data-bind="text: disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
                     <!-- /ko -->
                 </h5>
-                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(!featuresCollapsed()); }">
-                    <span data-bind="text: featuresCollapsed() ? 'Επεξεργασία ▾' : 'Σύμπτυξη ▴'"></span>
-                </a>
+                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(true); }">Σύμπτυξη ▴</a>
             </div>
-            <div class="card-body py-2" data-bind="visible: !featuresCollapsed()">
+            <div class="card-body py-1">
                 <p class="text-muted mb-2" style="font-size:13px;">
                     Δηλώστε τις βασικές παροχές. Όσα κριτήρια δεν αφορούν το κατάλυμά σας απενεργοποιούνται αυτόματα.
                 </p>
@@ -126,21 +155,13 @@
                     </div>
                 </div>
             </div>
-            <!-- ko if: featuresCollapsed() -->
-            <div class="card-body py-2">
-                <div data-bind="foreach: features" style="display:inline;">
-                    <span class="badge me-1 mb-1"
-                          data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
-                                     css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
-                </div>
-            </div>
             <!-- /ko -->
         </div>
     </div>
     <!-- /ko -->
 
     <div id="guide-bar" class="sticky-wrap tier-wrap col-xl-12">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:5px">
             <div>
                 <strong data-bind="text: tierLabel"></strong>
                 <span class="text-muted">(<span data-bind="text: totalScore"></span>/95)</span>
@@ -162,10 +183,10 @@
 
         <div class="tier-scale">
             <span style="left:0%">0</span>
-            <span style="left:17.79%">15</span>
-            <span style="left:36.84%">35</span>
-            <span style="left:57.89%">55</span>
-            <span style="left:78.94%">75</span>
+            <span style="left:16.79%">15</span>
+            <span style="left:37.55%">35</span>
+            <span style="left:58.89%">55</span>
+            <span style="left:79.94%">75</span>
             <span style="left:100%">95</span>
         </div>
         <hr style="margin:0!important" />
@@ -190,11 +211,8 @@
 
     </div>
 
-    <!-- ════ Επεξήγηση σελίδας (legend, collapsible) ════ -->
-    <div class="col-12 mb-2">
-        <a class="text-muted" data-bs-toggle="collapse" href="#page-legend" role="button" style="font-size:12px;">
-            <i class="mdi mdi-help-circle text-info me-1" style="font-size:15px;vertical-align:-2px;"></i> Επεξήγηση σελίδας
-        </a>
+    <!-- ════ Επεξήγηση σελίδας (legend — το toggle link είναι δίπλα στον τίτλο) ════ -->
+    <div class="col-12">
         <div class="collapse" id="page-legend">
             <div class="card mb-0 mt-1"><div class="card-body py-2" style="font-size:12px;">
                 <div class="row">
