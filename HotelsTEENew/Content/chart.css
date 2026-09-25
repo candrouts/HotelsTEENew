@@ -55,14 +55,14 @@
 
 .nav.nav-pills.bg-nav-pills {
     position: sticky;
-    top: 179px;
+    top: 126px;
     z-index: 100;
 }
 
 #v-pills-tab {
     position: sticky;
-    top: 260px;
-    max-height: calc(100vh - 248px);
+    top: 206px;
+    max-height: calc(100vh - 236px);
     overflow: auto;
     z-index: 100;
     align-self: flex-start;
@@ -371,3 +371,9 @@
     .sb-bar { flex-wrap: wrap; }
     .sb-track { order: 3; flex-basis: 100%; }
 }
+
+/* Συμπαγής μπάρα ως sticky guide-bar */
+#guide-bar .sb-bar { margin: 0; }
+.sb-save-link { font-size: 13px; font-weight: 600; color: #727cf5; text-decoration: none; }
+.sb-save-link:hover { color: #5b64d8; text-decoration: underline; }
+.sb-save-link.disabled { opacity: .5; pointer-events: none; }
