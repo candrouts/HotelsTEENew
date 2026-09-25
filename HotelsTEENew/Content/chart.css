@@ -55,13 +55,13 @@
 
 .nav.nav-pills.bg-nav-pills {
     position: sticky;
-    top: 145px;
+    top: 182px;
     z-index: 100;
 }
 
 #v-pills-tab {
     position: sticky;
-    top: 218px;
+    top: 260px;
     max-height: calc(100vh - 248px);
     overflow: auto;
     z-index: 100;
