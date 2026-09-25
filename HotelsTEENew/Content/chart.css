@@ -55,7 +55,7 @@
 
 .nav.nav-pills.bg-nav-pills {
     position: sticky;
-    top: 182px;
+    top: 179px;
     z-index: 100;
     align-self: flex-start;
 }
