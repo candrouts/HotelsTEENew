@@ -43,8 +43,12 @@ function attachScoreBar(self) {
     self.sbMedalName = ko.pureComputed(function () { var t = self.tier(); return t ? t.title : "Αταξινόμητο"; });
 
     self.sbPinLeft = ko.pureComputed(function () {
+        return pct(parseFloat(self.totalScore()) || 0);
+    });
+    // Κοντά στα άκρα το bubble «κουμπώνει» στην αρχή/τέλος της μπάρας (το βελάκι δείχνει πάντα το σκορ)
+    self.sbPinAlign = ko.pureComputed(function () {
         var v = parseFloat(self.totalScore()) || 0;
-        return pct(Math.max(2, Math.min(MAX - 2, v)));   // να μη βγαίνει εκτός άκρων
+        return v < 4 ? "start" : (v > MAX - 4 ? "end" : "mid");
     });
 
     // «Επόμενο βήμα»: υποβιβασμός έχει προτεραιότητα
