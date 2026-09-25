@@ -164,6 +164,43 @@
 
     </div>
 
+    <!-- ════ ΝΕΑ συμπαγής μπάρα βαθμολογίας (δοκιμή — παράλληλα με την υφιστάμενη) ════ -->
+    <div class="col-12">
+        <div class="sb-bar">
+            <span class="sb-medal" data-bind="css: 'sb-m-' + sbMedalKey()">
+                <span class="sb-ico" data-bind="text: sbMedalIcon"></span>
+                <span data-bind="text: sbMedalName"></span>
+                <span class="sb-pts" data-bind="text: totalScore"></span>
+            </span>
+
+            <div class="sb-track">
+                <div class="sb-rail" data-bind="foreach: sbZones">
+                    <i data-bind="style: { width: width }, css: 'sb-z-' + key + (isCurrent ? ' sb-cur' : '')"></i>
+                </div>
+                <div class="sb-fill" data-bind="style: { width: progressPct }"></div>
+                <!-- ko foreach: sbZones -->
+                <!-- ko ifnot: isFirst --><span class="sb-tick" data-bind="style: { left: left }"></span><!-- /ko -->
+                <!-- ko if: showName --><span class="sb-zone" data-bind="text: title, style: { left: mid }, css: { 'sb-on': isCurrent }"></span><!-- /ko -->
+                <!-- /ko -->
+                <span class="sb-pin" data-bind="text: totalScore, style: { left: sbPinLeft }"></span>
+            </div>
+
+            <span class="sb-next" data-bind="css: 'sb-' + sbNextState()">
+                <span class="sb-i" data-bind="text: sbNextState() === 'warn' ? '!' : (sbNextState() === 'top' ? '✓' : 'i')"></span>
+                <span data-bind="html: sbNextHtml"></span>
+                <span class="sb-pop" data-bind="text: sbNextDetail"></span>
+            </span>
+
+            @if (!_readOnly)
+            {
+            <span class="sb-acts">
+                <a class="sb-icon-btn" title="Προσωρινή αποθήκευση" data-bind="click: enableAll() ? saveDataTemp : null, css: { 'disabled': !enableAll() }"><i class="uil uil-save"></i></a>
+                <a class="btn sb-submit" data-bind="click: enableAll() ? saveData : null, css: { 'disabled': !enableAll() }">Υποβολή ›</a>
+            </span>
+            }
+        </div>
+    </div>
+
     <!-- ════ Επεξήγηση σελίδας (legend — το toggle link είναι δίπλα στον τίτλο) ════ -->
     <div class="col-12">
         <div class="collapse" id="page-legend">
