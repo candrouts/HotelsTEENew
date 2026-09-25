@@ -80,42 +80,27 @@
 
 <div class="row" data-bind="visible: !applicationInProgress() && !needsNewAssessment()">
 
-    <!-- ════ Κάρτα: Χαρακτηριστικά & Παροχές Καταλύματος (έλεγχος επιθεωρητή) ════ -->
+    <!-- ════ Κάρτα: Χαρακτηριστικά & Παροχές Καταλύματος ════ -->
     <!-- ko if: hasFeatures -->
     <div class="col-12">
         <div id="guide-features" class="border card border-info mb-2" style="background-color:#eef6fc;">
-
-            <!-- Συμπτυγμένο: ΟΛΑ σε μία λεπτή γραμμή -->
-            <!-- ko if: featuresCollapsed() -->
-            <div class="d-flex align-items-center flex-wrap gap-1 px-2 py-1">
-                <i class="uil uil-building text-info me-1"></i>
-                <strong class="me-1" style="font-size:13px;">Παροχές:</strong>
-                <!-- ko foreach: features -->
-                <span class="badge"
-                      data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
-                                 css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
-                <!-- /ko -->
-                <!-- ko if: disabledByFeaturesCount() > 0 -->
-                <span class="text-muted ms-1" style="font-size:12px;" data-bind="text: '· ' + disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
-                <!-- /ko -->
-                <a href="javascript:void(0)" class="text-muted ms-auto" style="font-size:12px;"
-                   data-bind="click: function(){ featuresCollapsed(false); }, text: (!readOnly() && enableAll()) ? 'Επεξεργασία ▾' : 'Προβολή ▾'"></a>
-            </div>
-            <!-- /ko -->
-            <!-- Ανοιχτό: πλήρης επεξεργασία/προβολή -->
-            <!-- ko ifnot: featuresCollapsed() -->
-            <div class="card-header py-1 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
+            <div class="card-header py-2 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
                 <h5 class="card-title mb-0">
                     <i class="uil uil-building me-1 text-info"></i> Χαρακτηριστικά &amp; Παροχές Καταλύματος
+                    <!-- ko ifnot: allFeaturesAnswered -->
+                    <span class="badge bg-warning ms-1">Συμπληρώστε</span>
+                    <!-- /ko -->
                     <!-- ko if: disabledByFeaturesCount() > 0 -->
                     <span class="badge bg-secondary ms-1" data-bind="text: disabledByFeaturesCount() + ' κριτήρια ανενεργά'"></span>
                     <!-- /ko -->
                 </h5>
-                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(true); }">Σύμπτυξη ▴</a>
+                <a href="javascript:void(0)" class="text-muted" data-bind="click: function(){ featuresCollapsed(!featuresCollapsed()); }">
+                    <span data-bind="text: featuresCollapsed() ? 'Επεξεργασία ▾' : 'Σύμπτυξη ▴'"></span>
+                </a>
             </div>
-            <div class="card-body py-1">
+            <div class="card-body py-2" data-bind="visible: !featuresCollapsed()">
                 <p class="text-muted mb-2" style="font-size:13px;">
-                    Οι παροχές όπως δηλώθηκαν από τον ξενοδόχο. <!-- ko if: enableAll -->Επιβεβαιώστε ή διορθώστε τις κατά την αυτοψία — τα σχετικά κριτήρια απενεργοποιούνται αυτόματα.<!-- /ko -->
+                    Δηλώστε τις βασικές παροχές. Όσα κριτήρια δεν αφορούν το κατάλυμά σας απενεργοποιούνται αυτόματα.
                 </p>
                 <div data-bind="foreach: features">
                     <div class="d-flex align-items-center justify-content-between py-1 border-bottom">
@@ -132,17 +117,21 @@
                             <button type="button" class="btn"
                                     data-bind="click: function(){ $root.setFeature($data, true); },
                                                css: { 'btn-success': answered() && hasFeature() === true, 'btn-outline-secondary': !(answered() && hasFeature() === true) },
-                                               enable: $root.enableAll()">
-                                Ναι
-                            </button>
+                                               enable: $root.enableAll()">Ναι</button>
                             <button type="button" class="btn"
                                     data-bind="click: function(){ $root.setFeature($data, false); },
                                                css: { 'btn-danger': answered() && hasFeature() === false, 'btn-outline-secondary': !(answered() && hasFeature() === false) },
-                                               enable: $root.enableAll()">
-                                Όχι
-                            </button>
+                                               enable: $root.enableAll()">Όχι</button>
                         </div>
                     </div>
+                </div>
+            </div>
+            <!-- ko if: featuresCollapsed() -->
+            <div class="card-body py-2">
+                <div data-bind="foreach: features" style="display:inline;">
+                    <span class="badge me-1 mb-1"
+                          data-bind="text: title + (answered() ? (hasFeature() ? ': Ναι' : ': Όχι') : ': —'),
+                                     css: { 'bg-success': answered() && hasFeature() === true, 'bg-secondary': answered() && hasFeature() === false, 'bg-light text-dark': !answered() }"></span>
                 </div>
             </div>
             <!-- /ko -->
@@ -207,22 +196,20 @@
             <i class="mdi mdi-help-circle text-info me-1" style="font-size:15px;vertical-align:-2px;"></i> Επεξήγηση σελίδας
         </a>
         <div class="collapse" id="page-legend">
-            <div class="card mb-0 mt-1">
-                <div class="card-body py-2" style="font-size:12px;">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Μπάρα βαθμολογίας:</strong> δείχνει τη συνολική (αναγμένη) βαθμολογία 0–95 και τη βαθμίδα/μετάλιο που επιτυγχάνετε.</p>
-                            <p class="mb-1"><span class="badge bg-warning"><i class="uil uil-lock-alt"></i></span> <strong>Υποβιβασμός:</strong> η συνολική σας αντιστοιχεί σε ανώτερο μετάλιο, αλλά υπολείπεστε στις ελάχιστες βάσεις κάποιων πυλώνων.</p>
-                            <p class="mb-0"><span class="badge bg-light text-dark border">λείπουν Χ βαθμοί</span> <strong>Δεξιά:</strong> πόσοι πόντοι για την επόμενη βαθμίδα.</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Κουμπιά πυλώνων:</strong> «αρχική βαθμολογία → αναγωγή» στις μονάδες του πυλώνα.</p>
-                            <p class="mb-1"><span class="badge bg-success"><i class="mdi mdi-check"></i></span> καλύπτει την ελάχιστη βάση του πυλώνα &nbsp; <span class="badge bg-danger"><i class="mdi mdi-lock"></i></span> υπολείπεται (δείχνει το ζητούμενο ελάχιστο).</p>
-                            <p class="mb-0"><strong>Προσωρινή Αποθήκευση:</strong> αποθήκευση χωρίς οριστικοποίηση. <strong>Υποβολή:</strong> οριστική — δεν αλλάζει μετά.</p>
-                        </div>
+            <div class="card mb-0 mt-1"><div class="card-body py-2" style="font-size:12px;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Μπάρα βαθμολογίας:</strong> δείχνει τη συνολική (αναγμένη) βαθμολογία 0–95 και τη βαθμίδα/μετάλιο που επιτυγχάνετε.</p>
+                        <p class="mb-1"><span class="badge bg-warning"><i class="uil uil-lock-alt"></i></span> <strong>Υποβιβασμός:</strong> η συνολική σας αντιστοιχεί σε ανώτερο μετάλιο, αλλά υπολείπεστε στις ελάχιστες βάσεις κάποιων πυλώνων.</p>
+                        <p class="mb-0"><span class="badge bg-light text-dark border">λείπουν Χ βαθμοί</span> <strong>Δεξιά:</strong> πόσοι πόντοι για την επόμενη βαθμίδα.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Κουμπιά πυλώνων:</strong> «αρχική βαθμολογία → αναγωγή» στις μονάδες του πυλώνα.</p>
+                        <p class="mb-1"><span class="badge bg-success"><i class="mdi mdi-check"></i></span> καλύπτει την ελάχιστη βάση του πυλώνα &nbsp; <span class="badge bg-danger"><i class="mdi mdi-lock"></i></span> υπολείπεται (δείχνει το ζητούμενο ελάχιστο).</p>
+                        <p class="mb-0"><strong>Προσωρινή Αποθήκευση:</strong> αποθήκευση χωρίς οριστικοποίηση. <strong>Υποβολή:</strong> οριστική — δεν αλλάζει μετά.</p>
                     </div>
                 </div>
-            </div>
+            </div></div>
         </div>
     </div>
 

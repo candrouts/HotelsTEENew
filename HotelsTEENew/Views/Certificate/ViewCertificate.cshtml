@@ -61,7 +61,6 @@
     <!-- ko if: hasFeatures -->
     <div class="col-12">
         <div id="guide-features" class="border card border-info mb-2" style="background-color:#eef6fc;">
-
             <!-- Συμπτυγμένο: ΟΛΑ σε μία λεπτή γραμμή -->
             <!-- ko if: featuresCollapsed() -->
             <div class="d-flex align-items-center flex-wrap gap-1 px-2 py-1">
@@ -79,6 +78,7 @@
                    data-bind="click: function(){ featuresCollapsed(false); }, text: (!readOnly() && enableAll()) ? 'Επεξεργασία ▾' : 'Προβολή ▾'"></a>
             </div>
             <!-- /ko -->
+
             <!-- Ανοιχτό: πλήρης επεξεργασία/προβολή -->
             <!-- ko ifnot: featuresCollapsed() -->
             <div class="card-header py-1 d-flex justify-content-between align-items-center" style="background-color:rgba(57,175,209,0.12);">
@@ -109,15 +109,11 @@
                             <button type="button" class="btn"
                                     data-bind="click: function(){ $root.setFeature($data, true); },
                                                css: { 'btn-success': answered() && hasFeature() === true, 'btn-outline-secondary': !(answered() && hasFeature() === true) },
-                                               enable: $root.enableAll()">
-                                Ναι
-                            </button>
+                                               enable: $root.enableAll()">Ναι</button>
                             <button type="button" class="btn"
                                     data-bind="click: function(){ $root.setFeature($data, false); },
                                                css: { 'btn-danger': answered() && hasFeature() === false, 'btn-outline-secondary': !(answered() && hasFeature() === false) },
-                                               enable: $root.enableAll()">
-                                Όχι
-                            </button>
+                                               enable: $root.enableAll()">Όχι</button>
                         </div>
                     </div>
                 </div>
@@ -158,12 +154,12 @@
 
         @if (!_readOnly)
         {
-            <div id="guide-actions" class="float-end ">
-                <a class="btn btn-sm btn-success mx-2 mt-1" data-bind="click: enableAll() ? saveData : null, css: { 'disabled': !enableAll() }"> <i class="uil uil-message me-1"></i>  Υποβολή</a>
-            </div>
-            <div class="float-end ">
-                <a class="btn btn-sm btn-primary mx-2 mt-1" data-bind="click: enableAll() ? saveDataTemp : null, css: { 'disabled': !enableAll() }"><i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση</a>
-            </div>
+        <div id="guide-actions" class="float-end ">
+            <a class="btn btn-sm btn-success mx-2 mt-1" data-bind="click: enableAll() ? saveData : null, css: { 'disabled': !enableAll() }"> <i class="uil uil-message me-1"></i>  Υποβολή</a>
+        </div>
+        <div class="float-end ">
+            <a class="btn btn-sm btn-primary mx-2 mt-1" data-bind="click: enableAll() ? saveDataTemp : null, css: { 'disabled': !enableAll() }"><i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση</a>
+        </div>
         }
 
     </div>
@@ -171,22 +167,20 @@
     <!-- ════ Επεξήγηση σελίδας (legend — το toggle link είναι δίπλα στον τίτλο) ════ -->
     <div class="col-12">
         <div class="collapse" id="page-legend">
-            <div class="card mb-0 mt-1">
-                <div class="card-body py-2" style="font-size:12px;">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Μπάρα βαθμολογίας:</strong> η συνολική (αναγμένη) βαθμολογία 0–95 και η βαθμίδα/μετάλιο του καταλύματος.</p>
-                            <p class="mb-1"><span class="badge bg-warning"><i class="uil uil-lock-alt"></i></span> <strong>Υποβιβασμός:</strong> η συνολική αντιστοιχεί σε ανώτερο μετάλιο, αλλά υπολείπεται σε ελάχιστες βάσεις πυλώνων.</p>
-                            <p class="mb-0"><span class="badge bg-light text-dark border">λείπουν Χ βαθμοί</span> πόντοι για την επόμενη βαθμίδα.</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p class="mb-1"><strong>Κουμπιά πυλώνων:</strong> «αρχική βαθμολογία → αναγωγή» στις μονάδες του πυλώνα.</p>
-                            <p class="mb-1"><span class="badge bg-success"><i class="mdi mdi-check"></i></span> καλύπτει την ελάχιστη βάση &nbsp; <span class="badge bg-danger"><i class="mdi mdi-lock"></i></span> υπολείπεται (δείχνει το ζητούμενο ελάχιστο).</p>
-                            <p class="mb-0"><strong>Υποβολή:</strong> οριστικοποιεί την τελική κατάταξη — εμφανίζει το μετάλιο που θα λάβει το κατάλυμα.</p>
-                        </div>
+            <div class="card mb-0 mt-1"><div class="card-body py-2" style="font-size:12px;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Μπάρα βαθμολογίας:</strong> η συνολική (αναγμένη) βαθμολογία 0–95 και η βαθμίδα/μετάλιο του καταλύματος.</p>
+                        <p class="mb-1"><span class="badge bg-warning"><i class="uil uil-lock-alt"></i></span> <strong>Υποβιβασμός:</strong> η συνολική αντιστοιχεί σε ανώτερο μετάλιο, αλλά υπολείπεται σε ελάχιστες βάσεις πυλώνων.</p>
+                        <p class="mb-0"><span class="badge bg-light text-dark border">λείπουν Χ βαθμοί</span> πόντοι για την επόμενη βαθμίδα.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Κουμπιά πυλώνων:</strong> «αρχική βαθμολογία → αναγωγή» στις μονάδες του πυλώνα.</p>
+                        <p class="mb-1"><span class="badge bg-success"><i class="mdi mdi-check"></i></span> καλύπτει την ελάχιστη βάση &nbsp; <span class="badge bg-danger"><i class="mdi mdi-lock"></i></span> υπολείπεται (δείχνει το ζητούμενο ελάχιστο).</p>
+                        <p class="mb-0"><strong>Υποβολή:</strong> οριστικοποιεί την τελική κατάταξη — εμφανίζει το μετάλιο που θα λάβει το κατάλυμα.</p>
                     </div>
                 </div>
-            </div>
+            </div></div>
         </div>
     </div>
 
@@ -252,7 +246,7 @@
 
                                 <i class="mdi mdi-home-variant d-md-none d-block"></i>
                                 <span class="d-none d-md-block" data-bind="html:title"></span>
-                                <p class="inbox-item-date">
+                                <p class="inbox-item-date" >
                                     <button type="button" class="btn btn-sm cr-btn-outline-primary px-1 py-0" data-bs-toggle="tooltip" title="Η βαθμολογία σου / Μέγιστη Βαθμολογία"> <span data-bind="html:subCategory.totalPoints() + ' / ' + subCategory.maxGrade()"></span> </button>
                                 </p>
                                 @*<span class="badge badge-success-lighten" data-bind="html:subCategory.totalPoints"></span>*@
@@ -380,8 +374,8 @@
                                                             <!-- ko if : criteriaType() == 2  -->
                                                             <label for="example-select" class="form-label">Επιλογή</label>
                                                             @*<select class="form-select" data-bind="options: options,  value: value,
-                                                                optionsText: function(item) { return item;}, optionsValue: function(item) { return item;}
-                                                                , optionsCaption: 'Επιλέξτε'"></select>*@
+                    optionsText: function(item) { return item;}, optionsValue: function(item) { return item;}
+                    , optionsCaption: 'Επιλέξτε'"></select>*@
                                                             <select class="form-select"
                                                                     data-bind="options: options,
                                                                                 optionsText: 'text',
@@ -409,20 +403,20 @@
 
                                                     @if (!_readOnly)
                                                     {
-                                                        <!-- ko if: $root.enableAll() -->
-                                                        <form action="@Url.Action("PostFiles","Certificate")" method="post" class="dropzone" data-plugin="dropzone" data-previews-container="#file-previews" data-upload-preview-template="#uploadPreviewTemplate" data-bind="attr:{ 'id': 'file-'+id() },dropzone:{files: files, hotelCriteriaID: $root.hotelCriteriaID(), criteriaFileID: id()}">
-                                                            <div class="fallback">
-                                                                <input name="file" type="file" />
-                                                            </div>
+                                                    <!-- ko if: $root.enableAll() -->
+                                                    <form action="@Url.Action("PostFiles","Certificate")" method="post" class="dropzone" data-plugin="dropzone" data-previews-container="#file-previews" data-upload-preview-template="#uploadPreviewTemplate" data-bind="attr:{ 'id': 'file-'+id() },dropzone:{files: files, hotelCriteriaID: $root.hotelCriteriaID(), criteriaFileID: id()}">
+                                                        <div class="fallback">
+                                                            <input name="file" type="file" />
+                                                        </div>
 
-                                                            <input type="hidden" id="criteriaFileID" data-bind="value:id" />
-                                                            <input type="hidden" id="hotelCriteriaID" data-bind="value:$root.hotelCriteriaID" />
-                                                            <div class="dz-message needsclick">
-                                                                <i class="h3 text-muted ri-upload-cloud-2-line"></i>
-                                                                <h4>Σύρετε αρχεία εδώ ή πατήστε για ανέβασμα.</h4>
-                                                            </div>
-                                                        </form>
-                                                        <!-- /ko -->
+                                                        <input type="hidden" id="criteriaFileID" data-bind="value:id" />
+                                                        <input type="hidden" id="hotelCriteriaID" data-bind="value:$root.hotelCriteriaID" />
+                                                        <div class="dz-message needsclick">
+                                                            <i class="h3 text-muted ri-upload-cloud-2-line"></i>
+                                                            <h4>Σύρετε αρχεία εδώ ή πατήστε για ανέβασμα.</h4>
+                                                        </div>
+                                                    </form>
+                                                    <!-- /ko -->
                                                     }
 
                                                     <!-- Preview -->
@@ -443,14 +437,14 @@
                                                                     </div>
                                                                     @if (!_readOnly)
                                                                     {
-                                                                        <!-- ko if: $root.enableAll() -->
-                                                                        <div class="col-auto">
-                                                                            <!-- Button -->
-                                                                            <a href="" class="btn btn-link btn-lg text-muted" data-bind="click: $root.deleteFile">
-                                                                                <i class="ri-close-line"></i>
-                                                                            </a>
-                                                                        </div>
-                                                                        <!-- /ko -->
+                                                                    <!-- ko if: $root.enableAll() -->
+                                                                    <div class="col-auto">
+                                                                        <!-- Button -->
+                                                                        <a href="" class="btn btn-link btn-lg text-muted" data-bind="click: $root.deleteFile">
+                                                                            <i class="ri-close-line"></i>
+                                                                        </a>
+                                                                    </div>
+                                                                    <!-- /ko -->
                                                                     }
                                                                 </div>
                                                             </div>
