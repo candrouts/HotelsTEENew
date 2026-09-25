@@ -172,7 +172,23 @@
                 </span>
                 <!-- /ko -->
             </div>
-            <span id="guide-nexttier" class="badge" data-bind="text: nextTierDeltaText, css: nextTierBadgeClass"></span>
+            <div class="d-flex align-items-center flex-wrap justify-content-end gap-1">
+                <span id="guide-nexttier" class="badge me-1" data-bind="text: nextTierDeltaText, css: nextTierBadgeClass"></span>
+                <span id="guide-actions" class="d-inline-flex gap-1">
+                    <a class="btn btn-sm btn-primary py-0"
+                       data-bind="click: enableAll() ? saveDataTemp : null,
+                                  css: { 'disabled': !enableAll() },
+                                  attr: { 'aria-disabled': !enableAll() }">
+                        <i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση
+                    </a>
+                    <a class="btn btn-sm btn-success py-0"
+                       data-bind="click: enableAll() ? saveData : null,
+                                  css: { 'disabled': !enableAll() },
+                                  attr: { 'aria-disabled': !enableAll() }">
+                        <i class="uil uil-message me-1"></i> Υποβολή
+                    </a>
+                </span>
+            </div>
         </div>
 
         <div class="tier-bar">
@@ -189,26 +205,6 @@
             <span style="left:79.94%">75</span>
             <span style="left:100%">95</span>
         </div>
-        <hr style="margin:0!important" />
-
-
-        <div id="guide-actions" class="float-end ">
-            <a class="btn btn-sm btn-success mx-2 mt-1"
-               data-bind="click: enableAll() ? saveData : null,
-                          css: { 'disabled': !enableAll() },
-                          attr: { 'aria-disabled': !enableAll() }">
-                <i class="uil uil-message me-1"></i> Υποβολή
-            </a>
-        </div>
-        <div class="float-end ">
-            <a class="btn btn-sm btn-primary mx-2 mt-1"
-               data-bind="click: enableAll() ? saveDataTemp : null,
-                          css: { 'disabled': !enableAll() },
-                          attr: { 'aria-disabled': !enableAll() }">
-                <i class="uil uil-save me-1"></i> Προσωρινή Αποθήκευση
-            </a>
-        </div>
-
     </div>
 
     <!-- ════ Επεξήγηση σελίδας (legend — το toggle link είναι δίπλα στον τίτλο) ════ -->
