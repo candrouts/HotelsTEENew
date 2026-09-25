@@ -241,7 +241,7 @@
                     <span class="d-none d-md-block" data-bind="html:category.title"></span>
                     <p class="inbox-item-date">
                         <button type="button" class="btn btn-sm cr-btn-outline-primary px-1 py-0" data-bs-toggle="tooltip"
-                                data-bind="attr: { title: 'Βαθμολογία ' + category.rawPoints() + ' από ' + category.maxGrade() + ' → αναγωγή στις ' + totalUnits() + ' μονάδες του πυλώνα' }">
+                                data-bind="attr: { 'data-bs-original-title': 'Βαθμολογία ' + category.rawPoints() + ' από ' + category.maxGrade() + ' → αναγωγή στις ' + totalUnits() + ' μονάδες του πυλώνα' }">
                             <span data-bind="html: category.rawPoints()"></span>
                             <i class="mdi mdi-arrow-right-thin"></i>
                             <strong data-bind="html: category.totalPoints()"></strong>
