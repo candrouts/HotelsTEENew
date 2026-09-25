@@ -391,3 +391,9 @@
     body.sb-in-header .nav.nav-pills.bg-nav-pills { top: 70px; }
     body.sb-in-header #v-pills-tab { top: 148px; max-height: calc(100vh - 178px); }
 }
+
+/* Bubble σκορ στα άκρα της μπάρας */
+.sb-pin.sb-pin-start { transform: translateX(-6px); }
+.sb-pin.sb-pin-start:after { left: 6px; }
+.sb-pin.sb-pin-end { transform: translateX(calc(-100% + 6px)); }
+.sb-pin.sb-pin-end:after { left: auto; right: 6px; margin-left: 0; margin-right: -4px; }

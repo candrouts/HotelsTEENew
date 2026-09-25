@@ -141,7 +141,7 @@
                 <!-- ko ifnot: isFirst --><span class="sb-tick" data-bind="style: { left: left }"></span><!-- /ko -->
                 <!-- ko if: showName --><span class="sb-zone" data-bind="text: title, style: { left: mid }, css: { 'sb-on': isCurrent }"></span><!-- /ko -->
                 <!-- /ko -->
-                <span class="sb-pin" data-bind="text: totalScore, style: { left: sbPinLeft }"></span>
+                <span class="sb-pin" data-bind="text: totalScore, style: { left: sbPinLeft }, css: 'sb-pin-' + sbPinAlign()"></span>
             </div>
 
             <span id="guide-nexttier" class="sb-next" data-bind="css: 'sb-' + sbNextState()">
