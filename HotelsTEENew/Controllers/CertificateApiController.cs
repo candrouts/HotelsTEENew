@@ -601,6 +601,8 @@ namespace HotelsTEE.Controllers
             // Server-side υποχρεωτικότητα βάσει δυναμικότητας (κλίνες): δεν επιτρέπεται
             // «μη εφαρμόσιμο» και, στην οριστική υποβολή, πρέπει να καλύπτεται.
             HashSet<decimal> capacityRequired = Utils.CapacityRules.GetCapacityRequiredCriteria(unitOfWork, model.hotelID, model.exploitingCompanyID);
+            // Πολλαπλασιαστές βαρύτητας βάσει δωματίων (π.χ. Water Metering > 40 δωμάτια)
+            Dictionary<decimal, decimal> weightFactors = Utils.CapacityRules.GetWeightFactors(unitOfWork, model.hotelID, model.exploitingCompanyID);
             if (model.status == 2)
             {
                 foreach (decimal cid in capacityRequired)
@@ -638,25 +640,26 @@ namespace HotelsTEE.Controllers
                     if (criteria.isApplicable == true)
                     {
                         Criteria crit = unitOfWork.CriteriaRepository.GetByID(z.criteriaID);
+                        decimal critW = crit.weight * Utils.CapacityRules.Factor(weightFactors, crit.id);  // διπλή βαρύτητα βάσει δωματίων
                         int ctype = crit.criteriaType;
                         if (ctype == 1 && criteria.isChecked == true)
                         {
-                            criteria.points = crit.maxGrade * crit.weight;
-                            totalPoints += crit.maxGrade * crit.weight;
-                            maxPoints += crit.maxGrade * crit.weight;
+                            criteria.points = crit.maxGrade * critW;
+                            totalPoints += crit.maxGrade * critW;
+                            maxPoints += crit.maxGrade * critW;
                         }
                         else if (ctype == 1)
                         {
                             criteria.points = 0;
-                            maxPoints += crit.maxGrade * crit.weight;
+                            maxPoints += crit.maxGrade * critW;
                         }
                         else if (ctype == 3)
                         {
                             if (criteria.isChecked == true)
                             {
-                                criteria.points = crit.maxGrade * crit.weight;
-                                totalPoints += crit.maxGrade * crit.weight;
-                                maxPoints += crit.maxGrade * crit.weight;
+                                criteria.points = crit.maxGrade * critW;
+                                totalPoints += crit.maxGrade * critW;
+                                maxPoints += crit.maxGrade * critW;
                             }
                             else
                             {
@@ -672,8 +675,8 @@ namespace HotelsTEE.Controllers
                                 if (z.value != null)
                                 {
                                     value = Convert.ToDecimal(z.value.Replace(".", ","));
-                                    criteria.points = value * crit.weight;
-                                    totalPoints += value.Value * crit.weight;
+                                    criteria.points = value * critW;
+                                    totalPoints += value.Value * critW;
                                 }
 
                             }
@@ -682,7 +685,7 @@ namespace HotelsTEE.Controllers
 
                             }
 
-                            maxPoints += crit.maxGrade * crit.weight;
+                            maxPoints += crit.maxGrade * critW;
 
                         }
 

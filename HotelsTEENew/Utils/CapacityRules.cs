@@ -32,6 +32,40 @@ namespace HotelsTEE.Utils
             new Rule("ΔΑ_ΣΑ_1", beds => beds > 100),   // διαλογή 4 ρευμάτων: νομική υποχρέωση > 100
         };
 
+        // Πολλαπλασιαστής βαρύτητας βάσει δωματίων (Οδηγός Εφαρμογής — Water Metering:
+        // σε μονάδες > 40 δωματίων τα υποκριτήρια αυτά έχουν διπλή βαρύτητα)
+        private const decimal DoubleWeightFactor = 2m;
+        private static readonly Rule[] DoubleWeightRules =
+        {
+            new Rule("ΔΥ_WM_3", rooms => rooms > 40),
+            new Rule("ΔΥ_WM_4", rooms => rooms > 40),
+            new Rule("ΔΥ_WM_5", rooms => rooms > 40),
+        };
+
+        public static int GetTotalRooms(UnitOfWork uow, object hotelID, object companyID)
+        {
+            int? rooms = uow.context.Database.SqlQuery<int?>(
+                "SELECT TOP 1 CAST(totalRooms AS INT) FROM V_TEE_HotelDetails WHERE hotelID = @hotelID AND exploitingCompanyID = @companyID",
+                new SqlParameter("@hotelID", hotelID ?? DBNull.Value),
+                new SqlParameter("@companyID", companyID ?? DBNull.Value)).FirstOrDefault();
+            return rooms ?? 0;
+        }
+
+        // criteriaID -> πολλαπλασιαστής βάρους (μόνο όσα διαφέρουν από 1)
+        public static Dictionary<decimal, decimal> GetWeightFactors(UnitOfWork uow, object hotelID, object companyID)
+        {
+            var result = new Dictionary<decimal, decimal>();
+            foreach (decimal id in Resolve(uow, DoubleWeightRules, GetTotalRooms(uow, hotelID, companyID)))
+                result[id] = DoubleWeightFactor;
+            return result;
+        }
+
+        public static decimal Factor(Dictionary<decimal, decimal> factors, decimal criteriaID)
+        {
+            decimal f;
+            return factors != null && factors.TryGetValue(criteriaID, out f) ? f : 1m;
+        }
+
         public static int GetTotalBeds(UnitOfWork uow, object hotelID, object companyID)
         {
             int? beds = uow.context.Database.SqlQuery<int?>(
