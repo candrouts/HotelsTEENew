@@ -96,6 +96,30 @@ namespace HotelsTEE.Utils
             return Resolve(uow, NotApplicableRules, GetTotalBeds(uow, hotelID, companyID));
         }
 
+        // Κανόνας ζεύγους αποχέτευσης (Οδηγός Εφαρμογής): υποχρεωτικά ένα από τα δύο «Ναι».
+        // Σύνδεση σε δίκτυο (ΔΑ_ΥΑ_1) «Ναι» => η επιτόπια επεξεργασία (ΔΑ_ΥΑ_2) είναι προαιρετική·
+        // αλλιώς (Όχι / Δ/Α) η ΔΑ_ΥΑ_2 είναι υποχρεωτική «Ναι». Ίδιος κανόνας και στον client.
+        public const string SewerConnectionCode = "ΔΑ_ΥΑ_1";
+        public const string OnSiteTreatmentCode = "ΔΑ_ΥΑ_2";
+
+        // Επιστρέφει μήνυμα σφάλματος ή null αν ο κανόνας ικανοποιείται
+        public static string CheckSewageRule(UnitOfWork uow, IEnumerable<HotelsTEE.ViewModels.HotelCriteria_CriteriaViewModel> answers)
+        {
+            var codes = new[] { SewerConnectionCode, OnSiteTreatmentCode };
+            var ids = uow.CriteriaRepository.Get(x => codes.Contains(x.code)).ToDictionary(c => c.code, c => c.id);
+            if (ids.Count < 2 || answers == null) return null;
+
+            Func<string, bool> yes = code =>
+            {
+                var a = answers.FirstOrDefault(c => c.criteriaID == ids[code]);
+                return a != null && a.isApplicable && a.isChecked == true;
+            };
+
+            if (yes(SewerConnectionCode) || yes(OnSiteTreatmentCode)) return null;
+            return "Πρέπει να τεκμηριωθεί είτε σύνδεση σε δίκτυο αποχέτευσης (" + SewerConnectionCode +
+                   ") είτε επεξεργασία λυμάτων εντός εγκατάστασης (" + OnSiteTreatmentCode + ").";
+        }
+
         // Ίδια σημασιολογία με το isValidRequired του client:
         // Ναι/Όχι => πρέπει «Ναι»· λίστα τιμών => επιλεγμένο και όχι 0.
         public static bool IsSatisfied(Criteria crit, bool? isChecked, string value)

@@ -1271,6 +1271,33 @@ function ViewCertificateViewModel() {
 
                     return false;
                 };
+                // Κανόνας ζεύγους αποχέτευσης (ίδιος και στον server: Utils/CapacityRules.CheckSewageRule):
+                // ΔΑ_ΥΑ_1 «Ναι» => ΔΑ_ΥΑ_2 προαιρετικό· αλλιώς (Όχι / Δ/Α) ΔΑ_ΥΑ_2 υποχρεωτικό «Ναι»
+                (function () {
+                    var sewer = null, onsite = null;
+                    Object.keys(self.criteriaIndex).forEach(function (k) {
+                        var c = self.criteriaIndex[k];
+                        if (c.code() === "ΔΑ_ΥΑ_1") sewer = c;
+                        if (c.code() === "ΔΑ_ΥΑ_2") onsite = c;
+                    });
+                    if (!sewer || !onsite) return;
+
+                    ko.computed(function () {
+                        var connected = sewer.isApplicable() && sewer.isChecked() === true;
+                        onsite.isRequired(!connected);
+                        onsite.capacityRequired(!connected);
+                        if (connected) {
+                            onsite.capacityReason("");
+                            onsite.ruleBadge("");
+                        } else {
+                            var why = sewer.isApplicable() ? "δεν υπάρχει σύνδεση σε δίκτυο αποχέτευσης" : "δεν υπάρχει δυνατότητα σύνδεσης σε δίκτυο αποχέτευσης";
+                            onsite.capacityReason("Υποχρεωτικό «Ναι» όταν " + why + " (ΔΑ_ΥΑ_1)");
+                            onsite.ruleBadge("Υποχρεωτικό — " + why);
+                            if (!onsite.isApplicable.peek()) onsite.isApplicable(true);
+                        }
+                    });
+                })();
+
 
 
 
