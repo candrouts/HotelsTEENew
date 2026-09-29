@@ -193,6 +193,7 @@
                 //self.totalRooms(data.hotelDetails.totalRooms);
                 // Κλίνες: χρειάζονται ΠΡΙΝ χτιστούν τα κριτήρια (υποχρεωτικότητα βάσει δυναμικότητας)
                 self.totalBeds(parseInt(data.hotelDetails.totalBeds || 0, 10));
+                self.totalRooms(parseInt(data.hotelDetails.totalRooms || 0, 10));   // για τη διπλή βαρύτητα Water Metering
 
                 //// Επιλογή κειμένου Δειγματοληψίας
                 //var beds = parseInt(self.totalBeds() || 0, 10);
@@ -306,6 +307,7 @@
                                     newCriteria.capacityNotApplicable = ko.observable(false);
                                     newCriteria.capacityReason = ko.observable("");
                                     newCriteria.ruleBadge = ko.observable("");
+                                    newCriteria.weightBadge = ko.observable("");
 
                                     newCriteria.options = ko.observableArray([]);
                                     //newCriteria.value = ko.observable();
@@ -560,6 +562,12 @@
                                     }
 
                                     newCriteria.isApplicable(criteria.isApplicable);
+
+                                    // Διπλή βαρύτητα για μονάδες > 40 δωματίων (ίδιος κανόνας και στον server: Utils/CapacityRules)
+                                    if (["ΔΥ_WM_3", "ΔΥ_WM_4", "ΔΥ_WM_5"].indexOf(newCriteria.code()) >= 0 && self.totalRooms() > 40) {
+                                        newCriteria.weight(newCriteria.weight() * 2);
+                                        newCriteria.weightBadge("Διπλή βαρύτητα — μονάδα άνω των 40 δωματίων (" + self.totalRooms() + ")");
+                                    }
 
                                     // Υποχρεωτικό βάσει δυναμικότητας (ίδιος κανόνας και στον server: Utils/CapacityRules)
                                     if (newCriteria.code() === "ΔΑ_ΣΑ_2" && self.totalBeds() > 100) {

@@ -334,6 +334,9 @@
                                                 <span class="badge badge-warning-lighten me-1" style="font-size:11px;" data-bind="text: ruleBadge()"></span>
                                                 <!-- /ko -->
                                                 <!-- /ko  -->
+                                                <!-- ko if: weightBadge() -->
+                                                <span class="badge badge-info-lighten me-1" style="font-size:11px;" data-bind="text: weightBadge()"></span>
+                                                <!-- /ko -->
                                                 <span data-bind="html:title"></span>
                                                 <span class="badge bg-danger ms-2" data-bind="visible: isDisabled">Μη εφαρμόσιμο</span>
                                                 <span class="badge bg-danger ms-2" data-bind="visible: isHeritage">Δεν Αφορά (Δ/Α)</span>

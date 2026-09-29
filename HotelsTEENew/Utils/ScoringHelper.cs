@@ -36,6 +36,9 @@ namespace HotelsTEE.Utils
                 .Get(c => critIds.Contains(c.id)).ToList()
                 .GroupBy(c => c.id).ToDictionary(g => g.Key, g => g.First());
 
+            // Διπλή βαρύτητα βάσει δωματίων (ίδιο με τα points που υπολογίστηκαν στο SaveCriteria)
+            Dictionary<decimal, decimal> factors = CapacityRules.GetWeightFactors(uow, hotelCriteria.hotelID, hotelCriteria.exploitingCompanyID);
+
             var raw = new Dictionary<decimal, decimal>();
             var rawMax = new Dictionary<decimal, decimal>();
 
@@ -59,6 +62,7 @@ namespace HotelsTEE.Utils
                         cmax = def.weight * def.maxGrade;
                     else if (ctype == 3 && sc.isChecked == true)
                         cmax = def.weight * def.maxGrade;
+                    cmax *= CapacityRules.Factor(factors, sc.criteriaID);
                 }
                 rawMax[mp] += cmax;
             }
