@@ -605,6 +605,11 @@ namespace HotelsTEE.Controllers
             Dictionary<decimal, decimal> weightFactors = Utils.CapacityRules.GetWeightFactors(unitOfWork, model.hotelID, model.exploitingCompanyID);
             if (model.status == 2)
             {
+                // Αποχέτευση: υποχρεωτικά ένα από ΔΑ_ΥΑ_1 / ΔΑ_ΥΑ_2 «Ναι»
+                string sewageError = Utils.CapacityRules.CheckSewageRule(unitOfWork, model.criteria);
+                if (sewageError != null)
+                    return Ok(new ApiAnswer() { success = false, responseText = sewageError });
+
                 foreach (decimal cid in capacityRequired)
                 {
                     if (featureDisabled.Contains(cid)) continue;
