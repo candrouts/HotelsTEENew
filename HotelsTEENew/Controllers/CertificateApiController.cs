@@ -113,6 +113,17 @@ namespace HotelsTEE.Controllers
                     .Get(x => certIds.Contains(x.certificateID))
                     .ToList();
 
+                // Ονόματα επιθεωρητών (admin): μία ανάγνωση για όλη τη λίστα
+                Dictionary<decimal, string> inspNames = null;
+                if (user.role == 100)
+                {
+                    List<decimal> inspIds = certEntities.Where(x => x.tee_inspectorID.HasValue)
+                        .Select(x => x.tee_inspectorID.Value).Distinct().ToList();
+                    inspNames = unitOfWork.InspectorRepository.Get(x => inspIds.Contains(x.id)).ToList()
+                        .GroupBy(x => x.id)
+                        .ToDictionary(g => g.Key, g => ((g.First().lastName ?? "") + " " + (g.First().firstName ?? "")).Trim());
+                }
+
                 foreach (var c in allCertificates)
                 {
                     HotelCriteria v2 = allHotelCriteria.FirstOrDefault(x => x.certificateID == c.certificateID && x.version == 2);
@@ -150,6 +161,13 @@ namespace HotelsTEE.Controllers
                         c.medalID = v3.medalID;
                         MedalViewModel m = medals.FirstOrDefault(x => x.id == v3.medalID.Value);
                         c.medalTitle = m != null ? m.title : null;
+                    }
+
+                    // Επιθεωρητής (admin)
+                    if (inspNames != null && ent != null && ent.tee_inspectorID.HasValue)
+                    {
+                        string nm;
+                        if (inspNames.TryGetValue(ent.tee_inspectorID.Value, out nm)) c.inspectorName = nm;
                     }
 
                     // Περιφέρεια/ΠΕ (admin)

@@ -56,5 +56,7 @@ namespace HotelsTEE.ViewModels
         public string periphereiaTitle { get; set; }  // Περιφέρεια (admin φίλτρο)
         public string peripheryTitle { get; set; }    // Περιφερειακή Ενότητα (admin φίλτρο)
 
+        public string inspectorName { get; set; }     // Επιθεωρητής (admin στήλη/φίλτρο)
+
     }
 }

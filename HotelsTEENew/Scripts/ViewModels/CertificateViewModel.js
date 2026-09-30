@@ -93,6 +93,7 @@ function CertificateViewModel() {
     self.filterCategory = ko.observable("");
     self.filterRegion = ko.observable("");   // periphereiaTitle
     self.filterPE = ko.observable("");        // peripheryTitle
+    self.filterInspector = ko.observable("");  // inspectorName (admin)
 
     var distinctSorted = function (selector, predicate) {
         var set = {};
@@ -105,6 +106,7 @@ function CertificateViewModel() {
     };
     self.categoryOptions = ko.pureComputed(function () { return distinctSorted(function (c) { return c.category; }); });
     self.regionOptions = ko.pureComputed(function () { return distinctSorted(function (c) { return c.periphereiaTitle; }); });
+    self.inspectorOptions = ko.pureComputed(function () { return distinctSorted(function (c) { return c.inspectorName; }); });
     self.peOptions = ko.pureComputed(function () {
         var region = self.filterRegion();
         return distinctSorted(function (c) { return c.peripheryTitle; },
@@ -132,6 +134,7 @@ function CertificateViewModel() {
         self.filterCategory("");
         self.filterRegion("");
         self.filterPE("");
+        self.filterInspector("");
         self.focusCertId("");
     };
 
@@ -327,6 +330,7 @@ function CertificateViewModel() {
         var cat = self.filterCategory();
         var region = self.filterRegion();
         var pe = self.filterPE();
+        var insp = self.filterInspector();
 
         return self.certificates().filter(function (c) {
             if (stage && c.stage() !== stage) return false;
@@ -334,11 +338,12 @@ function CertificateViewModel() {
             if (cat && c.category !== cat) return false;
             if (region && c.periphereiaTitle !== region) return false;
             if (pe && c.peripheryTitle !== pe) return false;
+            if (insp && c.inspectorName !== insp) return false;
 
             if (text) {
                 var haystack = [
                     c.hotelTitle, c.exploitingCompanyName, c.taxNumber,
-                    c.municipalityTitle, c.address, c.email,
+                    c.municipalityTitle, c.address, c.email, c.inspectorName,
                     "#" + c.certificateID
                 ].join(" ").toLowerCase();
 
@@ -374,6 +379,7 @@ function CertificateViewModel() {
     self.filterCategory.subscribe(function () { self.currentPage(1); });
     self.filterRegion.subscribe(function () { self.filterPE(""); self.currentPage(1); });
     self.filterPE.subscribe(function () { self.currentPage(1); });
+    self.filterInspector.subscribe(function () { self.currentPage(1); });
     self.pageSize.subscribe(function () { self.currentPage(1); });
 
     self.pagedCertificates = ko.pureComputed(function () {
