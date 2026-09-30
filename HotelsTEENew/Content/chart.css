@@ -397,3 +397,19 @@
 .sb-pin.sb-pin-start:after { left: 6px; }
 .sb-pin.sb-pin-end { transform: translateX(calc(-100% + 6px)); }
 .sb-pin.sb-pin-end:after { left: auto; right: 6px; margin-left: 0; margin-right: -4px; }
+
+/* Λίστα αιτήσεων: γραμμή «εκκρεμεί αυτοψία» — ίδιο χρώμα ανεξάρτητα από τις ρίγες (table-striped) */
+#certificates > tbody > tr.row-autopsy-due > * {
+    --bs-table-bg-type: #fff6e0 !important;
+    --bs-table-accent-bg: #fff6e0 !important;
+    background-color: #fff6e0 !important;
+    color: inherit;
+}
+#certificates > tbody > tr.row-autopsy-due > td:first-child {
+    box-shadow: inset 4px 0 0 #ffbc00 !important;
+}
+html[data-bs-theme="dark"] #certificates > tbody > tr.row-autopsy-due > * {
+    --bs-table-bg-type: rgba(255, 188, 0, .12) !important;
+    --bs-table-accent-bg: rgba(255, 188, 0, .12) !important;
+    background-color: rgba(255, 188, 0, .12) !important;
+}

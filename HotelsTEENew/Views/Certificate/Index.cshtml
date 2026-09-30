@@ -132,7 +132,7 @@
                         </thead>
                         <tbody data-bind="foreach: pagedCertificates">
 
-                            <tr data-bind="css: { 'table-warning': isAutopsyDue }">
+                            <tr data-bind="css: { 'row-autopsy-due': isAutopsyDue }">
                                 <td>
                                     <strong data-bind="text: '#' + certificateID"></strong>
                                     <!-- ko if: isNew -->
