@@ -82,20 +82,25 @@
 
                 <!-- Γεωγραφικά φίλτρα & κατηγορία (admin) -->
                 <div class="row g-2 align-items-end mt-1" data-bind="visible: isAdmin">
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label mb-1">Κατηγορία (αστέρια)</label>
                         <select class="form-select form-select-sm"
                                 data-bind="options: categoryOptions, value: filterCategory, optionsCaption: '-- Όλες οι κατηγορίες --'"></select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label mb-1">Περιφέρεια</label>
                         <select class="form-select form-select-sm"
                                 data-bind="options: regionOptions, value: filterRegion, optionsCaption: '-- Όλες οι Περιφέρειες --'"></select>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label class="form-label mb-1">Περιφερειακή Ενότητα</label>
                         <select class="form-select form-select-sm"
                                 data-bind="options: peOptions, value: filterPE, optionsCaption: '-- Όλες οι Π.Ε. --', enable: peOptions().length > 0"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label mb-1">Επιθεωρητής</label>
+                        <select class="form-select form-select-sm"
+                                data-bind="options: inspectorOptions, value: filterInspector, optionsCaption: '-- Όλοι οι επιθεωρητές --'"></select>
                     </div>
                 </div>
             </div>
@@ -117,6 +122,9 @@
                                 <th>Ξενοδοχείο</th>
                                 <th>Επιχείρηση</th>
                                 <th>Περιοχή / Επικοινωνία</th>
+                                <!-- ko if: isAdmin() -->
+                                <th>Επιθεωρητής</th>
+                                <!-- /ko -->
                                 <th>Ημ/νία Αυτοψίας</th>
                                 <th>Στάδιο</th>
                                 <th style="min-width:160px;">Ενέργειες</th>
@@ -134,6 +142,9 @@
                                 <td data-bind="html: hotelTitle + '<br><small class=text-muted>' + category + ' &middot; ' + totalRooms + ' δωμ. / ' + totalBeds + ' κλίνες</small>'"></td>
                                 <td data-bind="html: exploitingCompanyName + '<br><small class=text-muted>ΑΦΜ: ' + taxNumber + '</small>'"></td>
                                 <td data-bind="html: '<small>' + address + ', ' + municipalityTitle + ' ' + zipCode + '<br>' + email + ' &middot; ' + phoneNumber1 + '</small>'"></td>
+                                <!-- ko if: $root.isAdmin() -->
+                                <td data-bind="text: inspectorName || '—'"></td>
+                                <!-- /ko -->
 
                                 <!-- ── Ημ/νία Αυτοψίας: inline edit ── -->
                                 <td>
